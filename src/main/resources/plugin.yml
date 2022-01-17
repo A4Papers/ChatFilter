@@ -1,0 +1,12 @@
+name: ChatFilter
+version: 1.1.7
+main: a4.papers.chatfilter.chatfilter.ChatFilter
+api-version: 1.13
+authors: [ A4_Papers ]
+description: Basic Regex chat, book and anvil filter
+commands:
+  chatfilter:
+    aliases: [cf]
+    description: chatfilter
+  clearchat:
+    description: clear chat
