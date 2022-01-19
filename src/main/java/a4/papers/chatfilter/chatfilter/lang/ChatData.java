@@ -1,4 +1,4 @@
-package a4.papers.chatfilter.chatfilter;
+package a4.papers.chatfilter.chatfilter.lang;
 
 public class ChatData {
 
@@ -17,5 +17,6 @@ public class ChatData {
     public long getLong() {
         return this.lo;
     }
+
 
 }

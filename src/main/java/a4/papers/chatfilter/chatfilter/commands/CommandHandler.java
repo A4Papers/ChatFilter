@@ -1,5 +1,6 @@
-package a4.papers.chatfilter.chatfilter;
+package a4.papers.chatfilter.chatfilter.commands;
 
+import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.lang.Types;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

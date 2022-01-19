@@ -69,7 +69,7 @@ public class ChatFilters {
         }
 
         if (!(player.hasPermission("chatfilter.bypass.url"))) {
-            if (chatFilter.settingsAllowURL) {
+            if (!chatFilter.settingsAllowURL) {
 
                 Pattern p = Pattern.compile(chatFilter.URL_REGEX);
                 Matcher m = p.matcher(lowercaseString);

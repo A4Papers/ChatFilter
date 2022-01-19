@@ -1,6 +1,6 @@
 package a4.papers.chatfilter.chatfilter.lang;
 
-public enum enumStrings {
+public enum EnumStrings {
 
     NO_PERMISSION("NO_PERMISSION"),
     PAUSE_CHAT("PAUSE_CHAT"),
@@ -105,11 +105,11 @@ public enum enumStrings {
 
     public String s;
 
-    enumStrings(String s) {
+    EnumStrings(String s) {
         this.s = s;
     }
 
-    public static enumStrings fromId(String id) {
-        return enumStrings.valueOf(id);
+    public static EnumStrings fromId(String id) {
+        return EnumStrings.valueOf(id);
     }
 }

@@ -1,5 +1,6 @@
 package a4.papers.chatfilter.chatfilter;
 
+import a4.papers.chatfilter.chatfilter.commands.*;
 import a4.papers.chatfilter.chatfilter.events.*;
 import a4.papers.chatfilter.chatfilter.lang.Types;
 import org.bukkit.Bukkit;
@@ -21,7 +22,6 @@ public final class ChatFilter extends JavaPlugin {
 
     private static Locale SpanishLocale = new Locale("es");
     private static Locale PolishLocale = new Locale("pl");
-
 
     public ConsoleCommandSender consoleSender = Bukkit.getConsoleSender();
     public ChatFilter chatFilter;
@@ -60,14 +60,6 @@ public final class ChatFilter extends JavaPlugin {
     public String cancelChatReplace;
     public String URL_REGEX;
 
-    public String eventPriorityChat;
-    public String eventPrioritySign;
-    public String eventPriorityCommand;
-    public String eventPriorityBooks;
-    public String eventPriorityAnvil;
-
-
-
     Integer blockedInt = 1;
     int pluginId = 13946;
     Locale locale;
@@ -81,8 +73,8 @@ public final class ChatFilter extends JavaPlugin {
         commandHandler = new CommandHandler(this);
         Metrics metrics = new Metrics(this, pluginId);
         loadVariables();
-        getCommand("chatfilter").setExecutor(new Commands(this));
-        getCommand("clearchat").setExecutor(new Commands(this));
+        getCommand("chatfilter").setExecutor(new CommandMain(this));
+        getCommand("clearchat").setExecutor(new ClearChatCommand(this));
         getCommand("chatfilter").setTabCompleter(new TabComplete());
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new SwearChatListener(this), this);
@@ -92,7 +84,7 @@ public final class ChatFilter extends JavaPlugin {
         pm.registerEvents(new AnvilListener(this), this);
         pm.registerEvents(new ChatDelayListener(this), this);
         pm.registerEvents(new PauseChat(this), this);
-        pm.registerEvents(new CommandLIstener(this), this);
+        pm.registerEvents(new CommandListener(this), this);
         saveDefaultConfig();
         metrics.addCustomChart(new Metrics.SimplePie("used_language", () -> {
             return locale.toString();
@@ -213,7 +205,6 @@ public final class ChatFilter extends JavaPlugin {
 
     private void setupLanguageFiles() {
         String lang = getConfig().getString("locale");
-
         assert lang != null;
         if (lang.contains("en")) {
             locale = Locale.ENGLISH;

@@ -1,4 +1,4 @@
-package a4.papers.chatfilter.chatfilter;
+package a4.papers.chatfilter.chatfilter.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

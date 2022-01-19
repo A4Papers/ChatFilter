@@ -1,4 +1,4 @@
-package a4.papers.chatfilter.chatfilter;
+package a4.papers.chatfilter.chatfilter.lang;
 
 public class StringSimilarity {
 

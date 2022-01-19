@@ -1,10 +1,10 @@
 package a4.papers.chatfilter.chatfilter.events;
 
 
-import a4.papers.chatfilter.chatfilter.ChatData;
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import a4.papers.chatfilter.chatfilter.StringSimilarity;
-import a4.papers.chatfilter.chatfilter.lang.enumStrings;
+import a4.papers.chatfilter.chatfilter.lang.ChatData;
+import a4.papers.chatfilter.chatfilter.lang.EnumStrings;
+import a4.papers.chatfilter.chatfilter.lang.StringSimilarity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,9 +29,8 @@ public class ChatDelayListener implements Listener {
 
     @EventHandler
     public void onPlayerSpam(AsyncPlayerChatEvent e) {
-        if (e.getPlayer().hasPermission("chatfilter.bypass") || e.getPlayer().hasPermission("chatfilter.bypass.repeat")) {
+        if (e.getPlayer().hasPermission("chatfilter.bypass") || e.getPlayer().hasPermission("chatfilter.bypass.repeat"))
             return;
-        }
         Player p = e.getPlayer();
         UUID playerUUID = p.getUniqueId();
         String msg = e.getMessage();
@@ -42,12 +41,10 @@ public class ChatDelayListener implements Listener {
                 long time = chatmsgs.get(playerUUID).getLong();
                 double sim = StringSimilarity.similarity(msg, chatmsgs.get(playerUUID).getString());
                 BigDecimal d = new BigDecimal(chatFilter.percentage.trim().replace("%", "")).divide(BigDecimal.valueOf(100));
-
                 if (sim > d.doubleValue()) {
                     if (time > System.currentTimeMillis()) {
-
                         e.setCancelled(true);
-                        p.sendMessage(chatFilter.colour(chatFilter.mapToString(enumStrings.chatRepeatMessage.s)));
+                        p.sendMessage(chatFilter.colour(chatFilter.mapToString(EnumStrings.chatRepeatMessage.s)));
                     } else {
                         chatmsgs.put(playerUUID, new ChatData(msg, System.currentTimeMillis() + configtime));
                     }

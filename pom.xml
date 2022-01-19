@@ -39,6 +39,8 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <outputFile>C:\Users\A4pap\Desktop\Output\ChatFilter.jar</outputFile>
+
                         </configuration>
                     </execution>
                 </executions>

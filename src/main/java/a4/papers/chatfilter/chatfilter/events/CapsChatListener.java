@@ -20,13 +20,12 @@ public class CapsChatListener implements Listener {
     public void onPlayerCaps(AsyncPlayerChatEvent event) {
         String msg = event.getMessage();
         if (chatFilter.deCap) {
-            if (event.getPlayer().hasPermission("chatfilter.bypass") || event.getPlayer().hasPermission("chatfilter.bypass.caps")) {
+            if (event.getPlayer().hasPermission("chatfilter.bypass") || event.getPlayer().hasPermission("chatfilter.bypass.caps"))
                 return;
-            }
             char[] charArray = msg.toCharArray();
             int counter = 0;
             for (char c : charArray) {
-                if (Character.isUpperCase(c)) counter = counter + 1;
+                if (Character.isUpperCase(c)) counter++;
             }
             if (counter >= chatFilter.capsAmount) {
                 msg = msg.charAt(0) + msg.substring(1).toLowerCase();
