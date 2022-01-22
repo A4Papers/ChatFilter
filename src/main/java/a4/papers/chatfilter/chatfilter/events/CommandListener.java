@@ -2,8 +2,8 @@ package a4.papers.chatfilter.chatfilter.events;
 
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import a4.papers.chatfilter.chatfilter.lang.EnumStrings;
-import a4.papers.chatfilter.chatfilter.lang.Types;
+import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
+import a4.papers.chatfilter.chatfilter.shared.Types;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,7 +21,7 @@ public class CommandListener implements Listener {
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         Player p = event.getPlayer();
-        String cmd = event.getMessage().toLowerCase();
+        String cmd = ChatColor.stripColor(event.getMessage().toLowerCase());
         String[] array = cmd.split(" ");
         if (p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.command"))
             return;
@@ -36,6 +36,9 @@ public class CommandListener implements Listener {
             String warnPlayerMessage = "Error";
             if (chatFilter.getChatFilters().validResult(cmd, p).getResult()) {
                 Types type = chatFilter.getChatFilters().validResult(cmd, p).getType();
+                String[] stringArray = chatFilter.getChatFilters().validResult(cmd, p).getStringArray();
+                String regexPattern = chatFilter.getChatFilters().validResult(cmd, p).getRegexPattern();
+
                 if (type == Types.SWEAR && !swearconfig) {
                     return;
                 }
@@ -43,33 +46,33 @@ public class CommandListener implements Listener {
                     return;
                 }
                 if (type == Types.SWEAR && swearconfig) {
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixCmdSwear.s).replace("%player%", p.getName()));
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.stringArrayToString(chatFilter.getChatFilters().validResult(cmd, p).getStringArray()))));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixCmdSwear.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 }
                 if (type == Types.IP_DNS && dnsconfig) {
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixCmdIP.s).replace("%player%", p.getName()));
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.stringArrayToString(chatFilter.getChatFilters().validResult(cmd, p).getStringArray()))));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixCmdIP.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 }
                 if (type == Types.IP_SWEAR && dnsconfig && !swearconfig) {
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixCmdIP.s).replace("%player%", p.getName()));
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.stringArrayToString(chatFilter.getChatFilters().validResult(cmd, p).getStringArray()))));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixCmdIP.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 }
                 if (type == Types.IP_SWEAR && !dnsconfig && swearconfig) {
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixCmdSwear.s).replace("%player%", p.getName()));
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.stringArrayToString(chatFilter.getChatFilters().validResult(cmd, p).getStringArray()))));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixCmdSwear.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 }
                 if (type == Types.IP_SWEAR && dnsconfig && swearconfig) {
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixCmdIPandSwear.s).replace("%player%", p.getName()));
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.stringArrayToString(chatFilter.getChatFilters().validResult(cmd, p).getStringArray()))));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixCmdIPandSwear.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 }
                 event.setCancelled(true);
-                chatFilter.commandHandler.runCommand(type, p, chatFilter.getChatFilters().validResult(cmd, p).getStringArray());
-                chatFilter.sendConsole(chatFilter.getChatFilters().validResult(cmd, p).getType(), cmd, p, chatFilter.getChatFilters().validResult(cmd, p).getRegexPattern(), "Command");
-                p.sendMessage(warnPlayerMessage);
-                for (String oneWord : chatFilter.getChatFilters().validResult(cmd, p).getStringArray()) {
+                chatFilter.commandHandler.runCommand(type, p, stringArray);
+                chatFilter.sendConsole(type, cmd, p, regexPattern, "Command");
+                p.sendMessage(chatFilter.colour(warnPlayerMessage));
+                for (String oneWord : stringArray) {
                     cmd = cmd.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
                 }
-                chatFilter.sendStaffMessage(prefix + cmd);
+                chatFilter.sendStaffMessage(chatFilter.colour(prefix + cmd));
             }
         }
     }

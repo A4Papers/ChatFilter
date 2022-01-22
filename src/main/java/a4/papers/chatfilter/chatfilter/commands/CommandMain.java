@@ -1,7 +1,7 @@
 package a4.papers.chatfilter.chatfilter.commands;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import a4.papers.chatfilter.chatfilter.lang.EnumStrings;
+import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -52,10 +52,10 @@ public class CommandMain implements CommandExecutor {
                     this.whitelistCommand.onCommand(sender, cmd, label, args);
                     break;
                 default:
-                    sender.sendMessage(chatFilter.colour(chatFilter.mapToString(EnumStrings.NO_ARGS.s)));
+                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.NO_ARGS.s)));
             }
         } else {
-            sender.sendMessage(chatFilter.colour(chatFilter.mapToString(EnumStrings.NO_ARGS.s)));
+            sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.NO_ARGS.s)));
         }
         return true;
     }

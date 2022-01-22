@@ -2,7 +2,7 @@ package a4.papers.chatfilter.chatfilter.events;
 
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import a4.papers.chatfilter.chatfilter.lang.EnumStrings;
+import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,7 +23,7 @@ public class PauseChat implements Listener {
             if (event.getPlayer().hasPermission("chatfilter.bypass") || event.getPlayer().hasPermission("chatfilter.pause") || event.getPlayer().hasPermission("chatfilter.bypass.pause")) {
             } else {
                 event.setCancelled(true);
-                event.getPlayer().sendMessage(chatFilter.colour(chatFilter.mapToString(EnumStrings.denyMessagePause.s)));
+                event.getPlayer().sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.denyMessagePause.s)));
                 chatFilter.logMsg("[Chat filter] (Paused chat) " + event.getPlayer().getDisplayName() + ": " + event.getMessage());
             }
 

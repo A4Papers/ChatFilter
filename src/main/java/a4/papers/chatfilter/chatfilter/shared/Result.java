@@ -1,6 +1,4 @@
-package a4.papers.chatfilter.chatfilter;
-
-import a4.papers.chatfilter.chatfilter.lang.Types;
+package a4.papers.chatfilter.chatfilter.shared;
 
 public class Result {
     private final boolean result;

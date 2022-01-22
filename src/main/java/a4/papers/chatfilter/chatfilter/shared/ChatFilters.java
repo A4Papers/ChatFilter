@@ -1,6 +1,6 @@
-package a4.papers.chatfilter.chatfilter;
+package a4.papers.chatfilter.chatfilter.shared;
 
-import a4.papers.chatfilter.chatfilter.lang.Types;
+import a4.papers.chatfilter.chatfilter.ChatFilter;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;

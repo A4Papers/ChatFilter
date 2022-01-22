@@ -1,8 +1,8 @@
 package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import a4.papers.chatfilter.chatfilter.lang.EnumStrings;
-import a4.papers.chatfilter.chatfilter.lang.Types;
+import a4.papers.chatfilter.chatfilter.shared.Types;
+import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -30,7 +30,6 @@ public class BooksListener implements Listener {
             return;
         List<String> BookPageMatch = new ArrayList<>();
         List<String> bookPagesList = event.getNewBookMeta().getPages();
-        Types cTypes = Types.NOTYPE;
         String prefix = "Error";
         String warnPlayerMessage = "Error";
         boolean result = false;
@@ -38,38 +37,36 @@ public class BooksListener implements Listener {
             int nom = bookPagesList.indexOf(pageFilter) + 1;
             if (chatFilter.getChatFilters().validResult(pageFilter, p).getResult()) {
                 Types type = chatFilter.getChatFilters().validResult(pageFilter, p).getType();
+                String[] stringArray = chatFilter.getChatFilters().validResult(pageFilter, p).getStringArray();
+
                 result = true;
                 if (type == Types.SWEAR) {
-                    cTypes = Types.SWEAR;
                     if (!BookPageMatch.contains(pageFilter)) {
                         BookPageMatch.add(ChatColor.GOLD + "Page" + nom + ChatColor.WHITE + ": " + pageFilter);
                     }
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.stringArrayToString(chatFilter.getChatFilters().validResult(pageFilter, p).getStringArray()))));
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixBookSwear.s).replace("%player%", p.getName()));
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookSwear.s).replace("%player%", p.getName());
                 }
                 if (type == Types.IP_DNS) {
-                    cTypes = Types.IP_DNS;
                     if (!BookPageMatch.contains(pageFilter)) {
                         BookPageMatch.add(ChatColor.GOLD + "Page" + nom + ChatColor.WHITE + ": " + pageFilter);
                     }
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.stringArrayToString(chatFilter.getChatFilters().validResult(pageFilter, p).getStringArray()))));
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixBookIP.s).replace("%player%", p.getName()));
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookIP.s).replace("%player%", p.getName());
                 }
                 if (type == Types.IP_SWEAR) {
-                    cTypes = Types.IP_SWEAR;
                     if (!BookPageMatch.contains(pageFilter)) {
                         BookPageMatch.add(ChatColor.GOLD + "Page" + nom + ChatColor.WHITE + ": " + pageFilter);
                     }
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.stringArrayToString(chatFilter.getChatFilters().validResult(pageFilter, p).getStringArray()))));
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixBookIPandSwear.s).replace("%player%", p.getName()));
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookIPandSwear.s).replace("%player%", p.getName());
                 }
                 if (type == Types.FONT) {
-                    cTypes = Types.FONT;
                     if (!BookPageMatch.contains(pageFilter)) {
                         BookPageMatch.add(ChatColor.GOLD + "Page" + nom + ChatColor.WHITE + ": " + pageFilter);
                     }
-                    warnPlayerMessage = chatFilter.colour(chatFilter.mapToString(EnumStrings.warnFontMessage.s));
-                    prefix = chatFilter.colour(chatFilter.mapToString(EnumStrings.prefixBookFont.s).replace("%player%", p.getName()));
+                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s));
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookFont.s).replace("%player%", p.getName());
                 }
             }
         }
@@ -83,8 +80,8 @@ public class BooksListener implements Listener {
                     }
                 }.runTaskLater(chatFilter, 1);
             }
-            p.sendMessage(warnPlayerMessage);
-            chatFilter.sendStaffMessage(prefix);
+            p.sendMessage(chatFilter.colour(warnPlayerMessage));
+            chatFilter.sendStaffMessage(chatFilter.colour(prefix));
 
             for (String oneWord : BookPageMatch) {
                 chatFilter.sendStaffMessage(oneWord);

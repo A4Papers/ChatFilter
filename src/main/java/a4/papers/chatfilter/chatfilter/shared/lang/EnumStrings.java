@@ -1,4 +1,4 @@
-package a4.papers.chatfilter.chatfilter.lang;
+package a4.papers.chatfilter.chatfilter.shared.lang;
 
 public enum EnumStrings {
 

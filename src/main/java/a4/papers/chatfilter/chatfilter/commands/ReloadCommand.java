@@ -1,7 +1,7 @@
 package a4.papers.chatfilter.chatfilter.commands;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import a4.papers.chatfilter.chatfilter.lang.EnumStrings;
+import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,7 +20,7 @@ public class ReloadCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!sender.hasPermission("chatfilter.clear")) {
-            sender.sendMessage(chatFilter.replaceString(chatFilter.mapToString(EnumStrings.NO_PERMISSION.s), sender));
+            sender.sendMessage(chatFilter.replaceString(chatFilter.getLang().mapToString(EnumStrings.NO_PERMISSION.s), sender));
         } else if (sender.hasPermission("chatfilter.clear")) {
             for (Player noPermissionPlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (!noPermissionPlayer.hasPermission("chatfilter.bypass"))
@@ -30,7 +30,7 @@ public class ReloadCommand implements CommandExecutor {
             }
             for (Player PermissionPlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (PermissionPlayer.hasPermission("chatfilter.bypass") || PermissionPlayer.hasPermission("chatfilter.view"))
-                    PermissionPlayer.sendMessage(chatFilter.colour(chatFilter.mapToString(EnumStrings.clearChatMessage.s).replace("%player%", sender.getName())));
+                    PermissionPlayer.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.clearChatMessage.s).replace("%player%", sender.getName())));
             }
         }
         return false;
