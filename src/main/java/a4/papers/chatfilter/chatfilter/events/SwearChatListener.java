@@ -69,7 +69,7 @@ public class SwearChatListener implements Listener {
                 event.setCancelled(true);
             } else {
                 String msg = event.getMessage();
-                for (String oneWord : chatFilter.getChatFilters().validResult(msg, p).getStringArray()) {
+                for (String oneWord : stringArray) {
                     msg = msg.replace(oneWord, StringUtils.repeat(chatFilter.cancelChatReplace, oneWord.length()));
                 }
                 event.setMessage(msg);

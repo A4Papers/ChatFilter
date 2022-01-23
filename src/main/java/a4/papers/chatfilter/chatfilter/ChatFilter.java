@@ -158,10 +158,6 @@ public final class ChatFilter extends JavaPlugin {
             }
         }
     }
-    public String replaceString(String str, CommandSender sender) {
-        colour(str.replace("%player%", sender.getName()));
-        return str;
-    }
 
     public void sendConsole(Types type, String msg, Player p, String regexUsed, String pl) {
         if (!type.equals(Types.NOTYPE)) {

@@ -25,7 +25,7 @@ public class ClearChatCommand implements CommandExecutor {
 
     public boolean clearChat(CommandSender sender) {
         if (!sender.hasPermission("chatfilter.clear")) {
-            sender.sendMessage(chatFilter.replaceString(chatFilter.getLang().mapToString(EnumStrings.NO_PERMISSION.s), sender));
+            sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.NO_PERMISSION.s)));
         } else if (sender.hasPermission("chatfilter.clear")) {
             for (Player noPermissionPlayer : Bukkit.getServer().getOnlinePlayers()) {
                 if (!noPermissionPlayer.hasPermission("chatfilter.bypass"))

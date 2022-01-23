@@ -1,8 +1,8 @@
 package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import a4.papers.chatfilter.chatfilter.shared.Types;
+import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,7 +32,7 @@ public class SignListener implements Listener {
         String line1 = ChatColor.stripColor(event.getLine(1).toLowerCase());
         String line2 = ChatColor.stripColor(event.getLine(2).toLowerCase());
         String line3 = ChatColor.stripColor(event.getLine(3).toLowerCase());
-        String lines = line0 + " " +line1 + " " +line2 + " " +line3;
+        String lines = line0 + " " + line1 + " " + line2 + " " + line3;
 
         if (chatFilter.getChatFilters().validResult(lines, p).getResult()) {
             Types type = chatFilter.getChatFilters().validResult(lines, p).getType();
@@ -102,13 +102,11 @@ public class SignListener implements Listener {
                     }
                 }
                 if (!event.getLine(2).isEmpty()) {
-
                     for (String oneWord : stringArray) {
                         line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
                     }
                 }
                 if (!event.getLine(3).isEmpty()) {
-
                     for (String oneWord : stringArray) {
                         line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
                     }
@@ -117,28 +115,6 @@ public class SignListener implements Listener {
             if (type == Types.FONT) {
                 prefix = chatFilter.getLang().mapToString(EnumStrings.prefixSignFont.s).replace("%player%", p.getName());
                 warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s);
-                if (!event.getLine(0).isEmpty()) {
-                    for (String oneWord : stringArray) {
-                        line0 = line0.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
-                    }
-                }
-                if (!event.getLine(1).isEmpty()) {
-                    for (String oneWord : stringArray) {
-                        line1 = line1.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
-                    }
-                }
-                if (!event.getLine(2).isEmpty()) {
-
-                    for (String oneWord : stringArray) {
-                        line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
-                    }
-                }
-                if (!event.getLine(3).isEmpty()) {
-
-                    for (String oneWord : stringArray) {
-                        line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
-                    }
-                }
             }
             chatFilter.sendConsole(type, lines, p, regexPattern, "Sign");
             p.sendMessage(chatFilter.colour(warnPlayerMessage));

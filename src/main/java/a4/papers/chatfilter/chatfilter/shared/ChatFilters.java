@@ -1,6 +1,7 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -28,13 +29,12 @@ public class ChatFilters {
         String lowercaseString = string.toLowerCase();
         Types type = Types.NOTYPE;
         List<String> list = new ArrayList<String>();
-        List<String> bypassItems = new ArrayList<String>(chatFilter.regExWords);
 
-        bypassItems.addAll(chatFilter.byPassDNS);
-
-        for (String removewording : bypassItems) {
+        for (String removewording : chatFilter.byPassWords) {
+            Bukkit.broadcastMessage(removewording);
             if (lowercaseString.contains(removewording)) {
                 lowercaseString = lowercaseString.replaceAll(removewording, " ");
+                Bukkit.broadcastMessage(removewording);
             }
         }
 

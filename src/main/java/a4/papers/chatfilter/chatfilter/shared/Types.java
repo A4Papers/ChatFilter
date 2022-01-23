@@ -8,11 +8,6 @@ public enum Types {
 
     Types(String id) {
         this.id = id;
-
-    }
-
-    public static Types fromId(String id) {
-        return Types.valueOf(id);
     }
 
 }

@@ -12,22 +12,18 @@ public class CommandMain implements CommandExecutor {
     private ClearChatCommand clearChatCommand;
     private ReloadCommand reloadCommand;
     private HelpCommand helpCommand;
-
     private PauseCommand pauseCommand;
     private BlacklistCommand blacklistCommand;
     private WhitelistCommand whitelistCommand;
-
 
     public CommandMain(ChatFilter chatFilter) {
         this.chatFilter = chatFilter;
         this.clearChatCommand = new ClearChatCommand(this.chatFilter);
         this.reloadCommand = new ReloadCommand(this.chatFilter);
         this.helpCommand = new HelpCommand(this.chatFilter);
-
         this.pauseCommand = new PauseCommand(this.chatFilter);
         this.blacklistCommand = new BlacklistCommand(this.chatFilter);
         this.whitelistCommand = new WhitelistCommand(this.chatFilter);
-
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
