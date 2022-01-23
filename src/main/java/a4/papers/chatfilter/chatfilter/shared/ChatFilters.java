@@ -31,10 +31,8 @@ public class ChatFilters {
         List<String> list = new ArrayList<String>();
 
         for (String removewording : chatFilter.byPassWords) {
-            Bukkit.broadcastMessage(removewording);
             if (lowercaseString.contains(removewording)) {
                 lowercaseString = lowercaseString.replaceAll(removewording, " ");
-                Bukkit.broadcastMessage(removewording);
             }
         }
 
