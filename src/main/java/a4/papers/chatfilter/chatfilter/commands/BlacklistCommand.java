@@ -62,8 +62,7 @@ public class BlacklistCommand implements CommandExecutor {
                 for (String stringlist : chatFilter.regExWords) {
                     String listin = stringlist.replace(")\\b", "#").replace("\\b(", "#");
                     String stripRegex = listin.replace("\\", "").replace("(W|d|_)*", "").replace("+", "").replace("(", "").replace(")", "");
-                    stringlist = stringlist.replaceAll("[^\\p{L}0-9 ]+", " ").trim();
-                    strlist.add(stringlist);
+                    strlist.add(stripRegex);
                 }
                 Collections.sort(strlist);
                 ComponentBuilder message = new ComponentBuilder("");

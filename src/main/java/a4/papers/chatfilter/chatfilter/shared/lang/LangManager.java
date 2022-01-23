@@ -72,7 +72,6 @@ public class LangManager {
             File lang_cnFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_zh.properties");
             if (!lang_cnFile.exists()) {
                 chatFilter.saveResource("messages_zh.properties", false);
-
             }
         } else if (lang.contains("es")) {
             locale = SpanishLocale;
@@ -85,7 +84,6 @@ public class LangManager {
             File lang_cnFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_pl.properties");
             if (!lang_cnFile.exists()) {
                 chatFilter.saveResource("messages_pl.properties", false);
-
             }
         } else {
             locale = Locale.ENGLISH;

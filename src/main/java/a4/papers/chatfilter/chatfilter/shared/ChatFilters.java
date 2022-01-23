@@ -29,8 +29,10 @@ public class ChatFilters {
         String lowercaseString = string.toLowerCase();
         Types type = Types.NOTYPE;
         List<String> list = new ArrayList<String>();
+        List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
+        bypassItems.addAll(chatFilter.byPassDNS);
 
-        for (String removewording : chatFilter.byPassWords) {
+        for (String removewording : bypassItems) {
             if (lowercaseString.contains(removewording)) {
                 lowercaseString = lowercaseString.replaceAll(removewording, " ");
             }

@@ -73,6 +73,7 @@ public class BooksListener implements Listener {
         if (result) {
             if (event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.WRITABLE_BOOK)) {
                 event.getPlayer().getInventory().getItemInMainHand().setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
+
                 new BukkitRunnable() {
                     @Override
                     public void run() {
