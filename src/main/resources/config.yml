@@ -39,11 +39,11 @@
 # zh = Chinese
 # es = Spanish
 # pl = Polish
+# da = Danish
 
 # File can be edited to support custom messages etc.
 
 locale: en
-
 
 
 settings:
@@ -76,9 +76,6 @@ settings:
   ##If above is false, Replace the swear/ip with what?
   cancelChatReplace: "*"   
   
-  
-## Check commands for swearing/ips?  
-checkCommands: false 
 
 ## Run a command when the player swears?  
 CommandsOnSwear:  ## Word placeholder - %placeholder%
@@ -101,6 +98,8 @@ CommandsOnFont:
   command: warn %player%
 
 
+## Check commands for swearing/ips?
+checkCommands: false
 
 ## Commands to you wish to check
 commands:
@@ -113,10 +112,13 @@ commands:
   msg:
     swear: false
     ip: true
-
+  r:
+    swear: false
+    ip: true
 
 ## Words that are allowed to pass filter, Used to prevent false positives
-## Example: Having the word "anal" in the filter will also no allow "an alt" to pass
+## Example: Having the word "anal" in the filter will also not allow "an alt" to pass
+## However adding "an alt" via '/cf whitelist add word an alt' Will then allow "an alt" to pass
 bypassWords:
 - "an alt"
 - "mean a legit"
@@ -146,13 +148,12 @@ URL_REGEX: ^((https?|ftp)://|(www|ftp)\\.)
 
 ## DNS/IP filter 
 filteredIPandDNS:
-##DNS/URL Filter
 - \b[0-9]{1,3}(\.|dot|\(dot\)|-|;|,|(\W|\d|_)*\s)+[0-9]{1,3}(\.|dot|\(dot\)|-|;|,|(\W|\d|_)*\s)+[0-9]{1,3}(\.|dot|\(dot\)|-|;|,|(\W|\d|_)*\s)+[0-9]{1,3}\b
 - ([a-zA-Z0-9\-\.]+\s?(\.|dot|\(dot\)|-|;)(com|org|net|cz|co|uk|sk|biz|mobi|xxx|eu|io))
 
 
 ## Regex words - More presets https://pastebin.com/A67cK3SD
-filteredWords: #Note: Custom regex filteres can not be removed ingame.
+filteredWords: #Note: Custom regex filteres can not be removed and may look incorrect in /cf blacklist list.
 - \b(w+(\W|\d|_)*h+(\W|\d|_)*o+(\W|\d|_)*r+(\W|\d|_)*e+(\W|\d|_)*) #Whore
 - \b(s+(\W|\d|_)*e+(\W|\d|_)*x+(\W|\d|_)*) #sex
 - \b(f+(\W|\d|_)*u+(\W|\d|_)*c+(\W|\d|_)*k+(\W|\d|_)*) #Fuck

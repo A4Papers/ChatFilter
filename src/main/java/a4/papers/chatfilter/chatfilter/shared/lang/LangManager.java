@@ -22,6 +22,8 @@ public class LangManager {
 
     private Locale SpanishLocale = new Locale("es");
     private Locale PolishLocale = new Locale("pl");
+    private Locale DanishLocale = new Locale("da");
+
 
     public String mapToString(String s) {
         return convertedStrings.get(s).toString();
@@ -84,6 +86,12 @@ public class LangManager {
             File lang_cnFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_pl.properties");
             if (!lang_cnFile.exists()) {
                 chatFilter.saveResource("messages_pl.properties", false);
+            }
+        } else if (lang.contains("da")) {
+            locale = DanishLocale;
+            File lang_daFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_da.properties");
+            if (!lang_daFile.exists()) {
+                chatFilter.saveResource("messages_da.properties", false);
             }
         } else {
             locale = Locale.ENGLISH;
