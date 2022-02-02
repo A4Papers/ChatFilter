@@ -1,0 +1,13 @@
+ChatFilter:
+  aCoolFunCommand:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: Ingame_regex_generation
+    CancelChat: true
+    ReplaceWith: nope
+    Command: msg %player% please do not say %placeHolder%
+    AddedBy: ChatFilter
+

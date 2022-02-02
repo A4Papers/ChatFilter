@@ -1,6 +1,7 @@
 package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.ChatColor;
@@ -35,9 +36,11 @@ public class BooksListener implements Listener {
         boolean result = false;
         for (String pageFilter : bookPagesList) {
             int nom = bookPagesList.indexOf(pageFilter) + 1;
+            String[] stringArray = chatFilter.getChatFilters().validResult(pageFilter, p).getStringArray();
+            FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(pageFilter, p).getFilterWrapper();
+
             if (chatFilter.getChatFilters().validResult(pageFilter, p).getResult()) {
                 Types type = chatFilter.getChatFilters().validResult(pageFilter, p).getType();
-                String[] stringArray = chatFilter.getChatFilters().validResult(pageFilter, p).getStringArray();
 
                 result = true;
                 if (type == Types.SWEAR) {
@@ -69,25 +72,30 @@ public class BooksListener implements Listener {
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookFont.s).replace("%player%", p.getName());
                 }
             }
-        }
-        if (result) {
-            if (event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.WRITABLE_BOOK)) {
-                event.getPlayer().getInventory().getItemInMainHand().setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
 
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        event.getPlayer().getInventory().setItemInMainHand(new ItemStack(Material.WRITABLE_BOOK, 1));
+            if (result) {
+                if (event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.WRITABLE_BOOK)) {
+                    event.getPlayer().getInventory().getItemInMainHand().setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            event.getPlayer().getInventory().setItemInMainHand(new ItemStack(Material.WRITABLE_BOOK, 1));
+                        }
+                    }.runTaskLater(chatFilter, 1);
+                }
+                if(filterWrapper.getWarnPlayer()) {
+                    p.sendMessage(chatFilter.colour(warnPlayerMessage));
+                }
+                if (filterWrapper.getSendStaff()) {
+                    chatFilter.sendStaffMessage(chatFilter.colour(prefix));
+
+                    for (String oneWord : BookPageMatch) {
+                        chatFilter.sendStaffMessage(oneWord);
                     }
-                }.runTaskLater(chatFilter, 1);
+                    BookPageMatch.clear();
+                }
             }
-            p.sendMessage(chatFilter.colour(warnPlayerMessage));
-            chatFilter.sendStaffMessage(chatFilter.colour(prefix));
-
-            for (String oneWord : BookPageMatch) {
-                chatFilter.sendStaffMessage(oneWord);
-            }
-            BookPageMatch.clear();
         }
     }
 }

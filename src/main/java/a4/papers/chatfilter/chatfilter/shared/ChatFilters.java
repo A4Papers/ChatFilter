@@ -1,11 +1,12 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +24,9 @@ public class ChatFilters {
         boolean matchedSwear = false;
         boolean matchedIP = false;
         boolean matchedURL = false;
-        String regexUse = "";
+
+        String regex = "";
+        Map<String, FilterWrapper> regexMap = new HashMap<>();
 
 
         String lowercaseString = string.toLowerCase();
@@ -39,13 +42,13 @@ public class ChatFilters {
         }
 
         if (!(player.hasPermission("chatfilter.bypass.swear"))) {
-            for (String matchSwear : chatFilter.regExWords) {
+            for (String matchSwear : chatFilter.regexWords.keySet()) {
                 Pattern p = Pattern.compile(matchSwear);
                 Matcher m = p.matcher(lowercaseString);
                 while (m.find()) {
                     matched = true;
                     matchedSwear = true;
-                    regexUse = p.pattern();
+                    regex = p.pattern();
                     if (!list.contains(m.group(0))) {
                         list.add(m.group(0).replace(" ",""));
                     }
@@ -54,13 +57,13 @@ public class ChatFilters {
         }
 
         if (!(player.hasPermission("chatfilter.bypass.ip"))) {
-            for (String StringMatchedDNS : chatFilter.regExDNS) {
+            for (String StringMatchedDNS : chatFilter.regexAdvert.keySet()) {
                 Pattern p = Pattern.compile(StringMatchedDNS);
                 Matcher m = p.matcher(lowercaseString);
                 while (m.find()) {
                     matched = true;
                     matchedIP = true;
-                    regexUse = p.pattern();
+                    regex = p.pattern();
                     if (!list.contains(m.group(0))) {
                         list.add(m.group(0).replace(" ",""));
                     }
@@ -77,6 +80,8 @@ public class ChatFilters {
                 if (m.find()) {
                     matched = true;
                     matchedURL = true;
+                    regex = p.pattern();
+
                 }
             }
         }
@@ -100,7 +105,9 @@ public class ChatFilters {
         }
         String[] array = new String[list.size()];
         list.toArray(array);
-        return new Result(matched, array, type, regexUse);
+        regexMap.putAll(chatFilter.regexWords);
+        regexMap.putAll(chatFilter.regexAdvert);
+        return new Result(matched, array, type, regexMap.get(regex));
     }
 
     public boolean isFont(String string) {

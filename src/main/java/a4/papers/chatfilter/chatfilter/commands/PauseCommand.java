@@ -25,7 +25,6 @@ public class PauseCommand implements CommandExecutor {
         }
         if (sender.hasPermission("chatfilter.pause")) {
             if (!chatFilter.chatPause) {
-
                 for (Player permplayer : Bukkit.getServer().getOnlinePlayers()) {
                     if (permplayer.hasPermission("chatfilter.bypass") || (permplayer.hasPermission("chatfilter.pause")) || permplayer.hasPermission("chatfilter.view"))
                         permplayer.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.PAUSE_CHAT.s).replace("%player%", sender.getName())));

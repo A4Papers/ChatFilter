@@ -58,9 +58,7 @@ public class WhitelistCommand implements CommandExecutor {
                     message.append(ChatColor.WHITE + " " + words + ", ");
                     message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf whitelist remove ip " + words));
                     message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_1.s).replace("%ip%", words)))));
-
                 }
-
                 sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_IP_2.s)));
                 sender.spigot().sendMessage(message.create());
                 sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_IP_3.s)));
@@ -82,7 +80,7 @@ public class WhitelistCommand implements CommandExecutor {
             }
             if (args[2].equals("ip") && args.length > 3) {
                 String ArgsString = String.join(" ", args).toLowerCase().replaceAll("whitelist add ip ", "");
-                List<String> list = chatFilter.getConfig().getStringList("bypassIP");
+                List<String> list = chatFilter.getWhitelistConfig().getStringList("bypassIP");
                 if (list.contains(ArgsString)) {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_ADD_IP_NO.s).replace("%ip%", ArgsString)));
                     return true;
@@ -90,15 +88,15 @@ public class WhitelistCommand implements CommandExecutor {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_ADD_IP_ADDED.s).replace("%ip%", ArgsString)));
                     chatFilter.byPassDNS.add(ArgsString);
                     list.add(ArgsString);
-                    chatFilter.getConfig().set("bypassIP", list);
-                    chatFilter.saveConfig();
+                    chatFilter.getWhitelistConfig().set("bypassIP", list);
+                    chatFilter.save();
                     return true;
 
                 }
             }
             if (args[2].equals("word") && args.length > 3) {
                 String ArgsString = String.join(" ", args).toLowerCase().replaceAll("whitelist add word ", "");
-                List<String> list = chatFilter.getConfig().getStringList("bypassWords");
+                List<String> list = chatFilter.getWhitelistConfig().getStringList("bypassWords");
                 if (list.contains(ArgsString)) {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_ADD_WORD_NO.s).replace("%word%", ArgsString)));
                     return true;
@@ -107,8 +105,8 @@ public class WhitelistCommand implements CommandExecutor {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_ADD_WORD_ADDED.s).replace("%word%", ArgsString)));
                     chatFilter.byPassWords.add(ArgsString);
                     list.add(ArgsString);
-                    chatFilter.getConfig().set("bypassWords", list);
-                    chatFilter.saveConfig();
+                    chatFilter.getWhitelistConfig().set("bypassWords", list);
+                    chatFilter.save();
                     return true;
                 }
             }
@@ -132,20 +130,20 @@ public class WhitelistCommand implements CommandExecutor {
                     return true;
                 }
                 String ArgsString = String.join(" ", args).toLowerCase().replaceAll("whitelist remove word ", "");
-                List<String> list = chatFilter.getConfig().getStringList("bypassWords");
+                List<String> list = chatFilter.getWhitelistConfig().getStringList("bypassWords");
                 if (!list.contains(ArgsString)) {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_REMOVE_WORD_NO.s).replace("%word%", ArgsString)));
                 } else {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_REMOVE_WORD_REMOVED.s).replace("%word%", ArgsString)));
                     chatFilter.byPassWords.remove(ArgsString);
                     list.remove(ArgsString);
-                    chatFilter.getConfig().set("bypassWords", list);
-                    chatFilter.saveConfig();
+                    chatFilter.getWhitelistConfig().set("bypassWords", list);
+                    chatFilter.save();
                     return true;
                 }
             }
             if (args[2].equals("ip") && args.length > 3) {
-                List<String> list = chatFilter.getConfig().getStringList("bypassIP");
+                List<String> list = chatFilter.getWhitelistConfig().getStringList("bypassIP");
                 if (!list.contains(args[3])) {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_REMOVE_IP_NO.s).replace("%ip%", args[3])));
                     return true;
@@ -154,8 +152,8 @@ public class WhitelistCommand implements CommandExecutor {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_REMOVE_IP_REMOVED.s).replace("%ip%", args[3])));
                     chatFilter.byPassDNS.remove(args[3].toLowerCase());
                     list.remove(args[3].toLowerCase());
-                    chatFilter.getConfig().set("bypassIP", list);
-                    chatFilter.saveConfig();
+                    chatFilter.getWhitelistConfig().set("bypassIP", list);
+                    chatFilter.save();
                     return true;
                 }
             }

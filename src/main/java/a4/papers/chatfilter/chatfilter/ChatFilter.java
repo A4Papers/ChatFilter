@@ -6,21 +6,25 @@ import a4.papers.chatfilter.chatfilter.commands.CommandMain;
 import a4.papers.chatfilter.chatfilter.commands.TabComplete;
 import a4.papers.chatfilter.chatfilter.events.*;
 import a4.papers.chatfilter.chatfilter.shared.ChatFilters;
+import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.LangManager;
+import a4.papers.chatfilter.chatfilter.shared.regexHandler.LoadFilters;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 public final class ChatFilter extends JavaPlugin {
@@ -30,10 +34,21 @@ public final class ChatFilter extends JavaPlugin {
     public ChatFilters chatFilters;
     public CommandHandler commandHandler;
     public LangManager langManager;
+    public LoadFilters loadFilters;
+    public FilterWrapper filterWrapper;
 
 
-    public List<String> regExWords;
-    public List<String> regExDNS;
+    private File wordConfigFile;
+    private File advertConfigFile;
+    private File whitelistConfigFile;
+    private FileConfiguration whitelistConfig;
+    private FileConfiguration wordConfig;
+    private FileConfiguration advertConfig;
+
+    public Map<String, FilterWrapper> regexWords;
+    public Map<String, FilterWrapper> regexAdvert;
+
+
     public List<String> byPassWords;
     public List<String> byPassDNS;
 
@@ -64,15 +79,23 @@ public final class ChatFilter extends JavaPlugin {
     int pluginId = 13946;
 
     public void onEnable() {
+        this.regexWords = new HashMap<>();
+        this.regexAdvert = new HashMap<>();
+
+        createCustomConfig();
         chatFilters = new ChatFilters(this);
         commandHandler = new CommandHandler(this);
         langManager = new LangManager(this);
+        loadFilters = new LoadFilters(this);
         try {
             langManager.loadLang();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
         logMsg("[ChatFilter] Loaded using locale: " + getLang().locale);
+
+
         Metrics metrics = new Metrics(this, pluginId);
         loadVariables();
         getCommand("chatfilter").setExecutor(new CommandMain(this));
@@ -88,6 +111,11 @@ public final class ChatFilter extends JavaPlugin {
         pm.registerEvents(new PauseChat(this), this);
         pm.registerEvents(new CommandListener(this), this);
         saveDefaultConfig();
+        getFilters().loadWordFilter();
+        getFilters().loadAdvertFilter();
+        logMsg("[ChatFilter] Filtering " + regexWords.size() + " Enabled words.");
+        logMsg("[ChatFilter] Filtering " + regexAdvert.size() + " Enabled ip/dns.");
+
         metrics.addCustomChart(new Metrics.SimplePie("used_language", () -> {
             return getLang().locale.toString();
         }));
@@ -105,10 +133,8 @@ public final class ChatFilter extends JavaPlugin {
     }
 
     public void loadVariables() {
-        this.regExWords = getConfig().getStringList("filteredWords");
-        this.regExDNS = getConfig().getStringList("filteredIPandDNS");
-        this.byPassWords = getConfig().getStringList("bypassWords");
-        this.byPassDNS = getConfig().getStringList("bypassIP");
+        this.byPassWords = getWhitelistConfig().getStringList("bypassWords");
+        this.byPassDNS = getWhitelistConfig().getStringList("bypassIP");
 
         this.CommandsOnFontEnabled = getConfig().getBoolean("CommandsOnFont.enabled");
         this.CommandsOnFontCommand = getConfig().getString("CommandsOnFont.command");
@@ -149,7 +175,22 @@ public final class ChatFilter extends JavaPlugin {
         return chatFilters;
     }
 
+    public LoadFilters getFilters() {
+        return loadFilters;
+    }
+
     public LangManager getLang() { return langManager; }
+
+
+    public FileConfiguration getWordConfig() {
+        return this.wordConfig;
+    }
+    public FileConfiguration getAdvertConfig() {
+        return this.advertConfig;
+    }
+    public FileConfiguration getWhitelistConfig() {
+        return this.whitelistConfig;
+    }
 
     public void sendStaffMessage(String str) {
         for (Player online : Bukkit.getServer().getOnlinePlayers()) {
@@ -166,5 +207,50 @@ public final class ChatFilter extends JavaPlugin {
             consoleSender.sendMessage("Match: " + regexUsed);
             consoleSender.sendMessage("Catch > " + p.getName() + ": " + msg);
         }
+    }
+
+
+    private void createCustomConfig() {
+        wordConfigFile = new File(getDataFolder(), "wordFilters.yml");
+        advertConfigFile = new File(getDataFolder(), "advertFilters.yml");
+        whitelistConfigFile = new File(getDataFolder(), "whitelisted.yml");
+
+        if (!whitelistConfigFile.exists()) {
+            whitelistConfigFile.getParentFile().mkdirs();
+            saveResource("whitelisted.yml", false);
+        }
+        if (!wordConfigFile.exists()) {
+            wordConfigFile.getParentFile().mkdirs();
+            saveResource("wordFilters.yml", false);
+        }
+        if (!advertConfigFile.exists()) {
+            advertConfigFile.getParentFile().mkdirs();
+            saveResource("advertFilters.yml", false);
+        }
+
+        whitelistConfig = new YamlConfiguration();
+        wordConfig = new YamlConfiguration();
+        advertConfig = new YamlConfiguration();
+
+        try {
+            whitelistConfig.load(whitelistConfigFile);
+            advertConfig.load(advertConfigFile);
+            wordConfig.load(wordConfigFile);
+        } catch (IOException | InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
+    public void save() {
+        try {
+            whitelistConfig.save(whitelistConfigFile);
+            advertConfig.save(advertConfigFile);
+            wordConfig.save(wordConfigFile);
+        } catch (IOException ignored) {
+        }
+    }
+    public void reloadConfigs() throws Exception {
+        whitelistConfig.load(whitelistConfigFile);
+        advertConfig.load(advertConfigFile);
+        wordConfig.load(wordConfigFile);
     }
 }

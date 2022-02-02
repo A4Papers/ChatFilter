@@ -1,6 +1,7 @@
 package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.ChatColor;
@@ -49,9 +50,9 @@ public class AnvilListener implements Listener {
                                         if (chatFilter.getChatFilters().validResult(displayName, p).getResult()) {
                                             Types type = chatFilter.getChatFilters().validResult(displayName, p).getType();
                                             String[] stringArray = chatFilter.getChatFilters().validResult(displayName, p).getStringArray();
-                                            String regexPattern = chatFilter.getChatFilters().validResult(displayName, p).getRegexPattern();
+                                            FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(displayName, p).getFilterWrapper();
 
-                                            chatFilter.commandHandler.runCommand(type, p, chatFilter.getChatFilters().validResult(displayName, p).getStringArray());
+                                            chatFilter.commandHandler.runCommand(p, chatFilter.getChatFilters().validResult(displayName, p).getStringArray(), filterWrapper);
                                             event.setCancelled(true);
                                             if (type == Types.SWEAR) {
                                                 prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilSwear.s).replace("%player%", p.getName());
@@ -69,12 +70,19 @@ public class AnvilListener implements Listener {
                                                 prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilFont.s).replace("%player%", p.getName());
                                                 warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
                                             }
-                                            chatFilter.sendConsole(type, displayName, p, regexPattern, "Anvil");
-                                            p.sendMessage(chatFilter.colour(warnPlayerMessage));
-                                            for (String oneWord : chatFilter.getChatFilters().validResult(displayName, p).getStringArray()) {
-                                                displayName = displayName.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                                            if (filterWrapper.getWarnPlayer()) {
+                                                p.sendMessage(chatFilter.colour(warnPlayerMessage));
                                             }
-                                            chatFilter.sendStaffMessage(chatFilter.colour(prefix + displayName));
+                                            if (filterWrapper.getLogToConsole()) {
+                                                chatFilter.sendConsole(type, displayName, p, filterWrapper.getRegex(), "Anvil");
+                                            }
+                                            if (filterWrapper.getSendStaff()) {
+                                                for (String oneWord : chatFilter.getChatFilters().validResult(displayName, p).getStringArray()) {
+                                                    displayName = displayName.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                                                }
+                                                chatFilter.sendStaffMessage(chatFilter.colour(prefix + displayName));
+                                            }
+
                                         }
                                     }
                                 }

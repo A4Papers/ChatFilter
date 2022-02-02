@@ -1,6 +1,7 @@
 package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.ChatColor;
@@ -37,9 +38,10 @@ public class SignListener implements Listener {
         if (chatFilter.getChatFilters().validResult(lines, p).getResult()) {
             Types type = chatFilter.getChatFilters().validResult(lines, p).getType();
             String[] stringArray = chatFilter.getChatFilters().validResult(lines, p).getStringArray();
-            String regexPattern = chatFilter.getChatFilters().validResult(lines, p).getRegexPattern();
+            FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(lines, p).getFilterWrapper();
+
             event.getBlock().breakNaturally();
-            chatFilter.commandHandler.runCommand(type, p, stringArray);
+            chatFilter.commandHandler.runCommand(p, stringArray, filterWrapper);
             if (type == Types.SWEAR) {
                 prefix = chatFilter.getLang().mapToString(EnumStrings.prefixSignSwear.s).replace("%player%", p.getName());
                 warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
@@ -116,20 +118,26 @@ public class SignListener implements Listener {
                 prefix = chatFilter.getLang().mapToString(EnumStrings.prefixSignFont.s).replace("%player%", p.getName());
                 warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s);
             }
-            chatFilter.sendConsole(type, lines, p, regexPattern, "Sign");
-            p.sendMessage(chatFilter.colour(warnPlayerMessage));
-            chatFilter.sendStaffMessage(chatFilter.colour(prefix));
-            if (!line0.isEmpty()) {
-                chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine1.s)) + line0);
+            if (filterWrapper.getLogToConsole()) {
+                chatFilter.sendConsole(type, lines, p, filterWrapper.getRegex(), "Sign");
             }
-            if (!line1.isEmpty()) {
-                chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine2.s)) + line1);
+            if(filterWrapper.getWarnPlayer()) {
+                p.sendMessage(chatFilter.colour(warnPlayerMessage));
             }
-            if (!line2.isEmpty()) {
-                chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine3.s)) + line2);
-            }
-            if (!line3.isEmpty()) {
-                chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine4.s)) + line3);
+            if (filterWrapper.getSendStaff()) {
+                chatFilter.sendStaffMessage(chatFilter.colour(prefix));
+                if (!line0.isEmpty()) {
+                    chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine1.s)) + line0);
+                }
+                if (!line1.isEmpty()) {
+                    chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine2.s)) + line1);
+                }
+                if (!line2.isEmpty()) {
+                    chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine3.s)) + line2);
+                }
+                if (!line3.isEmpty()) {
+                    chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine4.s)) + line3);
+                }
             }
         }
     }

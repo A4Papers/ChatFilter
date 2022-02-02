@@ -1,16 +1,18 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
+import java.util.logging.Filter;
+
 public class Result {
     private final boolean result;
     private final String[] message;
     private final Types type;
-    private final String regexUse;
+    private FilterWrapper filterWrapper;
 
-    public Result(boolean result, String[] array, Types type, String regexUse) {
+    public Result(boolean result, String[] array, Types type, FilterWrapper filterWrapper) {
         this.result = result;
         this.message = array;
         this.type = type;
-        this.regexUse = regexUse;
+        this.filterWrapper = filterWrapper;
     }
 
     public String[] getStringArray() {
@@ -25,7 +27,7 @@ public class Result {
         return type;
     }
 
-    public String getRegexPattern() {
-        return regexUse;
+    public FilterWrapper getFilterWrapper() {
+        return filterWrapper;
     }
 }
