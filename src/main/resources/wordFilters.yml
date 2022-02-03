@@ -1,13 +1,649 @@
 ChatFilter:
-  aCoolFunCommand:
+  #The word in plain text
+  a_cool_fun_word:
+    #Filter this word?
+    Enabled: true
+    Warn:
+      #Notify staff when the filter catches a player
+      Staff: true
+      #Send the player a warning message?
+      Player: true
+      #Send catch to console?
+      Console: true
+    #The regex felter, You can enter your own or use the ingame creator
+    Regex: Ingame_regex_generation
+    #Cancel sending the message to chat
+    CancelChat: true
+    #If not canceled, What do we replace the message with?
+    ReplaceWith: nope
+    #Command run when the filter catches a player. Leave blank for nothing - %player% for player name - %item% for catched item
+    Command: msg %player% please do not say %item%
+    AddedBy: ChatFilter
+  <3:
+    Enabled: false
+    Warn:
+      Staff: false
+      Player: false
+      Console: false
+    Regex: <3
+    CancelChat: false
+    ReplaceWith: ❤
+    Command: ''
+    AddedBy: ChatFilter
+  whore:
     Enabled: true
     Warn:
       Staff: true
       Player: true
       Console: true
-    Regex: Ingame_regex_generation
+    Regex: (w|\*|\#)+(\W|_)*(h|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*
     CancelChat: true
-    ReplaceWith: nope
-    Command: msg %player% please do not say %placeHolder%
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  sex:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\$|s|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(x|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  fuck:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (f|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(\(|c|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  horny:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (h|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(y|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  hentai:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (h|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  slut:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\$|s|\*|\#)+(\W|_)*(1|l|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  slag:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\$|s|\*|\#)+(\W|_)*(1|l|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  boob:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (8|b|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(8|b|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  pussy:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (p|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*(y|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  vagina:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (w|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  penis:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (p|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  cunt:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\(|c|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  nigger:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (n|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  nagger:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (n|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  anal:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (@|a|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(1|l|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  wanker:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (w|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  shit:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\$|s|\*|\#)+(\W|_)*(h|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  rape:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (r|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(p|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  rapist:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (r|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(p|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  dick:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (d|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(\(|c|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  bitch:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (8|b|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*(\(|c|\*|\#)+(\W|_)*(h|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  asshole:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (@|a|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*(h|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(1|l|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  twat:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (7|t|\*|\#)+(\W|_)*(w|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  tit:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (7|t|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  homo:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (h|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(m|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  intercourse:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (!|i|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(\(|c|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  cum:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\(|c|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(m|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  sperm:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\$|s|\*|\#)+(\W|_)*(p|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(m|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  spunk:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\$|s|\*|\#)+(\W|_)*(p|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  testicle:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (7|t|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(\(|c|\*|\#)+(\W|_)*(1|l|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  milf:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (m|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(1|l|\*|\#)+(\W|_)*(f|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  anus:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (@|a|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  wtf:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (w|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*(f|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  pedo:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (p|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(d|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  porn:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (p|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  orgy:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (0|o|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(y|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  pornography:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (p|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(p|\*|\#)+(\W|_)*(h|\*|\#)+(\W|_)*(y|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  motherfucker:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (m|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*(h|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(f|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(\(|c|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  kunt:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (k|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  fkt:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (f|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  fgt:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (f|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(7|t|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  fkd:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (f|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(d|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  fark:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (f|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  n1gg3r:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (n|\*|\#)+(\W|_)*(1)+(\W|_)*(6|g|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(3)+(\W|_)*(r|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  gobbie:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (6|g|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(8|b|\*|\#)+(\W|_)*(8|b|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  gobby:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (6|g|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(8|b|\*|\#)+(\W|_)*(8|b|\*|\#)+(\W|_)*(y|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  niger:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (n|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  bdsm:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (8|b|\*|\#)+(\W|_)*(d|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*(m|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  bukkaki:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (8|b|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  bukkake:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (8|b|\*|\#)+(\W|_)*(u|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(@|a|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  tiddies:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (7|t|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(d|\*|\#)+(\W|_)*(d|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  niggr:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (n|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(6|g|\*|\#)+(\W|_)*(r|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  nonce:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (n|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(n|\*|\#)+(\W|_)*(\(|c|\*|\#)+(\W|_)*(3|e|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  tiddy:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (7|t|\*|\#)+(\W|_)*(!|i|\*|\#)+(\W|_)*(d|\*|\#)+(\W|_)*(d|\*|\#)+(\W|_)*(y|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  ffs:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (f|\*|\#)+(\W|_)*(f|\*|\#)+(\W|_)*(\$|s|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
+    AddedBy: ChatFilter
+  cock:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    Regex: (\(|c|\*|\#)+(\W|_)*(0|o|\*|\#)+(\W|_)*(\(|c|\*|\#)+(\W|_)*(k|\*|\#)+(\W|_)*
+    CancelChat: true
+    ReplaceWith: Cookies
+    Command: ''
     AddedBy: ChatFilter
 

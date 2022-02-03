@@ -3,8 +3,8 @@
 #                  ChatFilter config file                         #
 #                                                                 #
 #   If you need any help with this plugin or have any problems    #
-#   feel free to message me on discord: A4Papers#3211             #
-#                                                                 #
+#   feel free to join the support discord:                        #
+#   https://discord.gg/VKCwEh94hN                                 #
 #                                                                 #
 ###################################################################
 
@@ -41,10 +41,9 @@
 # pl = Polish
 # da = Danish
 
-# File can be edited to support custom messages etc.
+# Message customisation is done in the messages_(yourlang).properties File
 
 locale: en
-
 
 settings:
   ##Block fancy text? Often used with hacked clients 
@@ -61,6 +60,7 @@ settings:
   
   ##Remove excessive caps? Names are exempt
   deCap: true
+
   ##How many UPPERCASE letters before we lower the text string?
   capsAmount: 5
   
@@ -69,34 +69,9 @@ settings:
   
   ##Colour we use to highlight the matched swear.
   swearHighLight: "&c"
-  
-  ##Cancel the players chat message when the filter catches a message?
-  cancelChat: true 
-  
-  ##If above is false, Replace the swear/ip with what?
-  cancelChatReplace: "*"   
-  
 
-## Run a command when the player swears?  
-CommandsOnSwear:  ## Word placeholder - %placeholder%
-  enabled: false
-  command: warn %player%
-
-## Run a command when the player advertises?  
-CommandsOnAdvertises:  
-  enabled: false
-  command: warn %player%
-
-## Run a command when the player swears and advertises?
-CommandsOnSwearAndAdvertises:  
-  enabled: false
-  command: warn %player%
-
-## Run a command when the player uses a font?
-CommandsOnFont:  
-  enabled: false
-  command: warn %player%
-
+## Regex used to identify links
+URL_REGEX: ^((https?|ftp)://|(www|ftp)\\.)
 
 ## Check commands for swearing/ips?
 checkCommands: false
@@ -115,111 +90,3 @@ commands:
   r:
     swear: false
     ip: true
-
-## Words that are allowed to pass filter, Used to prevent false positives
-## Example: Having the word "anal" in the filter will also not allow "an alt" to pass
-## However adding "an alt" via '/cf whitelist add word an alt' Will then allow "an alt" to pass
-bypassWords:
-- "an alt"
-- "mean a legit"
-- "analytics"
-- "just watching"
-- "got it"
-- "shouldn't it"
-- "it's excellent"
-- "ain't it"
-- "isn't it"
-- "cocky"
-- "cockroach"
-- "cocktail"
-- "staff say"
-- "stuffs"
-- "wasn't it"
-
-## IPs or DNS that are able to pass though the advertising filter
-bypassIP:
-- "youtube.com"
-- "google.com"
-- "mc.server.net"
-
-
-## Regex used to identify links
-URL_REGEX: ^((https?|ftp)://|(www|ftp)\\.)
-
-## DNS/IP filter 
-filteredIPandDNS:
-- \b[0-9]{1,3}(\.|dot|\(dot\)|-|;|,|(\W|\d|_)*\s)+[0-9]{1,3}(\.|dot|\(dot\)|-|;|,|(\W|\d|_)*\s)+[0-9]{1,3}(\.|dot|\(dot\)|-|;|,|(\W|\d|_)*\s)+[0-9]{1,3}\b
-- ([a-zA-Z0-9\-\.]+\s?(\.|dot|\(dot\)|-|;)(com|org|net|cz|co|uk|sk|biz|mobi|xxx|eu|io))
-
-
-## Regex words - More presets https://pastebin.com/A67cK3SD
-filteredWords: #Note: Custom regex filteres can not be removed and may look incorrect in /cf blacklist list.
-- \b(w+(\W|\d|_)*h+(\W|\d|_)*o+(\W|\d|_)*r+(\W|\d|_)*e+(\W|\d|_)*) #Whore
-- \b(s+(\W|\d|_)*e+(\W|\d|_)*x+(\W|\d|_)*) #sex
-- \b(f+(\W|\d|_)*u+(\W|\d|_)*c+(\W|\d|_)*k+(\W|\d|_)*) #Fuck
-- \b(h+(\W|\d|_)*o+(\W|\d|_)*r+(\W|\d|_)*n+(\W|\d|_)*y+(\W|\d|_)*) #Horny
-- \b(a+(\W|\d|_)*r+(\W|\d|_)*o+(\W|\d|_)*u+(\W|\d|_)*s+(\W|\d|_)*e+(\W|\d|_)*d+(\W|\d|_)*) #Aroused
-- \b(h+(\W|\d|_)*e+(\W|\d|_)*n+(\W|\d|_)*t+(\W|\d|_)*a+(\W|\d|_)*i+(\W|\d|_)*) #Hentai
-- \b(s+(\W|\d|_)*l+(\W|\d|_)*u+(\W|\d|_)*t+(\W|\d|_)*) #Slut
-- \b(s+(\W|\d|_)*l+(\W|\d|_)*a+(\W|\d|_)*g+(\W|\d|_)*) #Slag
-- \b(b+(\W|\d|_)*o+(\W|\d|_)*o+(\W|\d|_)*b+(\W|\d|_)*) #Boob
-- \b(p+(\W|\d|_)*u+(\W|\d|_)*s+(\W|\d|_)*s+(\W|\d|_)*y+(\W|\d|_)*) #Pussy
-- \b(v+(\W|\d|_)*a+(\W|\d|_)*g+(\W|\d|_)*i+(\W|\d|_)*n+(\W|\d|_)*a+(\W|\d|_)*) #Vagina
-- \b(p+(\W|\d|_)*e+(\W|\d|_)*n+(\W|\d|_)*i+(\W|\d|_)*s+(\W|\d|_)*) #Penis
-- \b(b+(\W|\d|_)*a+(\W|\d|_)*s+(\W|\d|_)*t+(\W|\d|_)*a+(\W|\d|_)*r+(\W|\d|_)*d+(\W|\d|_)*) #
-- \b(c+(\W|\d|_)*u+(\W|\d|_)*n+(\W|\d|_)*t+(\W|\d|_)*) #Cunt
-- \b(n+(\W|\d|_)*i+(\W|\d|_)*g+(\W|\d|_)*g+(\W|\d|_)*a+(\W|\d|_)*) #Nigga
-- \b(n+(\W|\d|_)*i+(\W|\d|_)*g+(\W|\d|_)*g+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*) #Nigger
-- \b(a+(\W|\d|_)*n+(\W|\d|_)*a+(\W|\d|_)*l+(\W|\d|_)*) #Anal
-- \b(w+(\W|\d|_)*a+(\W|\d|_)*n+(\W|\d|_)*k+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*) #Wanker
-- \b(s+(\W|\d|_)*h+(\W|\d|_)*i+(\W|\d|_)*t+(\W|\d|_)*) #Shit
-- \b(r+(\W|\d|_)*a+(\W|\d|_)*p+(\W|\d|_)*e+(\W|\d|_)*) #Rape
-- \b(r+(\W|\d|_)*a+(\W|\d|_)*p+(\W|\d|_)*i+(\W|\d|_)*s+(\W|\d|_)*t+(\W|\d|_)*) #Rapist
-- \b(d+(\W|\d|_)*i+(\W|\d|_)*c+(\W|\d|_)*k+(\W|\d|_)*) #Dick
-- \b(b+(\W|\d|_)*i+(\W|\d|_)*t+(\W|\d|_)*c+(\W|\d|_)*h+(\W|\d|_)*) #Bitch
-- \b(a+(\W|\d|_)*s+(\W|\d|_)*s+(\W|\d|_)*h+(\W|\d|_)*o+(\W|\d|_)*l+(\W|\d|_)*e+(\W|\d|_)*) #Asshole
-- \b(t+(\W|\d|_)*w+(\W|\d|_)*a+(\W|\d|_)*t+(\W|\d|_)*) #Twat
-- \b(t+(\W|\d|_)*i+(\W|\d|_)*t+(\W|\d|_)*(t|s)+(\W|\d|_)*) #Titt/s
-- \b(h+(\W|\d|_)*o+(\W|\d|_)*m+(\W|\d|_)*o+(\W|\d|_)*) #Homo
-- \b(i+(\W|\d|_)*n+(\W|\d|_)*t+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*c+(\W|\d|_)*o+(\W|\d|_)*u+(\W|\d|_)*r+(\W|\d|_)*s+(\W|\d|_)*e+(\W|\d|_)*) #Intercourse
-- \b(c+(\W|\d|_)*u+(\W|\d|_)*m+(\W|\d|_)*) #Cum
-- \b(s+(\W|\d|_)*p+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*m+(\W|\d|_)*) #Sperm
-- \b(s+(\W|\d|_)*p+(\W|\d|_)*u+(\W|\d|_)*n+(\W|\d|_)*k+(\W|\d|_)*) #Spunk
-- \b(t+(\W|\d|_)*e+(\W|\d|_)*s+(\W|\d|_)*t+(\W|\d|_)*i+(\W|\d|_)*c+(\W|\d|_)*l+(\W|\d|_)*e+(\W|\d|_)*) #Testicle
-- \b(m+(\W|\d|_)*i+(\W|\d|_)*l+(\W|\d|_)*f+(\W|\d|_)*) #Milf
-- \b(a+(\W|\d|_)*n+(\W|\d|_)*u+(\W|\d|_)*s+(\W|\d|_)*) #Anus
-- \b(w+(\W|\d|_)*t+(\W|\d|_)*f+(\W|\d|_)*) #wtf
-- \b(p+(\W|\d|_)*e+(\W|\d|_)*d+(\W|\d|_)*o+(\W|\d|_)*) #Pedo
-- \b(p+(\W|\d|_)*o+(\W|\d|_)*r+(\W|\d|_)*n+(\W|\d|_)*) #Porn
-- \b(o+(\W|\d|_)*r+(\W|\d|_)*g+(\W|\d|_)*y+(\W|\d|_)*) #Orgy
-- \b(p+(\W|\d|_)*o+(\W|\d|_)*r+(\W|\d|_)*n+(\W|\d|_)*o+(\W|\d|_)*g+(\W|\d|_)*r+(\W|\d|_)*a+(\W|\d|_)*p+(\W|\d|_)*h+(\W|\d|_)*y+(\W|\d|_)*) #Pornography
-- \b(m+(\W|\d|_)*o+(\W|\d|_)*t+(\W|\d|_)*h+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*f+(\W|\d|_)*u+(\W|\d|_)*c+(\W|\d|_)*k+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*) #Motherfucker
-- \b(k+(\W|\d|_)*u+(\W|\d|_)*n+(\W|\d|_)*t+(\W|\d|_)*)\b #Kunt
-- \b(f+(\W|\d|_)*k+(\W|\d|_)*t+(\W|\d|_)*)\b #fkt
-- \b(s+(\W|\d|_)*h+(\W|\d|_)*t+(\W|\d|_)*)\b #sht
-- \b(f+(\W|\d|_)*k+(\W|\d|_)*d+(\W|\d|_)*)\b #fkd
-- (f+(\W|\d|_)*a+(\W|\d|_)*r+(\W|\d|_)*k+(\W|\d|_)*) #Fark
-- (n+(\W|\d|_)*1+(\W|\d|_)*g+(\W|\d|_)*g+(\W|\d|_)*3+(\W|\d|_)*r+(\W|\d|_)*) #N1gg3r
-- \b(n+(\W|\d|_)*a+(\W|\d|_)*g+(\W|\d|_)*g+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*s+(\W|\d|_)*)\b #Naggers
-- (c+(\W|\d|_)*u+(\W|\d|_)*n+(\W|\d|_)*t+(\W|\d|_)*) #Cunt
-- \b(g+(\W|\d|_)*o+(\W|\d|_)*b+(\W|\d|_)*b+(\W|\d|_)*y+(\W|\d|_)*)\b #Gobby
-- \b(g+(\W|\d|_)*o+(\W|\d|_)*b+(\W|\d|_)*b+(\W|\d|_)*i+(\W|\d|_)*e+(\W|\d|_)*)\b #Gobbie
-- (n+(\W|\d|_)*l+(\W|\d|_)*g+(\W|\d|_)*g+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*) #Nigger
-- \b(n+(\W|\d|_)*i+(\W|\d|_)*g+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*)\b #Niger
-- \b(b+(\W|\d|_)*d+(\W|\d|_)*s+(\W|\d|_)*m+(\W|\d|_)*)\b #Bdsm
-- \b(b+(\W|\d|_)*u+(\W|\d|_)*k+(\W|\d|_)*k+(\W|\d|_)*a+(\W|\d|_)*k+(\W|\d|_)*e+(\W|\d|_)*)\b #Bukkaki
-- \b(b+(\W|\d|_)*u+(\W|\d|_)*k+(\W|\d|_)*k+(\W|\d|_)*a+(\W|\d|_)*k+(\W|\d|_)*i+(\W|\d|_)*)\b #Bukkake
-- \b(t+(\W|\d|_)*i+(\W|\d|_)*d+(\W|\d|_)*d+(\W|\d|_)*i+(\W|\d|_)*e+(\W|\d|_)*s+(\W|\d|_)*)\b #Tiddies
-- (n+(\W|\d|_)*1+(\W|\d|_)*g+(\W|\d|_)*g+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*) #N1gger
-- (n+(\W|\d|_)*i+(\W|\d|_)*@+(\W|\d|_)*@+(\W|\d|_)*e+(\W|\d|_)*r+(\W|\d|_)*) #Ni@@er
-- (n+(\W|\d|_)*i+(\W|\d|_)*g+(\W|\d|_)*g+(\W|\d|_)*r+(\W|\d|_)*) #Niggr
-- (s+(\W|\d|_)*1+(\W|\d|_)*u+(\W|\d|_)*t+(\W|\d|_)*) #Slut
-- (n+(\W|\d|_)*o+(\W|\d|_)*n+(\W|\d|_)*c+(\W|\d|_)*e+(\W|\d|_)*) #Nonce
-- (b+(\W|\d|_)*i+(\W|\d|_)*t+(\W|\d|_)*c+(\W|\d|_)*h+(\W|\d|_)*) #Bitch
-- (t+(\W|\d|_)*i+(\W|\d|_)*d+(\W|\d|_)*d+(\W|\d|_)*y+(\W|\d|_)*) #Tiddy
-- \b(f+(\W|\d|_)*f+(\W|\d|_)*s+(\W|\d|_)*)\b #ffs
-- (c+(\W|\d|_)*o+(\W|\d|_)*c+(\W|\d|_)*k+(\W|\d|_)*)\b #Cock
-
-
-#- \b(t+(\W|\d|_)*f+(\W|\d|_)*)\b #tf
-#- \b(a+(\W|\d|_)*f+(\W|\d|_)*)\b #af

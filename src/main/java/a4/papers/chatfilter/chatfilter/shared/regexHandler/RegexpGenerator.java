@@ -48,8 +48,14 @@ public class RegexpGenerator {
                 case 'c':
                     sb.append("\\(|c");
                     break;
+                case 'd':
+                    sb.append("d");
+                    break;
                 case 'e':
                     sb.append("3|e");
+                    break;
+                case 'f':
+                    sb.append("f");
                     break;
                 case 'g':
                     sb.append("6|g");
@@ -60,17 +66,53 @@ public class RegexpGenerator {
                 case 'i':
                     sb.append("!|i");
                     break;
+                case 'j':
+                    sb.append("j");
+                    break;
+                case 'k':
+                    sb.append("k");
+                    break;
                 case 'l':
                     sb.append("1|l");
                     break;
+                case 'm':
+                    sb.append("m");
+                    break;
+                case 'n':
+                    sb.append("n");
+                    break;
                 case 'o':
                     sb.append("0|o");
+                    break;
+                case 'p':
+                    sb.append("p");
+                    break;
+                case 'q':
+                    sb.append("q");
+                    break;
+                case 'r':
+                    sb.append("r");
                     break;
                 case 's':
                     sb.append("\\$|s");
                     break;
                 case 't':
                     sb.append("7|t");
+                    break;
+                case 'u':
+                    sb.append("u");
+                    break;
+                case 'v':
+                    sb.append("w");
+                    break;
+                case 'w':
+                    sb.append("w");
+                    break;
+                case 'x':
+                    sb.append("x");
+                    break;
+                case 'y':
+                    sb.append("y");
                     break;
                 case 'z':
                     sb.append("2|z");

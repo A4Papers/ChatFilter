@@ -21,7 +21,7 @@ public class CommandHandler {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), filterWrapper.getCommand().replace("%player%", p.getName()).replace("%placeholder%", firstWord));
+                        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), filterWrapper.getCommand().replace("%player%", p.getName()).replace("%item%", firstWord));
                     }
                 }.runTask(chatFilter);
             }

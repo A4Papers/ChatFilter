@@ -12,7 +12,6 @@ import a4.papers.chatfilter.chatfilter.shared.lang.LangManager;
 import a4.papers.chatfilter.chatfilter.shared.regexHandler.LoadFilters;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,7 +23,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public final class ChatFilter extends JavaPlugin {
@@ -36,28 +37,15 @@ public final class ChatFilter extends JavaPlugin {
     public LangManager langManager;
     public LoadFilters loadFilters;
     public FilterWrapper filterWrapper;
-
-
-    private File wordConfigFile;
-    private File advertConfigFile;
-    private File whitelistConfigFile;
-    private FileConfiguration whitelistConfig;
-    private FileConfiguration wordConfig;
-    private FileConfiguration advertConfig;
-
     public Map<String, FilterWrapper> regexWords;
     public Map<String, FilterWrapper> regexAdvert;
-
-
     public List<String> byPassWords;
     public List<String> byPassDNS;
-
     public int capsAmount;
     public boolean CommandsOnSwearEnabled;
     public boolean CommandsOnAdvertisesEnabled;
     public boolean antiRepeatEnabled;
     public boolean cancelChat;
-    public boolean commandsOnAdvertises;
     public boolean CommandsOnSwearAndAdvertisesEnabled;
     public boolean settingsAllowURL;
     public boolean settingsBlockFancyChat;
@@ -65,7 +53,6 @@ public final class ChatFilter extends JavaPlugin {
     public boolean deCap;
     public boolean chatPause = false;
     public boolean cmdCheck;
-
     public String CommandsOnSwearCommand;
     public String CommandsOnAdvertisesCommand;
     public String CommandsOnSwearAndAdvertisesCommand;
@@ -74,15 +61,18 @@ public final class ChatFilter extends JavaPlugin {
     public String percentage;
     public String cancelChatReplace;
     public String URL_REGEX;
-
     Integer blockedInt = 1;
     int pluginId = 13946;
+    private File wordConfigFile;
+    private File advertConfigFile;
+    private File whitelistConfigFile;
+    private FileConfiguration whitelistConfig;
+    private FileConfiguration wordConfig;
+    private FileConfiguration advertConfig;
 
     public void onEnable() {
         this.regexWords = new HashMap<>();
         this.regexAdvert = new HashMap<>();
-
-        createCustomConfig();
         chatFilters = new ChatFilters(this);
         commandHandler = new CommandHandler(this);
         langManager = new LangManager(this);
@@ -92,11 +82,7 @@ public final class ChatFilter extends JavaPlugin {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
-        logMsg("[ChatFilter] Loaded using locale: " + getLang().locale);
-
-
-        Metrics metrics = new Metrics(this, pluginId);
+        createCustomConfig();
         loadVariables();
         getCommand("chatfilter").setExecutor(new CommandMain(this));
         getCommand("clearchat").setExecutor(new ClearChatCommand(this));
@@ -113,9 +99,12 @@ public final class ChatFilter extends JavaPlugin {
         saveDefaultConfig();
         getFilters().loadWordFilter();
         getFilters().loadAdvertFilter();
-        logMsg("[ChatFilter] Filtering " + regexWords.size() + " Enabled words.");
-        logMsg("[ChatFilter] Filtering " + regexAdvert.size() + " Enabled ip/dns.");
+        logMsg("[ChatFilter] Loaded using locale: " + getLang().locale);
+        logMsg("[ChatFilter] " + regexWords.size() + " Enabled word filters.");
+        logMsg("[ChatFilter] " + regexAdvert.size() + " Enabled advertising filters.");
+        logMsg("[ChatFilter] " + (byPassWords.size() + byPassWords.size()) + " whitelisted items.");
 
+        Metrics metrics = new Metrics(this, pluginId);
         metrics.addCustomChart(new Metrics.SimplePie("used_language", () -> {
             return getLang().locale.toString();
         }));
@@ -135,24 +124,17 @@ public final class ChatFilter extends JavaPlugin {
     public void loadVariables() {
         this.byPassWords = getWhitelistConfig().getStringList("bypassWords");
         this.byPassDNS = getWhitelistConfig().getStringList("bypassIP");
-
         this.CommandsOnFontEnabled = getConfig().getBoolean("CommandsOnFont.enabled");
         this.CommandsOnFontCommand = getConfig().getString("CommandsOnFont.command");
-
         this.CommandsOnSwearEnabled = getConfig().getBoolean("CommandsOnSwear.enabled");
         this.CommandsOnSwearCommand = getConfig().getString("CommandsOnSwear.command");
-
         this.CommandsOnAdvertisesEnabled = getConfig().getBoolean("CommandsOnAdvertises.enabled");
         this.CommandsOnAdvertisesCommand = getConfig().getString("CommandsOnAdvertises.command");
-
         this.CommandsOnSwearAndAdvertisesEnabled = getConfig().getBoolean("CommandsOnSwearAndAdvertises.enabled");
         this.CommandsOnSwearAndAdvertisesCommand = getConfig().getString("CommandsOnSwearAndAdvertises.command");
-
         this.settingsAllowURL = getConfig().getBoolean("settings.allowURL");
-
         this.settingsBlockFancyChat = getConfig().getBoolean("settings.blockFancyChat");
         this.settingsSwearHighLight = getConfig().getString("settings.swearHighLight");
-
         this.cmdCheck = getConfig().getBoolean("checkCommands");
         this.capsAmount = getConfig().getInt("settings.capsAmount");
         this.deCap = getConfig().getBoolean("settings.deCap");
@@ -171,23 +153,26 @@ public final class ChatFilter extends JavaPlugin {
         consoleSender.sendMessage(message);
     }
 
-    public ChatFilters getChatFilters() {
-        return chatFilters;
-    }
-
     public LoadFilters getFilters() {
         return loadFilters;
     }
 
-    public LangManager getLang() { return langManager; }
+    public ChatFilters getChatFilters() {
+        return chatFilters;
+    }
 
+    public LangManager getLang() {
+        return langManager;
+    }
 
     public FileConfiguration getWordConfig() {
         return this.wordConfig;
     }
+
     public FileConfiguration getAdvertConfig() {
         return this.advertConfig;
     }
+
     public FileConfiguration getWhitelistConfig() {
         return this.whitelistConfig;
     }
@@ -202,19 +187,17 @@ public final class ChatFilter extends JavaPlugin {
 
     public void sendConsole(Types type, String msg, Player p, String regexUsed, String pl) {
         if (!type.equals(Types.NOTYPE)) {
-            blockedInt = new Integer(blockedInt.intValue()+ 1);
+            blockedInt = new Integer(blockedInt.intValue() + 1);
             consoleSender.sendMessage("------- Match Type: " + type.id + " ~ " + pl.toUpperCase());
             consoleSender.sendMessage("Match: " + regexUsed);
             consoleSender.sendMessage("Catch > " + p.getName() + ": " + msg);
         }
     }
 
-
     private void createCustomConfig() {
         wordConfigFile = new File(getDataFolder(), "wordFilters.yml");
         advertConfigFile = new File(getDataFolder(), "advertFilters.yml");
         whitelistConfigFile = new File(getDataFolder(), "whitelisted.yml");
-
         if (!whitelistConfigFile.exists()) {
             whitelistConfigFile.getParentFile().mkdirs();
             saveResource("whitelisted.yml", false);
@@ -227,11 +210,9 @@ public final class ChatFilter extends JavaPlugin {
             advertConfigFile.getParentFile().mkdirs();
             saveResource("advertFilters.yml", false);
         }
-
         whitelistConfig = new YamlConfiguration();
         wordConfig = new YamlConfiguration();
         advertConfig = new YamlConfiguration();
-
         try {
             whitelistConfig.load(whitelistConfigFile);
             advertConfig.load(advertConfigFile);
@@ -240,6 +221,7 @@ public final class ChatFilter extends JavaPlugin {
             e.printStackTrace();
         }
     }
+
     public void save() {
         try {
             whitelistConfig.save(whitelistConfigFile);
@@ -248,6 +230,7 @@ public final class ChatFilter extends JavaPlugin {
         } catch (IOException ignored) {
         }
     }
+
     public void reloadConfigs() throws Exception {
         whitelistConfig.load(whitelistConfigFile);
         advertConfig.load(advertConfigFile);

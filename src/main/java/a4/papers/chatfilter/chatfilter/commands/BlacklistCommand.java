@@ -45,11 +45,16 @@ public class BlacklistCommand implements CommandExecutor {
 
             }
             if (args[2].equals("ip")) {
+                List<String> strlist = new ArrayList<>();
                 ComponentBuilder message = new ComponentBuilder("");
                 for (String words : chatFilter.regexAdvert.keySet()) {
-                    message.append(ChatColor.WHITE + " " + words + ", ");
-                    message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf blacklist remove ip " + words));
-                    message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_1.s).replace("%ip%", words)))));
+                    strlist.add(chatFilter.regexAdvert.get(words).getWord());
+                }
+                Collections.sort(strlist);
+                for (String word : strlist) {
+                    message.append(ChatColor.WHITE + " " + word + ", ");
+                    message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf blacklist remove ip " + word));
+                    message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_1.s).replace("%ip%", word)))));
                 }
                 sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_2.s)));
                 sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_3.s)));
@@ -111,7 +116,7 @@ public class BlacklistCommand implements CommandExecutor {
                 return true;
             }
             if (args[2].equals("ip") && args.length > 3) {
-                ConfigurationSection config = chatFilter.getWordConfig().getConfigurationSection("ChatFilter");
+                ConfigurationSection config = chatFilter.getAdvertConfig().getConfigurationSection("ChatFilter");
                 Set<String> set = config.getKeys(false);
                 if (!set.contains(args[3])) {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_REMOVE_IP_NO.s).replace("%ip%", args[3])));
@@ -148,13 +153,13 @@ public class BlacklistCommand implements CommandExecutor {
 
                 } else {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_ADD_WORD_ADDED.s).replace("%word%", ArgsString)));
-                    chatFilter.getFilters().createWordFilter(ArgsString, sender);
+                    chatFilter.getFilters().createWordFilter(ArgsString, sender.getName());
                     return true;
                 }
             } else if (args[2].equals("ip") && args.length > 3) {
                 String ArgsString = String.join(" ", args).toLowerCase().replaceAll("blacklist add ip ", "");
                 sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_ADD_IP_ADDED.s).replace("%ip%", ArgsString)));
-                chatFilter.getFilters().createAdvertFilter(ArgsString, sender);
+                chatFilter.getFilters().createAdvertFilter(ArgsString, sender.getName());
                 return true;
             }
         } else {
