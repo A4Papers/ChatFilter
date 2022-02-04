@@ -5,7 +5,6 @@ import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,7 +38,7 @@ public class SwearChatListener implements Listener {
             String[] stringArray = chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray();
             FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(chatMessage, p).getFilterWrapper();
 
-           chatFilter.commandHandler.runCommand(p, chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray(), filterWrapper);
+            chatFilter.commandHandler.runCommand(p, chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray(), filterWrapper);
 
             if (type == Types.SWEAR) {
                 prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatSwear.s).replace("%player%", p.getName());
@@ -64,7 +63,7 @@ public class SwearChatListener implements Listener {
             if (filterWrapper.getLogToConsole()) {
                 chatFilter.sendConsole(type, chatMessage, p, filterWrapper.getRegex(), "Chat");
             }
-            if(filterWrapper.getWarnPlayer()) {
+            if (filterWrapper.getWarnPlayer()) {
                 p.sendMessage(chatFilter.colour(warnPlayerMessage));
             }
             if (filterWrapper.getSendStaff()) {
@@ -78,7 +77,9 @@ public class SwearChatListener implements Listener {
             } else {
                 String msg = event.getMessage();
                 for (String oneWord : stringArray) {
-                    msg = msg.replace(oneWord, filterWrapper.getReplace());
+                    if (filterWrapper.getCancelChatReplace()) {
+                        msg = msg.replace(oneWord, filterWrapper.getReplace());
+                    }
                 }
                 event.setMessage(msg);
             }

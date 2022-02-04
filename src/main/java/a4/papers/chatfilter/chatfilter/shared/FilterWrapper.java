@@ -1,26 +1,30 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
+import java.util.List;
+
 public class FilterWrapper {
 
-    private final String command;
+    private final List<String> action;
     private final String word;
     private final String regex;
     private final String replace;
-
+    private final boolean cancelChatReplace;
     private final boolean sendStaff;
     private final boolean logToConsole;
     private final boolean cancelChat;
     private final boolean warnPlayer;
 
-    public FilterWrapper(String word, String command, String regex,boolean cancelChat, String replace, boolean sendStaff, boolean logToConsole,boolean warnPlayer) {
-        this.command = command;
+    public FilterWrapper(String word, List<String> action, String regex, boolean cancelChat, boolean cancelChatReplace, String replace, boolean sendStaff, boolean logToConsole, boolean warnPlayer) {
+        this.action = action;
         this.regex = regex;
         this.replace = replace;
         this.word = word;
         this.sendStaff = sendStaff;
         this.logToConsole = logToConsole;
         this.cancelChat = cancelChat;
+        this.cancelChatReplace = cancelChatReplace;
         this.warnPlayer = warnPlayer;
+
     }
     public boolean getLogToConsole() {
         return this.logToConsole;
@@ -34,10 +38,14 @@ public class FilterWrapper {
     public boolean getWarnPlayer() {
         return this.warnPlayer;
     }
-
-    public String getCommand() {
-        return this.command;
+    public boolean getCancelChatReplace() {
+        return this.cancelChatReplace;
     }
+
+    public  List<String> getActionList() {
+        return this.action;
+    }
+
     public String getRegex() {
         return this.regex;
     }

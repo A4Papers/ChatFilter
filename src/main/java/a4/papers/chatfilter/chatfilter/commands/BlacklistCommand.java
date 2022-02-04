@@ -148,7 +148,7 @@ public class BlacklistCommand implements CommandExecutor {
                 ConfigurationSection config = chatFilter.getWordConfig().getConfigurationSection("ChatFilter");
                 Set<String> set = config.getKeys(false);
 
-                if (set.contains(ArgsString)) {
+                if (set.toString().replace("#","").contains(ArgsString.replace("#",""))) {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_ADD_WORD_NO.s).replace("%word%", ArgsString)));
 
                 } else {
