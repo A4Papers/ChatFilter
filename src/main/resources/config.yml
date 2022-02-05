@@ -68,13 +68,13 @@ settings:
   allowURL: true
   
   ##Colour we use to highlight the matched swear.
-  swearHighLight: "&c"
-
-## Regex used to identify links
-URL_REGEX: ^((https?|ftp)://|(www|ftp)\\.)
+  swearHighLight: "&c%catch%&r"
 
 ## Check commands for swearing/ips?
 checkCommands: false
+
+#Let the regex generator use leet speak? https://en.wikipedia.org/wiki/Leet
+enableLeetSpeak: true
 
 ## Commands to you wish to check
 commands:

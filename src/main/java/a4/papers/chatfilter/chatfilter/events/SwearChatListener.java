@@ -68,7 +68,7 @@ public class SwearChatListener implements Listener {
             }
             if (filterWrapper.getSendStaff()) {
                 for (String oneWord : chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray()) {
-                    chatMessage = chatMessage.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                    chatMessage = chatMessage.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord)));
                 }
                 chatFilter.sendStaffMessage(chatFilter.colour(prefix + chatMessage));
             }

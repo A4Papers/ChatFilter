@@ -3,10 +3,7 @@ package a4.papers.chatfilter.chatfilter.shared;
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,7 +47,7 @@ public class ChatFilters {
                     matchedSwear = true;
                     regex = p.pattern();
                     if (!list.contains(m.group(0))) {
-                        list.add(m.group(0).replace(" ",""));
+                        list.add(m.group(0).replace(" ", ""));
                     }
                 }
             }
@@ -65,27 +62,23 @@ public class ChatFilters {
                     matchedIP = true;
                     regex = p.pattern();
                     if (!list.contains(m.group(0))) {
-                        list.add(m.group(0).replace(" ",""));
+                        list.add(m.group(0).replace(" ", ""));
                     }
                 }
             }
         }
-
         if (!(player.hasPermission("chatfilter.bypass.url"))) {
             if (!chatFilter.settingsAllowURL) {
-
                 Pattern p = Pattern.compile(chatFilter.URL_REGEX);
                 Matcher m = p.matcher(lowercaseString);
-
                 if (m.find()) {
                     matched = true;
                     matchedURL = true;
-                    regex = p.pattern();
-
+                    regex = chatFilter.URL_REGEX;
                 }
+                regexMap.put(chatFilter.URL_REGEX, new FilterWrapper("URL", Collections.singletonList("none"), chatFilter.URL_REGEX, true, false, "", false, true, false));
             }
         }
-
         if (matchedURL) {
             matched = true;
             type = Types.URL;
@@ -93,6 +86,9 @@ public class ChatFilters {
         if (isFont(string)) {
             matched = true;
             type = Types.FONT;
+            regex = "unicode";
+            regexMap.put("unicode", new FilterWrapper("unicode", Collections.singletonList("none"), "unicode", true, false, "", true, true, true));
+
         }
         if (matchedSwear) {
             type = Types.SWEAR;

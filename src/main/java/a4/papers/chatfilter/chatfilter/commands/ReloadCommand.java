@@ -29,8 +29,8 @@ public class ReloadCommand implements CommandExecutor {
                     chatFilter.reloadConfigs();
                     chatFilter.getFilters().loadAdvertFilter();
                     chatFilter.getFilters().loadWordFilter();
-                    chatFilter.byPassWords = chatFilter.getConfig().getStringList("bypassWords");
-                    chatFilter.byPassDNS = chatFilter.getConfig().getStringList("bypassIP");
+                    chatFilter.byPassWords = chatFilter.getWhitelistConfig().getStringList("bypassWords");
+                    chatFilter.byPassDNS = chatFilter.getWhitelistConfig().getStringList("bypassIP");
                 } catch (Exception e) {
                     sender.sendMessage(ChatColor.RED + "Reload failed.");
                 }

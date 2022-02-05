@@ -10,6 +10,7 @@ import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.LangManager;
 import a4.papers.chatfilter.chatfilter.shared.regexHandler.LoadFilters;
+import a4.papers.chatfilter.chatfilter.shared.regexHandler.RegexpGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -37,6 +38,7 @@ public final class ChatFilter extends JavaPlugin {
     public LangManager langManager;
     public LoadFilters loadFilters;
     public FilterWrapper filterWrapper;
+    public RegexpGenerator regexpGenerator;
     public Map<String, FilterWrapper> regexWords;
     public Map<String, FilterWrapper> regexAdvert;
     public List<String> byPassWords;
@@ -53,6 +55,7 @@ public final class ChatFilter extends JavaPlugin {
     public boolean deCap;
     public boolean chatPause = false;
     public boolean cmdCheck;
+    public boolean enableLeetSpeak;
     public String CommandsOnSwearCommand;
     public String CommandsOnAdvertisesCommand;
     public String CommandsOnSwearAndAdvertisesCommand;
@@ -77,6 +80,8 @@ public final class ChatFilter extends JavaPlugin {
         commandHandler = new CommandHandler(this);
         langManager = new LangManager(this);
         loadFilters = new LoadFilters(this);
+        regexpGenerator = new RegexpGenerator(this);
+
         try {
             langManager.loadLang();
         } catch (MalformedURLException e) {
@@ -107,6 +112,9 @@ public final class ChatFilter extends JavaPlugin {
         Metrics metrics = new Metrics(this, pluginId);
         metrics.addCustomChart(new Metrics.SimplePie("used_language", () -> {
             return getLang().locale.toString();
+        }));
+        metrics.addCustomChart(new Metrics.SimplePie("total_filters", () -> {
+            return String.valueOf(regexWords.size() +regexAdvert.size());
         }));
         metrics.addCustomChart(new Metrics.SingleLineChart("block", new Callable<Integer>() {
             @Override
@@ -143,6 +151,7 @@ public final class ChatFilter extends JavaPlugin {
         this.cancelChat = getConfig().getBoolean("settings.cancelChat");
         this.cancelChatReplace = getConfig().getString("settings.cancelChatReplace");
         this.URL_REGEX = getConfig().getString("URL_REGEX");
+        this.enableLeetSpeak = getConfig().getBoolean("enableLeetSpeak");
     }
 
     public String colour(String s) {
@@ -176,6 +185,11 @@ public final class ChatFilter extends JavaPlugin {
     public FileConfiguration getWhitelistConfig() {
         return this.whitelistConfig;
     }
+
+    public RegexpGenerator regexpGenerator() {
+        return this.regexpGenerator;
+    }
+
 
     public void sendStaffMessage(String str) {
         for (Player online : Bukkit.getServer().getOnlinePlayers()) {

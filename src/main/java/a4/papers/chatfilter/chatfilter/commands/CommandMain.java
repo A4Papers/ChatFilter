@@ -15,6 +15,8 @@ public class CommandMain implements CommandExecutor {
     private PauseCommand pauseCommand;
     private BlacklistCommand blacklistCommand;
     private WhitelistCommand whitelistCommand;
+    private ImportCommand importCommand;
+
 
     public CommandMain(ChatFilter chatFilter) {
         this.chatFilter = chatFilter;
@@ -24,6 +26,8 @@ public class CommandMain implements CommandExecutor {
         this.pauseCommand = new PauseCommand(this.chatFilter);
         this.blacklistCommand = new BlacklistCommand(this.chatFilter);
         this.whitelistCommand = new WhitelistCommand(this.chatFilter);
+        this.importCommand = new ImportCommand(this.chatFilter);
+
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -46,6 +50,9 @@ public class CommandMain implements CommandExecutor {
                     break;
                 case "whitelist":
                     this.whitelistCommand.onCommand(sender, cmd, label, args);
+                    break;
+                case "import":
+                    this.importCommand.onCommand(sender, cmd, label, args);
                     break;
                 default:
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.NO_ARGS.s)));

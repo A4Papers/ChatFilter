@@ -8,6 +8,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class CapsChatListener implements Listener {
 
     ChatFilter chatFilter;
@@ -21,6 +24,8 @@ public class CapsChatListener implements Listener {
         String msg = event.getMessage();
         if (chatFilter.deCap) {
             if (event.getPlayer().hasPermission("chatfilter.bypass") || event.getPlayer().hasPermission("chatfilter.bypass.caps"))
+                return;
+            if (isURL(msg))
                 return;
             char[] charArray = msg.toCharArray();
             int counter = 0;
@@ -40,5 +45,15 @@ public class CapsChatListener implements Listener {
             }
             event.setMessage(newmsg);
         }
+    }
+
+    public boolean isURL(String str) {
+        boolean matched = false;
+        Pattern p = Pattern.compile(chatFilter.URL_REGEX);
+        Matcher m = p.matcher(str);
+        if (m.find()) {
+            matched = true;
+        }
+        return matched;
     }
 }

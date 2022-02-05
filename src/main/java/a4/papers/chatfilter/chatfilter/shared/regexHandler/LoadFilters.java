@@ -54,7 +54,7 @@ public class LoadFilters {
     public void createWordFilter(String word, String sender) {
         List<String> list =  new ArrayList<>(Collections.singleton("none"));
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Enabled", true);
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".Regex", RegexpGenerator.generateRegexp(word));
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".Regex", chatFilter.regexpGenerator().generateRegexp(word));
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Staff", true);
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Player", true);
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Console", true);
