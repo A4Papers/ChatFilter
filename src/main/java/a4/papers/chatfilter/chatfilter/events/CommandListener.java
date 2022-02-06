@@ -77,7 +77,7 @@ public class CommandListener implements Listener {
                 }
                 if (filterWrapper.getSendStaff()) {
                     for (String oneWord : stringArray) {
-                        cmd = cmd.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        cmd = cmd.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                     chatFilter.sendStaffMessage(chatFilter.colour(prefix + cmd));
                 }

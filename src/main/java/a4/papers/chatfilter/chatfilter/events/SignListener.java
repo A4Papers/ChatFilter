@@ -47,22 +47,23 @@ public class SignListener implements Listener {
                 warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 if (!event.getLine(0).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line0 = line0.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+
+                        line0 = line0.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(1).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line1 = line1.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line1 = line1.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(2).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line2 = line2.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(3).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line3 = line3.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
             }
@@ -71,22 +72,22 @@ public class SignListener implements Listener {
                 warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 if (!event.getLine(0).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line0 = line0.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line0 = line0.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(1).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line1 = line1.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line1 = line1.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(2).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line2 = line2.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(3).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line3 = line3.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
             }
@@ -95,22 +96,22 @@ public class SignListener implements Listener {
                 warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 if (!event.getLine(0).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line0 = line0.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line0 = line0.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(1).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line1 = line1.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line1 = line1.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(2).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line2 = line2.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
                 if (!event.getLine(3).isEmpty()) {
                     for (String oneWord : stringArray) {
-                        line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight + oneWord + ChatColor.WHITE));
+                        line3 = line3.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
                     }
                 }
             }

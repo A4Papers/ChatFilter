@@ -15,7 +15,7 @@
 #  /cf whitelist (list/ip/word) <args/word> - chatfilter.whitelist
 #  /cf pause - chatfilter.pause
 
-#  Other permissions: 
+#  Other permissions:
 #  chatfilter.bypass - bypass all filters(inc: chat, books, signs and anvils)
 #  chatfilter.bypass.chat - bypass in chat only
 #  chatfilter.bypass.command - bypass in commands only
@@ -31,6 +31,8 @@
 #  chatfilter.view - players with this perm can view filtered messages
 #  chatfilter.blacklist.remove - Able to remove works via the list
 #  chatfilter.whitelist.remove - Able to remove works via the list
+
+#  chatfilter.import - /cf import - import plain text words from data.txt file
 
 
 ##Alvalable languages: - If you make a custom lang file, Feel free to contact me and I'll add it to the plugin for others
