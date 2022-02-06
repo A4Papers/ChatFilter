@@ -780,3 +780,17 @@ ChatFilter:
     Action:
       - none
     AddedBy: ChatFilter
+  fuck:
+    Enabled: true
+    Regex: ((f)+(\W|_)*(u)+(\W|_)*(\(|c)+(\W|_)*(k)+(\W|_)*)
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    CancelChat:
+      Cancel: true
+      Replace: false
+      ReplaceWith: Cookies
+    Action:
+      - none
+    AddedBy: ChatFilter

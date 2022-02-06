@@ -10,20 +10,16 @@ import java.util.*;
 
 public class LangManager {
 
-    ChatFilter chatFilter;
-
-    public LangManager(ChatFilter instance) {
-        chatFilter = instance;
-    }
-
     public Locale locale;
-
     public Map convertedStrings = new HashMap();
-
+    ChatFilter chatFilter;
     private Locale SpanishLocale = new Locale("es");
     private Locale PolishLocale = new Locale("pl");
     private Locale DanishLocale = new Locale("da");
 
+    public LangManager(ChatFilter instance) {
+        chatFilter = instance;
+    }
 
     public String mapToString(String s) {
         return convertedStrings.get(s).toString();
@@ -63,42 +59,46 @@ public class LangManager {
     private void setupLanguageFiles() {
         String lang = chatFilter.getConfig().getString("locale");
         assert lang != null;
-        if (lang.contains("en")) {
-            locale = Locale.ENGLISH;
-            File lang_enFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_en.properties");
-            if (!lang_enFile.exists()) {
-                chatFilter.saveResource("messages_en.properties", false);
-            }
-        } else if (lang.contains("zh")) {
-            locale = Locale.CHINESE;
-            File lang_cnFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_zh.properties");
-            if (!lang_cnFile.exists()) {
-                chatFilter.saveResource("messages_zh.properties", false);
-            }
-        } else if (lang.contains("es")) {
-            locale = SpanishLocale;
-            File lang_cnFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_es.properties");
-            if (!lang_cnFile.exists()) {
-                chatFilter.saveResource("messages_es.properties", false);
-            }
-        } else if (lang.contains("pl")) {
-            locale = PolishLocale;
-            File lang_cnFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_pl.properties");
-            if (!lang_cnFile.exists()) {
-                chatFilter.saveResource("messages_pl.properties", false);
-            }
-        } else if (lang.contains("da")) {
-            locale = DanishLocale;
-            File lang_daFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_da.properties");
-            if (!lang_daFile.exists()) {
-                chatFilter.saveResource("messages_da.properties", false);
-            }
-        } else {
-            locale = Locale.ENGLISH;
-            File lang_enFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_en.properties");
-            if (!lang_enFile.exists()) {
-                chatFilter.saveResource("messages_en.properties", false);
-            }
+        File lang_enFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_en.properties");
+        switch (lang) {
+            case "en":
+                locale = Locale.ENGLISH;
+                if (!lang_enFile.exists()) {
+                    chatFilter.saveResource("messages_en.properties", false);
+                }
+                break;
+            case "zh":
+                locale = Locale.CHINESE;
+                File lang_cnFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_zh.properties");
+                if (!lang_cnFile.exists()) {
+                    chatFilter.saveResource("messages_zh.properties", false);
+                }
+                break;
+            case "es":
+                locale = SpanishLocale;
+                File lang_esFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_es.properties");
+                if (!lang_esFile.exists()) {
+                    chatFilter.saveResource("messages_es.properties", false);
+                }
+                break;
+            case "pl":
+                locale = PolishLocale;
+                File lang_plFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_pl.properties");
+                if (!lang_plFile.exists()) {
+                    chatFilter.saveResource("messages_pl.properties", false);
+                }
+            case "da":
+                locale = DanishLocale;
+                File lang_daFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_da.properties");
+                if (!lang_daFile.exists()) {
+                    chatFilter.saveResource("messages_da.properties", false);
+                }
+                break;
+            default:
+                locale = Locale.ENGLISH;
+                if (!lang_enFile.exists()) {
+                    chatFilter.saveResource("messages_en.properties", false);
+                }
         }
     }
 }

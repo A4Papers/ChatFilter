@@ -51,38 +51,36 @@ public class AnvilListener implements Listener {
                                             Types type = chatFilter.getChatFilters().validResult(displayName, p).getType();
                                             String[] stringArray = chatFilter.getChatFilters().validResult(displayName, p).getStringArray();
                                             FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(displayName, p).getFilterWrapper();
-
                                             chatFilter.commandHandler.runCommand(p, chatFilter.getChatFilters().validResult(displayName, p).getStringArray(), filterWrapper);
                                             event.setCancelled(true);
-                                            if (type == Types.SWEAR) {
-                                                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilSwear.s).replace("%player%", p.getName());
-                                                warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
+                                            switch (type) {
+                                                case SWEAR:
+                                                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilSwear.s).replace("%player%", p.getName());
+                                                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
+                                                    break;
+                                                case IP_DNS:
+                                                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilIP.s).replace("%player%", p.getName());
+                                                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
+                                                    break;
+                                                case IP_SWEAR:
+                                                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilIPandSwear.s).replace("%player%", p.getName());
+                                                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
+                                                    break;
+                                                case FONT:
+                                                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilFont.s).replace("%player%", p.getName());
+                                                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
+                                                    break;
                                             }
-                                            if (type == Types.IP_DNS) {
-                                                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilIP.s).replace("%player%", p.getName());
-                                                warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
-                                            }
-                                            if (type == Types.IP_SWEAR) {
-                                                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilIPandSwear.s).replace("%player%", p.getName());
-                                                warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
-                                            }
-                                            if (type == Types.FONT) {
-                                                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilFont.s).replace("%player%", p.getName());
-                                                warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
-                                            }
-                                            if (filterWrapper.getWarnPlayer()) {
+                                            if (filterWrapper.getWarnPlayer())
                                                 p.sendMessage(chatFilter.colour(warnPlayerMessage));
-                                            }
-                                            if (filterWrapper.getLogToConsole()) {
+                                            if (filterWrapper.getLogToConsole())
                                                 chatFilter.sendConsole(type, displayName, p, filterWrapper.getRegex(), "Anvil");
-                                            }
                                             if (filterWrapper.getSendStaff()) {
                                                 for (String oneWord : chatFilter.getChatFilters().validResult(displayName, p).getStringArray()) {
-                                                    displayName = displayName.replace(oneWord, chatFilter.colour( chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord))));
+                                                    displayName = displayName.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
                                                 }
                                                 chatFilter.sendStaffMessage(chatFilter.colour(prefix + displayName));
                                             }
-
                                         }
                                     }
                                 }

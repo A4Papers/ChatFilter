@@ -72,13 +72,16 @@ settings:
   ##Colour we use to highlight the matched swear.
   swearHighLight: "&c%catch%&r"
 
-## Check commands for swearing/ips?
-checkCommands: false
-
 #Let the regex generator use leet speak? https://en.wikipedia.org/wiki/Leet
 enableLeetSpeak: true
 
+# # Regex used to identify links
+URL_REGEX: ^((https?|ftp)://|(www|ftp)\\.)
 ## Commands to you wish to check
+
+## Check commands for swearing/ips?
+checkCommands: false
+
 commands:
   ##Command name
   command-name-here: #This is the command we want to filter

@@ -5,7 +5,6 @@ import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,7 +51,7 @@ public class LoadFilters {
     }
 
     public void createWordFilter(String word, String sender) {
-        List<String> list =  new ArrayList<>(Collections.singleton("none"));
+        List<String> list = new ArrayList<>(Collections.singleton("none"));
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Enabled", true);
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Regex", chatFilter.regexpGenerator().generateRegexp(word));
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Staff", true);
@@ -64,14 +63,14 @@ public class LoadFilters {
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Action", list);
         chatFilter.getWordConfig().set("ChatFilter." + word + ".AddedBy", sender);
         chatFilter.save();
-        reload();
+        reloadFilters();
     }
 
     public void createAdvertFilter(String s, String sender) {
-        String notDot = s.replace(".","");
-        List<String> list =  new ArrayList<>(Collections.singleton("none"));
+        String notDot = s.replace(".", "");
+        List<String> list = new ArrayList<>(Collections.singleton("none"));
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Enabled", true);
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Regex",s);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Regex", s);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Staff", true);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Player", true);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Console", true);
@@ -81,10 +80,10 @@ public class LoadFilters {
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Action", list);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".AddedBy", sender);
         chatFilter.save();
-        reload();
+        reloadFilters();
     }
 
-    public void reload() {
+    public void reloadFilters() {
         chatFilter.regexAdvert.clear();
         chatFilter.regexWords.clear();
         loadAdvertFilter();

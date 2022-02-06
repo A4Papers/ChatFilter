@@ -16,28 +16,22 @@ public class ChatFilters {
     }
 
     public Result validResult(String string, Player player) {
-
         boolean matched = false;
         boolean matchedSwear = false;
         boolean matchedIP = false;
         boolean matchedURL = false;
-
         String regex = "";
         Map<String, FilterWrapper> regexMap = new HashMap<>();
-
-
         String lowercaseString = string.toLowerCase();
         Types type = Types.NOTYPE;
         List<String> list = new ArrayList<String>();
         List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
         bypassItems.addAll(chatFilter.byPassDNS);
-
         for (String removewording : bypassItems) {
             if (lowercaseString.contains(removewording)) {
                 lowercaseString = lowercaseString.replaceAll(removewording, " ");
             }
         }
-
         if (!(player.hasPermission("chatfilter.bypass.swear"))) {
             for (String matchSwear : chatFilter.regexWords.keySet()) {
                 Pattern p = Pattern.compile(matchSwear);
@@ -52,7 +46,6 @@ public class ChatFilters {
                 }
             }
         }
-
         if (!(player.hasPermission("chatfilter.bypass.ip"))) {
             for (String StringMatchedDNS : chatFilter.regexAdvert.keySet()) {
                 Pattern p = Pattern.compile(StringMatchedDNS);

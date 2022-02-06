@@ -108,8 +108,4 @@ public enum EnumStrings {
     EnumStrings(String s) {
         this.s = s;
     }
-
-    public static EnumStrings fromId(String id) {
-        return EnumStrings.valueOf(id);
-    }
 }

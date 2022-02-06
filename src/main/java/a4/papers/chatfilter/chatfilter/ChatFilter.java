@@ -39,6 +39,7 @@ public final class ChatFilter extends JavaPlugin {
     public LoadFilters loadFilters;
     public FilterWrapper filterWrapper;
     public RegexpGenerator regexpGenerator;
+    public Manager manager;
     public Map<String, FilterWrapper> regexWords;
     public Map<String, FilterWrapper> regexAdvert;
     public List<String> byPassWords;
@@ -64,8 +65,7 @@ public final class ChatFilter extends JavaPlugin {
     public String percentage;
     public String cancelChatReplace;
     public String URL_REGEX;
-    Integer blockedInt = 1;
-    int pluginId = 13946;
+    private Integer blockedInt = 1;
     private File wordConfigFile;
     private File advertConfigFile;
     private File whitelistConfigFile;
@@ -73,14 +73,16 @@ public final class ChatFilter extends JavaPlugin {
     private FileConfiguration wordConfig;
     private FileConfiguration advertConfig;
 
+
     public void onEnable() {
-        this.regexWords = new HashMap<>();
-        this.regexAdvert = new HashMap<>();
+        regexWords = new HashMap<>();
+        regexAdvert = new HashMap<>();
         chatFilters = new ChatFilters(this);
         commandHandler = new CommandHandler(this);
         langManager = new LangManager(this);
         loadFilters = new LoadFilters(this);
         regexpGenerator = new RegexpGenerator(this);
+        manager = new Manager(this);
 
         try {
             langManager.loadLang();
@@ -108,13 +110,13 @@ public final class ChatFilter extends JavaPlugin {
         logMsg("[ChatFilter] " + regexWords.size() + " Enabled word filters.");
         logMsg("[ChatFilter] " + regexAdvert.size() + " Enabled advertising filters.");
         logMsg("[ChatFilter] " + (byPassWords.size() + byPassWords.size()) + " whitelisted items.");
-
+        int pluginId = 13946;
         Metrics metrics = new Metrics(this, pluginId);
         metrics.addCustomChart(new Metrics.SimplePie("used_language", () -> {
             return getLang().locale.toString();
         }));
         metrics.addCustomChart(new Metrics.SimplePie("total_filters", () -> {
-            return String.valueOf(regexWords.size() +regexAdvert.size());
+            return String.valueOf(regexWords.size() + regexAdvert.size());
         }));
         metrics.addCustomChart(new Metrics.SingleLineChart("block", new Callable<Integer>() {
             @Override
@@ -155,7 +157,11 @@ public final class ChatFilter extends JavaPlugin {
     }
 
     public String colour(String s) {
-        return ChatColor.translateAlternateColorCodes('&', s);
+        if (manager.supported("hex")) {
+            return manager.colorStringHex(s);
+        } else {
+            return ChatColor.translateAlternateColorCodes('&', s);
+        }
     }
 
     public void logMsg(String message) {
@@ -189,7 +195,6 @@ public final class ChatFilter extends JavaPlugin {
     public RegexpGenerator regexpGenerator() {
         return this.regexpGenerator;
     }
-
 
     public void sendStaffMessage(String str) {
         for (Player online : Bukkit.getServer().getOnlinePlayers()) {

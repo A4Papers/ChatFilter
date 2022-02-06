@@ -33,45 +33,42 @@ public class SwearChatListener implements Listener {
         if (chatFilter.chatPause)
             return;
         if (chatFilter.getChatFilters().validResult(chatMessage, p).getResult()) {
-
             Types type = chatFilter.getChatFilters().validResult(chatMessage, p).getType();
             String[] stringArray = chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray();
             FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(chatMessage, p).getFilterWrapper();
-
             chatFilter.commandHandler.runCommand(p, chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray(), filterWrapper);
-
-            if (type == Types.SWEAR) {
-                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatSwear.s).replace("%player%", p.getName());
-                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+            switch (type) {
+                case SWEAR:
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatSwear.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                    break;
+                case IP_DNS:
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatIP.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                    break;
+                case IP_SWEAR:
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatIPandSwear.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                    break;
+                case FONT:
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatFont.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s);
+                    break;
+                case URL:
+                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatIP.s).replace("%player%", p.getName());
+                    warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnURLMessage.s);
+                    break;
+                default: return;
             }
-            if (type == Types.IP_DNS) {
-                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatIP.s).replace("%player%", p.getName());
-                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
-            }
-            if (type == Types.IP_SWEAR) {
-                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatIPandSwear.s).replace("%player%", p.getName());
-                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
-            }
-            if (type == Types.FONT) {
-                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatFont.s).replace("%player%", p.getName());
-                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s);
-            }
-            if (type == Types.URL) {
-                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatIP.s).replace("%player%", p.getName());
-                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnURLMessage.s);
-            }
-            if (filterWrapper.getLogToConsole()) {
+            if (filterWrapper.getLogToConsole())
                 chatFilter.sendConsole(type, chatMessage, p, filterWrapper.getRegex(), "Chat");
-            }
-            if (filterWrapper.getWarnPlayer()) {
+            if (filterWrapper.getWarnPlayer())
                 p.sendMessage(chatFilter.colour(warnPlayerMessage));
-            }
-            if (filterWrapper.getSendStaff()) {
+            if (filterWrapper.getSendStaff())
                 for (String oneWord : chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray()) {
-                    chatMessage = chatMessage.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%",oneWord)));
+                    chatMessage = chatMessage.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
                 }
-                chatFilter.sendStaffMessage(chatFilter.colour(prefix + chatMessage));
-            }
+            chatFilter.sendStaffMessage(chatFilter.colour(prefix + chatMessage));
             if (filterWrapper.getCancelChat()) {
                 event.setCancelled(true);
             } else {
