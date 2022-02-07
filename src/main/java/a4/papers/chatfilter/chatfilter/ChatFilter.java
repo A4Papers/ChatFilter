@@ -57,6 +57,10 @@ public final class ChatFilter extends JavaPlugin {
     public boolean chatPause = false;
     public boolean cmdCheck;
     public boolean enableLeetSpeak;
+    public boolean antiSpamEnabled;
+    public int antiSpamAboveAmount;
+    public int antiSpamReplaceAmount;
+
     public String CommandsOnSwearCommand;
     public String CommandsOnAdvertisesCommand;
     public String CommandsOnSwearAndAdvertisesCommand;
@@ -103,6 +107,7 @@ public final class ChatFilter extends JavaPlugin {
         pm.registerEvents(new ChatDelayListener(this), this);
         pm.registerEvents(new PauseChat(this), this);
         pm.registerEvents(new CommandListener(this), this);
+        pm.registerEvents(new RepeatCharListener(this), this);
         saveDefaultConfig();
         getFilters().loadWordFilter();
         getFilters().loadAdvertFilter();
@@ -154,6 +159,9 @@ public final class ChatFilter extends JavaPlugin {
         this.cancelChatReplace = getConfig().getString("settings.cancelChatReplace");
         this.URL_REGEX = getConfig().getString("URL_REGEX");
         this.enableLeetSpeak = getConfig().getBoolean("enableLeetSpeak");
+        this.antiSpamEnabled = getConfig().getBoolean("antiSpam.enabled");
+        this.antiSpamAboveAmount = getConfig().getInt("antiSpam.aboveAmount");
+        this.antiSpamReplaceAmount = getConfig().getInt("antiSpam.replaceAmount");
     }
 
     public String colour(String s) {

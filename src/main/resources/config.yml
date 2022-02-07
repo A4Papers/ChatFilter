@@ -50,7 +50,7 @@ locale: en
 settings:
   ##Block fancy text? Often used with hacked clients 
   blockFancyChat: true
- 
+
   ##Prevent repeat message spam?
   antiRepeatEnabled: true
   
@@ -72,16 +72,25 @@ settings:
   ##Colour we use to highlight the matched swear.
   swearHighLight: "&c%catch%&r"
 
-#Let the regex generator use leet speak? https://en.wikipedia.org/wiki/Leet
+##Anti characters spam - 'aaaaaaaaaaaaaaaaaaaa' to 'aaaa'
+antiSpam:
+  #Enable Anti characters spam?
+  enable: true
+  #If the string of repeat characters is above this amount it is then counted as spam
+  aboveAmount: 4
+  #The amount of characters we replace the spam with.
+  replaceAmount: 4
+
+##Let the regex generator use leet speak? https://en.wikipedia.org/wiki/Leet
 enableLeetSpeak: true
 
-# # Regex used to identify links
+## Regex used to identify links
 URL_REGEX: ^((https?|ftp)://|(www|ftp)\\.)
-## Commands to you wish to check
 
 ## Check commands for swearing/ips?
 checkCommands: false
 
+## Commands to you wish to check
 commands:
   ##Command name
   command-name-here: #This is the command we want to filter
