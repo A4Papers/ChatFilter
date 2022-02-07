@@ -23,6 +23,7 @@ ChatFilter:
     # <RunCommand> - Have the server run a command.
     # <SendMessage> Send a message to the player.
     Action:
+      - '<RunCommand>discord broadcast #game-reports **%player%** has been caught by the swear filter for saying %item%'
       - <RunCommand>msg %player% please do not say %item%
       - <SendMessage>&c%player%! &e%item% &cIs not allowed.
     AddedBy: ChatFilter

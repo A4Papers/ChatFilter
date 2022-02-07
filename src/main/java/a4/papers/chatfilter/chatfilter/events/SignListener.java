@@ -37,7 +37,6 @@ public class SignListener implements Listener {
             Types type = chatFilter.getChatFilters().validResult(lines, p).getType();
             String[] stringArray = chatFilter.getChatFilters().validResult(lines, p).getStringArray();
             FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(lines, p).getFilterWrapper();
-            event.getBlock().breakNaturally();
             chatFilter.commandHandler.runCommand(p, stringArray, filterWrapper);
             switch (type) {
                 case SWEAR:
@@ -118,6 +117,7 @@ public class SignListener implements Listener {
                     break;
                 default: return;
             }
+            event.getBlock().breakNaturally();
             if (filterWrapper.getLogToConsole())
                 chatFilter.sendConsole(type, lines, p, filterWrapper.getRegex(), "Sign");
             if (filterWrapper.getWarnPlayer())

@@ -41,7 +41,7 @@ public class ChatFilters {
                     matchedSwear = true;
                     regex = p.pattern();
                     if (!list.contains(m.group(0))) {
-                        list.add(m.group(0).replace(" ", ""));
+                        list.add(m.group(0));
                     }
                 }
             }
@@ -55,7 +55,7 @@ public class ChatFilters {
                     matchedIP = true;
                     regex = p.pattern();
                     if (!list.contains(m.group(0))) {
-                        list.add(m.group(0).replace(" ", ""));
+                        list.add(m.group(0));
                     }
                 }
             }

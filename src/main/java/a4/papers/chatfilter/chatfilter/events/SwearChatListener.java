@@ -64,11 +64,12 @@ public class SwearChatListener implements Listener {
                 chatFilter.sendConsole(type, chatMessage, p, filterWrapper.getRegex(), "Chat");
             if (filterWrapper.getWarnPlayer())
                 p.sendMessage(chatFilter.colour(warnPlayerMessage));
-            if (filterWrapper.getSendStaff())
+            if (filterWrapper.getSendStaff()) {
                 for (String oneWord : chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray()) {
                     chatMessage = chatMessage.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
                 }
-            chatFilter.sendStaffMessage(chatFilter.colour(prefix + chatMessage));
+                chatFilter.sendStaffMessage(chatFilter.colour(prefix + chatMessage));
+            }
             if (filterWrapper.getCancelChat()) {
                 event.setCancelled(true);
             } else {
