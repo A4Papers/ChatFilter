@@ -81,18 +81,33 @@ antiSpam:
   #The amount of characters we replace the spam with.
   replaceAmount: 4
 
+#Set the wordFilter defults for when adding via /cf blacklst
+#This makes adding
 defults:
   word:
     Enabled: true
     Warn:
+      # Notify staff when the filter catches a player?
       Staff: true
+      # Send the player the default warning message? Custom message can be defined below. Set this to false if you are sending a custom message.
       Player: true
+      # Send catch to console?
       Console: true
     CancelChat:
+      # Cancel sending the message to chat?
       Cancel: true
+      # if above is false, Do you wish to replace the word?
       Replace: false
+      # If the above is true, What do we replace the word with?
       ReplaceWith: Cookies
+    # Run command or send a message to the player, Messages can be custom per filter item
+    # however it's recomended you disable warning the player in the warn section above(Warn.Player) to prevent sending a message twice.
+    # <RunCommand> - Have the server run a command.
+    # <SendMessage> Send a message to the player.
     Action:
+      #- '<RunCommand>discord broadcast #game-reports **%player%** has been caught by the swear filter for saying %item%'
+      #- <RunCommand>msg %player% please do not say %item%
+      #- <SendMessage>&c%player%! &e%item% &cIs not allowed.
       - none
   ip:
     Enabled: true
@@ -106,6 +121,7 @@ defults:
       ReplaceWith: Cookies
     Action:
       - none
+
 ##Let the regex generator use leet speak? https://en.wikipedia.org/wiki/Leet
 enableLeetSpeak: true
 
