@@ -44,6 +44,8 @@ public final class ChatFilter extends JavaPlugin {
     public Map<String, FilterWrapper> regexAdvert;
     public List<String> byPassWords;
     public List<String> byPassDNS;
+    public List<String>  defaultWordAction;
+    public List<String> defaultIPAction;
     public int capsAmount;
     public boolean CommandsOnSwearEnabled;
     public boolean CommandsOnAdvertisesEnabled;
@@ -58,9 +60,22 @@ public final class ChatFilter extends JavaPlugin {
     public boolean cmdCheck;
     public boolean enableLeetSpeak;
     public boolean antiSpamEnabled;
+    public boolean defaultIPEnabled;
+    public boolean defaultIPWarnStaff;
+    public boolean defaultIPWarnPlayer;
+    public boolean defaultIPWarnConsole ;
+    public boolean defaultIPCancelChatCancel;
+    public boolean defaultIPCancelReplace;
+    public boolean defaultWordEnabled;
+    public boolean defaultWordWarnStaff ;
+    public boolean defaultWordWarnPlayer;
+    public boolean defaultWordWarnConsole ;
+    public boolean defaultWordCancelChatCancel;
+    public boolean defaultWordCancelReplace ;
     public int antiSpamAboveAmount;
     public int antiSpamReplaceAmount;
-
+    public String defaultWordCancelReplaceWith;
+    public String defaultIPCancelReplaceWith;
     public String CommandsOnSwearCommand;
     public String CommandsOnAdvertisesCommand;
     public String CommandsOnSwearAndAdvertisesCommand;
@@ -162,6 +177,25 @@ public final class ChatFilter extends JavaPlugin {
         this.antiSpamEnabled = getConfig().getBoolean("antiSpam.enabled");
         this.antiSpamAboveAmount = getConfig().getInt("antiSpam.aboveAmount");
         this.antiSpamReplaceAmount = getConfig().getInt("antiSpam.replaceAmount");
+
+
+        this.defaultWordEnabled = getConfig().getBoolean("default.Word.Enabled");
+        this.defaultWordWarnStaff = getConfig().getBoolean("default.word.Warn.Staff");
+        this.defaultWordWarnPlayer = getConfig().getBoolean("default.word.Warn.Player");
+        this.defaultWordWarnConsole = getConfig().getBoolean("default.word.Warn.Console");
+        this.defaultWordCancelChatCancel = getConfig().getBoolean("default.word.CancelChat.Cancel");
+        this.defaultWordCancelReplace = getConfig().getBoolean("default.word.CancelChat.Replace");
+        this.defaultWordCancelReplaceWith = getConfig().getString("default.word.CancelChat.ReplaceWith");
+        this.defaultWordAction = getConfig().getStringList("default.word.Action");
+
+        this.defaultIPEnabled = getConfig().getBoolean("default.ip.Enabled");
+        this.defaultIPWarnStaff = getConfig().getBoolean("default.ip.Warn.Staff");
+        this.defaultIPWarnPlayer = getConfig().getBoolean("default.ip.Warn.Player");
+        this.defaultIPWarnConsole = getConfig().getBoolean("default.ip.Warn.Console");
+        this.defaultIPCancelChatCancel = getConfig().getBoolean("default.ip.CancelChat.Cancel");
+        this.defaultIPCancelReplace = getConfig().getBoolean("default.ip.CancelChat.Replace");
+        this.defaultIPCancelReplaceWith = getConfig().getString("default.ip.CancelChat.ReplaceWith");
+        this.defaultIPAction = getConfig().getStringList("default.ip.Action");
     }
 
     public String colour(String s) {

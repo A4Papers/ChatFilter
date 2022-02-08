@@ -81,6 +81,31 @@ antiSpam:
   #The amount of characters we replace the spam with.
   replaceAmount: 4
 
+defults:
+  word:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    CancelChat:
+      Cancel: true
+      Replace: false
+      ReplaceWith: Cookies
+    Action:
+      - none
+  ip:
+    Enabled: true
+    Warn:
+      Staff: true
+      Player: true
+      Console: true
+    CancelChat:
+      Cancel: true
+      Replace: false
+      ReplaceWith: Cookies
+    Action:
+      - none
 ##Let the regex generator use leet speak? https://en.wikipedia.org/wiki/Leet
 enableLeetSpeak: true
 

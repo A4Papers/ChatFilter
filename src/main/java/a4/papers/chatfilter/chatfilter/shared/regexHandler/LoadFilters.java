@@ -51,16 +51,15 @@ public class LoadFilters {
     }
 
     public void createWordFilter(String word, String sender) {
-        List<String> list = new ArrayList<>(Collections.singleton("none"));
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".Enabled", true);
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".Enabled", chatFilter.defaultWordEnabled);
         chatFilter.getWordConfig().set("ChatFilter." + word + ".Regex", chatFilter.regexpGenerator().generateRegexp(word));
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Staff", true);
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Player", true);
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Console", true);
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".CancelChat.Cancel", true);
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".CancelChat.Replace", false);
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".CancelChat.ReplaceWith", "Cookies");
-        chatFilter.getWordConfig().set("ChatFilter." + word + ".Action", list);
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Staff", chatFilter.defaultWordWarnStaff);
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Player", chatFilter.defaultWordWarnPlayer);
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".Warn.Console", chatFilter.defaultWordWarnConsole);
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".CancelChat.Cancel", chatFilter.defaultWordCancelChatCancel);
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".CancelChat.Replace", chatFilter.defaultWordCancelReplace);
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".CancelChat.ReplaceWith", chatFilter.defaultWordCancelReplaceWith);
+        chatFilter.getWordConfig().set("ChatFilter." + word + ".Action", chatFilter.defaultWordAction);
         chatFilter.getWordConfig().set("ChatFilter." + word + ".AddedBy", sender);
         chatFilter.save();
         reloadFilters();
@@ -68,16 +67,15 @@ public class LoadFilters {
 
     public void createAdvertFilter(String s, String sender) {
         String notDot = s.replace(".", "");
-        List<String> list = new ArrayList<>(Collections.singleton("none"));
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Enabled", true);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Enabled", chatFilter.defaultIPEnabled);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Regex", s);
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Staff", true);
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Player", true);
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Console", true);
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".CancelChat.Cancel", true);
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".CancelChat.Replace", false);
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".CancelChat.ReplaceWith", "Cookies");
-        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Action", list);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Staff", chatFilter.defaultIPWarnStaff);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Player", chatFilter.defaultIPWarnPlayer);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Warn.Console", chatFilter.defaultIPWarnConsole);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".CancelChat.Cancel", chatFilter.defaultIPCancelChatCancel);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".CancelChat.Replace", chatFilter.defaultIPCancelReplace);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".CancelChat.ReplaceWith", chatFilter.defaultIPCancelReplaceWith);
+        chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Action", chatFilter.defaultIPAction);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".AddedBy", sender);
         chatFilter.save();
         reloadFilters();
