@@ -24,10 +24,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 public final class ChatFilter extends JavaPlugin {
 
@@ -40,11 +42,13 @@ public final class ChatFilter extends JavaPlugin {
     public FilterWrapper filterWrapper;
     public RegexpGenerator regexpGenerator;
     public Manager manager;
+    public List<Pattern> wordRegexPattern = new ArrayList<>();
+    public List<Pattern> advertRegexPattern = new ArrayList<>();
     public Map<String, FilterWrapper> regexWords;
     public Map<String, FilterWrapper> regexAdvert;
     public List<String> byPassWords;
     public List<String> byPassDNS;
-    public List<String>  defaultWordAction;
+    public List<String> defaultWordAction;
     public List<String> defaultIPAction;
     public int capsAmount;
     public boolean CommandsOnSwearEnabled;
@@ -63,15 +67,15 @@ public final class ChatFilter extends JavaPlugin {
     public boolean defaultIPEnabled;
     public boolean defaultIPWarnStaff;
     public boolean defaultIPWarnPlayer;
-    public boolean defaultIPWarnConsole ;
+    public boolean defaultIPWarnConsole;
     public boolean defaultIPCancelChatCancel;
     public boolean defaultIPCancelReplace;
     public boolean defaultWordEnabled;
-    public boolean defaultWordWarnStaff ;
+    public boolean defaultWordWarnStaff;
     public boolean defaultWordWarnPlayer;
-    public boolean defaultWordWarnConsole ;
+    public boolean defaultWordWarnConsole;
     public boolean defaultWordCancelChatCancel;
-    public boolean defaultWordCancelReplace ;
+    public boolean defaultWordCancelReplace;
     public int antiSpamAboveAmount;
     public int antiSpamReplaceAmount;
     public String defaultWordCancelReplaceWith;
@@ -126,6 +130,7 @@ public final class ChatFilter extends JavaPlugin {
         saveDefaultConfig();
         getFilters().loadWordFilter();
         getFilters().loadAdvertFilter();
+        getFilters().regexCompile();
         logMsg("[ChatFilter] Loaded using locale: " + getLang().locale);
         logMsg("[ChatFilter] " + regexWords.size() + " Enabled word filters.");
         logMsg("[ChatFilter] " + regexAdvert.size() + " Enabled advertising filters.");
@@ -178,8 +183,7 @@ public final class ChatFilter extends JavaPlugin {
         this.antiSpamAboveAmount = getConfig().getInt("antiSpam.aboveAmount");
         this.antiSpamReplaceAmount = getConfig().getInt("antiSpam.replaceAmount");
 
-
-        this.defaultWordEnabled = getConfig().getBoolean("default.Word.Enabled");
+        this.defaultWordEnabled = getConfig().getBoolean("default.word.Enabled");
         this.defaultWordWarnStaff = getConfig().getBoolean("default.word.Warn.Staff");
         this.defaultWordWarnPlayer = getConfig().getBoolean("default.word.Warn.Player");
         this.defaultWordWarnConsole = getConfig().getBoolean("default.word.Warn.Console");
@@ -187,7 +191,6 @@ public final class ChatFilter extends JavaPlugin {
         this.defaultWordCancelReplace = getConfig().getBoolean("default.word.CancelChat.Replace");
         this.defaultWordCancelReplaceWith = getConfig().getString("default.word.CancelChat.ReplaceWith");
         this.defaultWordAction = getConfig().getStringList("default.word.Action");
-
         this.defaultIPEnabled = getConfig().getBoolean("default.ip.Enabled");
         this.defaultIPWarnStaff = getConfig().getBoolean("default.ip.Warn.Staff");
         this.defaultIPWarnPlayer = getConfig().getBoolean("default.ip.Warn.Player");

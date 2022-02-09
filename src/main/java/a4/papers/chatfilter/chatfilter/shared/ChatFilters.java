@@ -1,6 +1,7 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -15,6 +16,18 @@ public class ChatFilters {
         chatFilter = instance;
     }
 
+    private String removeWhitelist(String s) {
+        List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
+        bypassItems.addAll(chatFilter.byPassDNS);
+        for (String removewording : bypassItems) {
+            if (removewording.contains(s)) {
+                s = s.replaceAll(removewording, " ");
+            }
+        }
+        return s;
+    }
+
+
     public Result validResult(String string, Player player) {
         boolean matched = false;
         boolean matchedSwear = false;
@@ -22,40 +35,33 @@ public class ChatFilters {
         boolean matchedURL = false;
         String regex = "";
         Map<String, FilterWrapper> regexMap = new HashMap<>();
-        String lowercaseString = string.toLowerCase();
+        String lowercaseString = removeWhitelist(string.toLowerCase());
         Types type = Types.NOTYPE;
-        List<String> list = new ArrayList<String>();
-        List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
-        bypassItems.addAll(chatFilter.byPassDNS);
-        for (String removewording : bypassItems) {
-            if (lowercaseString.contains(removewording)) {
-                lowercaseString = lowercaseString.replaceAll(removewording, " ");
-            }
-        }
+        List<String> groupWords = new ArrayList<String>();
+
         if (!(player.hasPermission("chatfilter.bypass.swear"))) {
-            for (String matchSwear : chatFilter.regexWords.keySet()) {
-                Pattern p = Pattern.compile(matchSwear);
+            for (Pattern p : chatFilter.wordRegexPattern) {
                 Matcher m = p.matcher(lowercaseString);
                 while (m.find()) {
                     matched = true;
                     matchedSwear = true;
                     regex = p.pattern();
-                    if (!list.contains(m.group(0))) {
-                        list.add(m.group(0));
+                    if (!groupWords.contains(m)) {
+                        groupWords.add(m.group(0));
                     }
                 }
             }
         }
+
         if (!(player.hasPermission("chatfilter.bypass.ip"))) {
-            for (String StringMatchedDNS : chatFilter.regexAdvert.keySet()) {
-                Pattern p = Pattern.compile(StringMatchedDNS);
+            for (Pattern p : chatFilter.advertRegexPattern) {
                 Matcher m = p.matcher(lowercaseString);
                 while (m.find()) {
                     matched = true;
                     matchedIP = true;
                     regex = p.pattern();
-                    if (!list.contains(m.group(0))) {
-                        list.add(m.group(0));
+                    if (!groupWords.contains(m.group(0))) {
+                        groupWords.add(m.group(0));
                     }
                 }
             }
@@ -92,8 +98,8 @@ public class ChatFilters {
         if (matchedSwear && matchedIP) {
             type = Types.IP_SWEAR;
         }
-        String[] array = new String[list.size()];
-        list.toArray(array);
+        String[] array = new String[groupWords.size()];
+        groupWords.toArray(array);
         regexMap.putAll(chatFilter.regexWords);
         regexMap.putAll(chatFilter.regexAdvert);
         return new Result(matched, array, type, regexMap.get(regex));

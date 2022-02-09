@@ -83,7 +83,7 @@ antiSpam:
 
 #Set the wordFilter defults for when adding via /cf blacklst
 #This makes adding
-defults:
+default:
   word:
     Enabled: true
     Warn:
@@ -109,6 +109,7 @@ defults:
       #- <RunCommand>msg %player% please do not say %item%
       #- <SendMessage>&c%player%! &e%item% &cIs not allowed.
       - none
+      - none1
   ip:
     Enabled: true
     Warn:
