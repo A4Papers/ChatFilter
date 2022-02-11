@@ -81,8 +81,8 @@ antiSpam:
   #The amount of characters we replace the spam with.
   replaceAmount: 4
 
-#Set the wordFilter defults for when adding via /cf blacklst
-#This makes adding
+#Set up the presets for when adding via /cf blacklist
+#This makes adding in game far simpler as you won't have to set each individual filter up.
 default:
   word:
     Enabled: true
@@ -109,7 +109,6 @@ default:
       #- <RunCommand>msg %player% please do not say %item%
       #- <SendMessage>&c%player%! &e%item% &cIs not allowed.
       - none
-      - none1
   ip:
     Enabled: true
     Warn:

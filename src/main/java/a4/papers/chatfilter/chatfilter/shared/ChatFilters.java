@@ -1,7 +1,6 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -16,18 +15,6 @@ public class ChatFilters {
         chatFilter = instance;
     }
 
-    private String removeWhitelist(String s) {
-        List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
-        bypassItems.addAll(chatFilter.byPassDNS);
-        for (String removewording : bypassItems) {
-            if (removewording.contains(s)) {
-                s = s.replaceAll(removewording, " ");
-            }
-        }
-        return s;
-    }
-
-
     public Result validResult(String string, Player player) {
         boolean matched = false;
         boolean matchedSwear = false;
@@ -35,9 +22,18 @@ public class ChatFilters {
         boolean matchedURL = false;
         String regex = "";
         Map<String, FilterWrapper> regexMap = new HashMap<>();
-        String lowercaseString = removeWhitelist(string.toLowerCase());
+        String lowercaseString = string.toLowerCase();
         Types type = Types.NOTYPE;
         List<String> groupWords = new ArrayList<String>();
+
+        List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
+        bypassItems.addAll(chatFilter.byPassDNS);
+
+        for (String removewording : bypassItems) {
+            if (lowercaseString.contains(removewording)) {
+                lowercaseString = lowercaseString.replaceAll(removewording, " ");
+            }
+        }
 
         if (!(player.hasPermission("chatfilter.bypass.swear"))) {
             for (Pattern p : chatFilter.wordRegexPattern) {
