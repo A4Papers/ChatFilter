@@ -40,29 +40,42 @@ public class WhitelistCommand implements CommandExecutor {
                 }
                 if (args[2].equals("word")) {
                     Collections.sort(chatFilter.byPassWords);
-                    ComponentBuilder message = new ComponentBuilder("");
-                    for (String words : chatFilter.byPassWords) {
-                        message.append(ChatColor.WHITE + " " + words + ", ");
-                        message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf whitelist remove word " + words));
-                        message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_1.s).replace("%word%", words)))));
+                    if (chatFilter.manager.supported("text-component")) {
+                        ComponentBuilder message = new ComponentBuilder("");
+                        for (String words : chatFilter.byPassWords) {
+                            message.append(ChatColor.WHITE + " " + words + ", ");
+                            message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf whitelist remove word " + words));
+                            message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_1.s).replace("%word%", words)))));
+                        }
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_2.s)));
+                        sender.spigot().sendMessage(message.create());
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_3.s)));
+                        return true;
+                    } else {
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_2.s)));
+                        sender.sendMessage(String.join(", ", chatFilter.byPassWords));
+                        return true;
+
                     }
-                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_2.s)));
-                    sender.spigot().sendMessage(message.create());
-                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_3.s)));
-                    return true;
                 }
                 if (args[2].equals("ip")) {
                     Collections.sort(chatFilter.byPassDNS);
-                    ComponentBuilder message = new ComponentBuilder("");
-                    for (String words : chatFilter.byPassDNS) {
-                        message.append(ChatColor.WHITE + " " + words + ", ");
-                        message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf whitelist remove ip " + words));
-                        message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_1.s).replace("%ip%", words)))));
+                    if (chatFilter.manager.supported("text-component")) {
+
+                        ComponentBuilder message = new ComponentBuilder("");
+                        for (String words : chatFilter.byPassDNS) {
+                            message.append(ChatColor.WHITE + " " + words + ", ");
+                            message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf whitelist remove ip " + words));
+                            message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_WORD_1.s).replace("%ip%", words)))));
+                        }
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_IP_2.s)));
+                        sender.spigot().sendMessage(message.create());
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_IP_3.s)));
+                        return true;
+                    } else {
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_IP_2.s)));
+                        sender.sendMessage(String.join(", ", chatFilter.byPassDNS));
                     }
-                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_IP_2.s)));
-                    sender.spigot().sendMessage(message.create());
-                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_WHITELIST_LIST_IP_3.s)));
-                    return true;
                 }
                 break;
             case "add":

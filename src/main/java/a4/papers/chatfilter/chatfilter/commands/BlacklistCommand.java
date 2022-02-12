@@ -7,7 +7,6 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -26,14 +25,6 @@ public class BlacklistCommand implements CommandExecutor {
         chatFilter = instance;
     }
 
-    public static boolean useLoop(String[] arr, String targetValue) {
-        for (String s : arr) {
-            if (s.equals(targetValue))
-                return true;
-        }
-        return false;
-    }
-
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!sender.hasPermission("chatfilter.blacklist")) {
@@ -49,25 +40,29 @@ public class BlacklistCommand implements CommandExecutor {
                 if (args.length == 2) {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_ARGS_LIST.s)));
                     return true;
-
                 }
                 if (args[2].equals("ip")) {
                     List<String> strlist = new ArrayList<>();
-                    ComponentBuilder message = new ComponentBuilder("");
                     for (String words : chatFilter.regexAdvert.keySet()) {
                         strlist.add(chatFilter.regexAdvert.get(words).getWord());
                     }
                     Collections.sort(strlist);
-                    for (String word : strlist) {
-                        message.append(ChatColor.WHITE + " " + word + ", ");
-                        message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf blacklist remove ip " + word));
-                        message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_1.s).replace("%ip%", word)))));
-                    }
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_2.s)));
-                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_3.s)));
-                    sender.spigot().sendMessage(message.create());
-                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_4.s)));
-                    return true;
+                    if (chatFilter.manager.supported("text-component")) {
+                        ComponentBuilder message = new ComponentBuilder("");
+                        for (String word : strlist) {
+                            message.append(ChatColor.WHITE + " " + word + ", ");
+                            message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf blacklist remove ip " + word));
+                            message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_1.s).replace("%ip%", word)))));
+                        }
+
+                        sender.spigot().sendMessage(message.create());
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_4.s)));
+                        return true;
+                    } else {
+                        sender.sendMessage(String.join(", ", strlist));
+                        return true;
+                    }
                 }
                 if (args[2].equals("word")) {
                     List<String> strlist = new ArrayList<>();
@@ -75,16 +70,22 @@ public class BlacklistCommand implements CommandExecutor {
                         strlist.add(chatFilter.regexWords.get(stringlist).getWord());
                     }
                     Collections.sort(strlist);
-                    ComponentBuilder message = new ComponentBuilder("");
-                    for (String words : strlist) {
-                        message.append(ChatColor.WHITE + " " + words + ", ");
-                        message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf blacklist remove word " + words));
-                        message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_1.s).replace("%word%", words)))));
+                    if (chatFilter.manager.supported("text-component")) {
+                        ComponentBuilder message = new ComponentBuilder("");
+                        for (String words : strlist) {
+                            message.append(ChatColor.WHITE + " " + words + ", ");
+                            message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf blacklist remove word " + words));
+                            message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_1.s).replace("%word%", words)))));
+                        }
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_2.s)));
+                        sender.spigot().sendMessage(message.create());
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_3.s)));
+                        return true;
+                    } else {
+                        sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_2.s)));
+                        sender.sendMessage(String.join(", ", strlist));
+                        return true;
                     }
-                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_2.s)));
-                    sender.spigot().sendMessage(message.create());
-                    sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_3.s)));
-                    return true;
                 } else {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_ARGS_LIST.s)));
                 }
@@ -175,15 +176,6 @@ public class BlacklistCommand implements CommandExecutor {
         ConfigurationSection config = chatFilter.getWordConfig().getConfigurationSection("ChatFilter");
         for (String s : config.getKeys(false)) {
             if (s.replace("#", "").equals(args.replace("#", ""))) {
-                return true;
-            }
-        }
-        return false;
-    }
-    private boolean matchStringRemove(String args) {
-        ConfigurationSection config = chatFilter.getWordConfig().getConfigurationSection("ChatFilter");
-        for (String s : config.getKeys(false)) {
-            if (s.equals(args)) {
                 return true;
             }
         }

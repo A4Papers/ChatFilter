@@ -98,6 +98,7 @@ public final class ChatFilter extends JavaPlugin {
 
 
     public void onEnable() {
+        logMsg(Bukkit.getBukkitVersion().split("[.\\-]")[1]);
         regexWords = new HashMap<>();
         regexAdvert = new HashMap<>();
         chatFilters = new ChatFilters(this);

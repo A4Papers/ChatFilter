@@ -347,9 +347,9 @@ ChatFilter:
     Action:
       - none
     AddedBy: ChatFilter
-  tit:
+  '#tit':
     Enabled: true
-    Regex: ((7|t)+(\W|_)*(!|i)+(\W|_)*(7|t)+(\W|_)*)
+    Regex: \b((7|t)+(\W|_)*(!|i)+(\W|_)*(7|t)+(\W|_)*)
     Warn:
       Staff: true
       Player: true
@@ -557,9 +557,9 @@ ChatFilter:
     Action:
       - none
     AddedBy: ChatFilter
-  fkt:
+  '#fkt#':
     Enabled: true
-    Regex: ((f)+(\W|_)*(k)+(\W|_)*(7|t)+(\W|_)*)
+    Regex: \b((f)+(\W|_)*(k)+(\W|_)*(7|t)+(\W|_)*)\b
     Warn:
       Staff: true
       Player: true
@@ -571,9 +571,9 @@ ChatFilter:
     Action:
       - none
     AddedBy: ChatFilter
-  sht:
+  '#sht#':
     Enabled: true
-    Regex: ((\$|s)+(\W|_)*(h)+(\W|_)*(7|t)+(\W|_)*)
+    Regex: \b((\$|s)+(\W|_)*(h)+(\W|_)*(7|t)+(\W|_)*)\b
     Warn:
       Staff: true
       Player: true

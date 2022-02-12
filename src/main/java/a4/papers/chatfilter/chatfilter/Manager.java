@@ -25,7 +25,9 @@ public class Manager {
             case "hex":
                 statement = Integer.parseInt(Bukkit.getBukkitVersion().split("[.\\-]")[1]) >= 16;
                 break;
-                //for future use
+            case "text-component":
+                statement = Integer.parseInt(Bukkit.getBukkitVersion().split("[.\\-]")[1]) >= 12;
+                break;
         }
         return statement;
     }
