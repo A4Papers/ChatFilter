@@ -27,9 +27,16 @@ public class LangManager {
 
     public String stringArrayToString(String[] strArr) {
         StringBuilder sb = new StringBuilder();
+        String prefix = "";
         for (String str : strArr)
-            sb.append(str).append(" ");
-        return sb.substring(0, sb.length() - 1);
+            if (strArr.length > 1) {
+                sb.append(prefix);
+                prefix = ", ";
+                sb.append(str.replace(" ", ""));
+            } else {
+                sb.append(str.replace(" ", ""));
+            }
+        return sb.toString();
     }
 
     public ResourceBundle fromClassLoader() throws MalformedURLException {
