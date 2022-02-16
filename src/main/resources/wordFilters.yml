@@ -263,9 +263,9 @@ ChatFilter:
     Action:
       - none
     AddedBy: ChatFilter
-  rape:
+  '#rape':
     Enabled: true
-    Regex: ((r)+(\W|_)*(@|a)+(\W|_)*(p)+(\W|_)*(3|e)+(\W|_)*)
+    Regex: \b((r)+(\W|_)*(@|a)+(\W|_)*(p)+(\W|_)*(3|e)+(\W|_)*)
     Warn:
       Staff: true
       Player: true
@@ -767,9 +767,9 @@ ChatFilter:
     Action:
       - none
     AddedBy: ChatFilter
-  ffs:
+  '#ffs':
     Enabled: true
-    Regex: ((f)+(\W|_)*(f)+(\W|_)*(\$|s)+(\W|_)*)
+    Regex: \b((f)+(\W|_)*(f)+(\W|_)*(\$|s)+(\W|_)*)
     Warn:
       Staff: true
       Player: true

@@ -77,7 +77,7 @@ public class AnvilListener implements Listener {
                                                 chatFilter.sendConsole(type, displayName, p, filterWrapper.getRegex(), "Anvil");
                                             if (filterWrapper.getSendStaff()) {
                                                 for (String oneWord : chatFilter.getChatFilters().validResult(displayName, p).getStringArray()) {
-                                                    displayName = displayName.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
+                                                    displayName = displayName.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
                                                 }
                                                 chatFilter.sendStaffMessage(chatFilter.colour(prefix + displayName));
                                             }

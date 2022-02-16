@@ -42,80 +42,21 @@ public class SignListener implements Listener {
                 case SWEAR:
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixSignSwear.s).replace("%player%", p.getName());
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
-                    if (!event.getLine(0).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line0 = line0.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(1).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line1 = line1.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(2).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(3).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
                     break;
                 case IP_DNS:
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixSignIP.s).replace("%player%", p.getName());
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
-                    if (!event.getLine(0).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line0 = line0.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(1).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line1 = line1.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(2).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(3).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
                     break;
                 case IP_SWEAR:
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixSignIPandSwear.s).replace("%player%", p.getName());
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
-                    if (!event.getLine(0).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line0 = line0.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(1).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line1 = line1.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(2).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
-                    if (!event.getLine(3).isEmpty()) {
-                        for (String oneWord : stringArray) {
-                            line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord))));
-                        }
-                    }
                     break;
                 case FONT:
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixSignFont.s).replace("%player%", p.getName());
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s);
                     break;
-                default: return;
+                default:
+                    return;
             }
             event.getBlock().breakNaturally();
             if (filterWrapper.getLogToConsole())
@@ -124,17 +65,30 @@ public class SignListener implements Listener {
                 p.sendMessage(chatFilter.colour(warnPlayerMessage));
             if (filterWrapper.getSendStaff()) {
                 chatFilter.sendStaffMessage(chatFilter.colour(prefix));
-                if (!line0.isEmpty()) {
+                if (!event.getLine(0).isEmpty()) {
+                    for (String oneWord : stringArray) {
+                        line0 = line0.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
+                    }
                     chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine1.s)) + line0);
                 }
-                if (!line1.isEmpty()) {
+                if (!event.getLine(1).isEmpty()) {
+                    for (String oneWord : stringArray) {
+                        line1 = line1.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
+                    }
                     chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine2.s)) + line1);
                 }
-                if (!line2.isEmpty()) {
+                if (!event.getLine(2).isEmpty()) {
+                    for (String oneWord : stringArray) {
+                        line2 = line2.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
+                    }
                     chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine3.s)) + line2);
                 }
-                if (!line3.isEmpty()) {
+                if (!event.getLine(3).isEmpty()) {
+                    for (String oneWord : stringArray) {
+                        line3 = line3.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
+                    }
                     chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine4.s)) + line3);
+
                 }
             }
         }
