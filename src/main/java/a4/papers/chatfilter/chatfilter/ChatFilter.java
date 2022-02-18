@@ -18,6 +18,12 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -31,7 +37,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-public final class ChatFilter extends JavaPlugin {
+public class ChatFilter extends JavaPlugin {
 
     public ConsoleCommandSender consoleSender = Bukkit.getConsoleSender();
     public ChatFilter chatFilter;
@@ -98,7 +104,6 @@ public final class ChatFilter extends JavaPlugin {
 
 
     public void onEnable() {
-        logMsg(Bukkit.getBukkitVersion().split("[.\\-]")[1]);
         regexWords = new HashMap<>();
         regexAdvert = new HashMap<>();
         chatFilters = new ChatFilters(this);
@@ -107,7 +112,6 @@ public final class ChatFilter extends JavaPlugin {
         loadFilters = new LoadFilters(this);
         regexpGenerator = new RegexpGenerator(this);
         manager = new Manager(this);
-
         try {
             langManager.loadLang();
         } catch (MalformedURLException e) {
@@ -119,15 +123,24 @@ public final class ChatFilter extends JavaPlugin {
         getCommand("clearchat").setExecutor(new ClearChatCommand(this));
         getCommand("chatfilter").setTabCompleter(new TabComplete());
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(new SwearChatListener(this), this);
-        pm.registerEvents(new CapsChatListener(this), this);
-        pm.registerEvents(new BooksListener(this), this);
-        pm.registerEvents(new SignListener(this), this);
-        pm.registerEvents(new AnvilListener(this), this);
-        pm.registerEvents(new ChatDelayListener(this), this);
-        pm.registerEvents(new PauseChat(this), this);
-        pm.registerEvents(new CommandListener(this), this);
-        pm.registerEvents(new RepeatCharListener(this), this);
+        SwearChatListener scl = new SwearChatListener(this);
+        CapsChatListener ccl = new CapsChatListener(this);
+        BooksListener bl = new BooksListener(this);
+        SignListener sl = new SignListener(this);
+        AnvilListener al = new AnvilListener(this);
+        ChatDelayListener cdl = new ChatDelayListener(this);
+        PauseChat pc = new PauseChat(this);
+        CommandListener cl = new CommandListener(this);
+        RepeatCharListener rcl = new RepeatCharListener(this);
+        pm.registerEvent(AsyncPlayerChatEvent.class, scl, EventPriority.valueOf(getConfig().getString("EventPriority.SwearListener")), scl, this, true);
+        pm.registerEvent(AsyncPlayerChatEvent.class, ccl, EventPriority.valueOf(getConfig().getString("EventPriority.CapsListener")), ccl, this, true);
+        pm.registerEvent(PlayerEditBookEvent.class, bl, EventPriority.valueOf(getConfig().getString("EventPriority.BookListener")), bl, this, true);
+        pm.registerEvent(SignChangeEvent.class, sl, EventPriority.valueOf(getConfig().getString("EventPriority.SignListener")), sl, this, true);
+        pm.registerEvent(InventoryClickEvent.class, al, EventPriority.valueOf(getConfig().getString("EventPriority.AdvilListener")), al, this, true);
+        pm.registerEvent(AsyncPlayerChatEvent.class, cdl, EventPriority.valueOf(getConfig().getString("EventPriority.ChatDelayListener")), cdl, this, true);
+        pm.registerEvent(AsyncPlayerChatEvent.class, pc, EventPriority.valueOf(getConfig().getString("EventPriority.PauseChatListener")), pc, this, true);
+        pm.registerEvent(PlayerCommandPreprocessEvent.class, cl, EventPriority.valueOf(getConfig().getString("EventPriority.CommandListener")), cl, this, true);
+        pm.registerEvent(AsyncPlayerChatEvent.class, rcl, EventPriority.valueOf(getConfig().getString("EventPriority.RepeatCharListener")), rcl, this, true);
         saveDefaultConfig();
         getFilters().loadWordFilter();
         getFilters().loadAdvertFilter();

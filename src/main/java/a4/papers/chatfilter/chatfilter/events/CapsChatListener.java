@@ -3,15 +3,14 @@ package a4.papers.chatfilter.chatfilter.events;
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.plugin.EventExecutor;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CapsChatListener implements Listener {
+public class CapsChatListener implements EventExecutor, Listener {
 
     ChatFilter chatFilter;
 
@@ -19,7 +18,11 @@ public class CapsChatListener implements Listener {
         this.chatFilter = instance;
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @Override
+    public void execute(final Listener listener, final Event event) throws EventException {
+        this.onPlayerCaps((AsyncPlayerChatEvent) event);
+    }
+
     public void onPlayerCaps(AsyncPlayerChatEvent event) {
         String msg = event.getMessage();
         if (chatFilter.deCap) {

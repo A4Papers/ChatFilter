@@ -13,11 +13,21 @@ public class TabComplete implements TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
             List<String> arguments1 = new ArrayList<>();
-            arguments1.add("whitelist");
-            arguments1.add("blacklist");
-            arguments1.add("reload");
-            arguments1.add("pause");
-            arguments1.add("clear");
+            if (sender.hasPermission("chatfilter.whitelist")) {
+                arguments1.add("whitelist");
+            }
+            if (sender.hasPermission("chatfilter.blacklist")) {
+                arguments1.add("blacklist");
+            }
+            if (sender.hasPermission("chatfilter.reload")) {
+                arguments1.add("reload");
+            }
+            if (sender.hasPermission("chatfilter.pause")) {
+                arguments1.add("pause");
+            }
+            if (sender.hasPermission("chatfilter.clear")) {
+                arguments1.add("clear");
+            }
             arguments1.add("help");
             return arguments1;
         } else if (args.length == 2) {

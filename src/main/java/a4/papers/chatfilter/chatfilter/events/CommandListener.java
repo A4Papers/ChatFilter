@@ -3,23 +3,31 @@ package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
+import a4.papers.chatfilter.chatfilter.shared.Result;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.plugin.EventExecutor;
 
-public class CommandListener implements Listener {
+public class CommandListener implements EventExecutor, Listener {
 
     ChatFilter chatFilter;
 
     public CommandListener(ChatFilter instance) {
         chatFilter = instance;
     }
+    @Override
+    public void execute(final Listener listener, final Event event) throws EventException {
+        this.onPlayerCommand((PlayerCommandPreprocessEvent) event);
+    }
 
-    @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         Player p = event.getPlayer();
         String cmd = ChatColor.stripColor(event.getMessage().toLowerCase());
@@ -36,11 +44,11 @@ public class CommandListener implements Listener {
 
             String prefix = "Error";
             String warnPlayerMessage = "Error";
-            if (chatFilter.getChatFilters().validResult(cmd, p).getResult()) {
-                FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(cmd, p).getFilterWrapper();
-                Types type = chatFilter.getChatFilters().validResult(cmd, p).getType();
-                String[] stringArray = chatFilter.getChatFilters().validResult(cmd, p).getStringArray();
-
+            Result result = chatFilter.getChatFilters().validResult(cmd, p);
+            if (result.getResult()) {
+                Types type = result.getType();
+                String[] stringArray = result.getStringArray();
+                FilterWrapper filterWrapper = result.getFilterWrapper();
                 if (type == Types.SWEAR && !swearconfig) {
                     return;
                 }

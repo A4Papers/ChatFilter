@@ -3,16 +3,19 @@ package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.plugin.EventExecutor;
 
-public class PauseChat implements Listener {
+public class PauseChat implements EventExecutor, Listener {
     ChatFilter chatFilter;
 
     public PauseChat(ChatFilter instance) {
         chatFilter = instance;
+    }
+    @Override
+    public void execute(final Listener listener, final Event event) throws EventException {
+        this.onPlayerChatPause((AsyncPlayerChatEvent) event);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

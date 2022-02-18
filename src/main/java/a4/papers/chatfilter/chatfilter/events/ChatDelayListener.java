@@ -6,16 +6,19 @@ import a4.papers.chatfilter.chatfilter.shared.ChatData;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import a4.papers.chatfilter.chatfilter.shared.StringSimilarity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.plugin.EventExecutor;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ChatDelayListener implements Listener {
+public class ChatDelayListener implements EventExecutor, Listener {
     public Map<UUID, ChatData> chatmsgs = new HashMap<UUID, ChatData>();
     ChatFilter chatFilter;
     private HashMap<UUID, String> chatMSG = new HashMap<>();
@@ -23,6 +26,10 @@ public class ChatDelayListener implements Listener {
 
     public ChatDelayListener(ChatFilter instance) {
         chatFilter = instance;
+    }
+    @Override
+    public void execute(final Listener listener, final Event event) throws EventException {
+        this.onPlayerSpam((AsyncPlayerChatEvent) event);
     }
 
     @EventHandler

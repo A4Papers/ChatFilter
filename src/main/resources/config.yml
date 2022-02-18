@@ -29,8 +29,8 @@
 #  chatfilter.bypass.ip - bypass all ip filters
 
 #  chatfilter.view - players with this perm can view filtered messages
-#  chatfilter.blacklist.remove - Able to remove works via the list
-#  chatfilter.whitelist.remove - Able to remove works via the list
+#  chatfilter.blacklist.remove - Able to remove words via the list
+#  chatfilter.whitelist.remove - Able to remove words via the list
 
 #  chatfilter.import - /cf import - import plain text words from data.txt file
 
@@ -71,6 +71,18 @@ settings:
   
   ##Colour we use to highlight the matched swear.
   swearHighLight: "&c%catch%&r"
+
+EventPriority:
+  SwearListener: HIGHEST
+  SignListener: NORMAL
+  RepeatCharListener: NORMAL
+  PauseChatListener: HIGHEST
+  CommandListener: NORMAL
+  ChatDelayListener: NORMAL
+  CapsListener: LOWEST
+  BookListener: HIGHEST
+  AdvilListener: NORMAL
+
 
 ##Anti characters spam - 'aaaaaaaaaaaaaaaaaaaa' to 'aaaa'
 antiSpam:

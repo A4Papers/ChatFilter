@@ -15,6 +15,17 @@ public class ChatFilters {
         chatFilter = instance;
     }
 
+    private String removeBypass(String s) {
+        List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
+        bypassItems.addAll(chatFilter.byPassDNS);
+        for (String removewording : bypassItems) {
+            if (s.contains(removewording)) {
+                s = s.replaceAll(removewording, " ");
+            }
+        }
+        return s;
+    }
+
     public Result validResult(String string, Player player) {
         boolean matched = false;
         boolean matchedSwear = false;
@@ -22,19 +33,9 @@ public class ChatFilters {
         boolean matchedURL = false;
         String regex = "";
         Map<String, FilterWrapper> regexMap = new HashMap<>();
-        String lowercaseString = string.toLowerCase();
+        String lowercaseString = removeBypass(string.toLowerCase());
         Types type = Types.NOTYPE;
         List<String> groupWords = new ArrayList<String>();
-
-        List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
-        bypassItems.addAll(chatFilter.byPassDNS);
-
-        for (String removewording : bypassItems) {
-            if (lowercaseString.contains(removewording)) {
-                lowercaseString = lowercaseString.replaceAll(removewording, " ");
-            }
-        }
-
         if (!(player.hasPermission("chatfilter.bypass.swear"))) {
             for (Pattern p : chatFilter.wordRegexPattern) {
                 Matcher m = p.matcher(lowercaseString);
@@ -42,7 +43,7 @@ public class ChatFilters {
                     matched = true;
                     matchedSwear = true;
                     regex = p.pattern();
-                    if (!groupWords.contains(m)) {
+                    if (!groupWords.contains(m.group(0))) {
                         groupWords.add(m.group(0));
                     }
                 }
@@ -94,6 +95,7 @@ public class ChatFilters {
         if (matchedSwear && matchedIP) {
             type = Types.IP_SWEAR;
         }
+
         String[] array = new String[groupWords.size()];
         groupWords.toArray(array);
         regexMap.putAll(chatFilter.regexWords);

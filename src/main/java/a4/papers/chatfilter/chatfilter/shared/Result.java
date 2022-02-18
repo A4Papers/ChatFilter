@@ -1,7 +1,5 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
-import java.util.logging.Filter;
-
 public class Result {
     private final boolean result;
     private final String[] message;

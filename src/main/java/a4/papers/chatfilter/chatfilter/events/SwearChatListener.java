@@ -3,16 +3,18 @@ package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
+import a4.papers.chatfilter.chatfilter.shared.Result;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.plugin.EventExecutor;
 
-public class SwearChatListener implements Listener {
+public class SwearChatListener implements EventExecutor, Listener {
 
     ChatFilter chatFilter;
 
@@ -20,7 +22,12 @@ public class SwearChatListener implements Listener {
         chatFilter = instance;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @Override
+    public void execute(final Listener listener, final Event event) throws EventException {
+        this.onPlayerSwear((AsyncPlayerChatEvent) event);
+    }
+
+
     public void onPlayerSwear(AsyncPlayerChatEvent event) {
         Player p = event.getPlayer();
         String chatMessage = ChatColor.stripColor(event.getMessage()).toLowerCase();
@@ -32,11 +39,12 @@ public class SwearChatListener implements Listener {
             return;
         if (chatFilter.chatPause)
             return;
-        if (chatFilter.getChatFilters().validResult(chatMessage, p).getResult()) {
-            Types type = chatFilter.getChatFilters().validResult(chatMessage, p).getType();
-            String[] stringArray = chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray();
-            FilterWrapper filterWrapper = chatFilter.getChatFilters().validResult(chatMessage, p).getFilterWrapper();
-            chatFilter.commandHandler.runCommand(p, chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray(), filterWrapper);
+        Result result = chatFilter.getChatFilters().validResult(chatMessage, p);
+        if (result.getResult()) {
+            Types type = result.getType();
+            String[] stringArray = result.getStringArray();
+            FilterWrapper filterWrapper = result.getFilterWrapper();
+            chatFilter.commandHandler.runCommand(p, stringArray, filterWrapper);
             switch (type) {
                 case SWEAR:
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatSwear.s).replace("%player%", p.getName());
@@ -58,14 +66,15 @@ public class SwearChatListener implements Listener {
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatIP.s).replace("%player%", p.getName());
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnURLMessage.s);
                     break;
-                default: return;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + type);
             }
             if (filterWrapper.getLogToConsole())
                 chatFilter.sendConsole(type, chatMessage, p, filterWrapper.getRegex(), "Chat");
             if (filterWrapper.getWarnPlayer())
                 p.sendMessage(chatFilter.colour(warnPlayerMessage));
             if (filterWrapper.getSendStaff()) {
-                for (String oneWord : chatFilter.getChatFilters().validResult(chatMessage, p).getStringArray()) {
+                for (String oneWord : stringArray) {
                     chatMessage = chatMessage.replace(oneWord, chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
                 }
                 chatFilter.sendStaffMessage(chatFilter.colour(prefix + chatMessage));
