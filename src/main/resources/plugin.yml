@@ -1,5 +1,5 @@
 name: ChatFilter
-version: 2.0.6
+version: 2.0.8
 main: a4.papers.chatfilter.chatfilter.ChatFilter
 api-version: 1.13
 authors: [ A4_Papers ]

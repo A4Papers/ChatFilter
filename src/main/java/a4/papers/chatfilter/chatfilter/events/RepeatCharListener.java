@@ -3,7 +3,6 @@ package a4.papers.chatfilter.chatfilter.events;
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.EventExecutor;
@@ -15,25 +14,26 @@ public class RepeatCharListener implements EventExecutor, Listener {
 
     ChatFilter chatFilter;
 
-
     public RepeatCharListener(ChatFilter instance) {
         this.chatFilter = instance;
     }
+
     @Override
     public void execute(final Listener listener, final Event event) throws EventException {
-        this.onPlayerCaps((AsyncPlayerChatEvent) event);
+        this.onPlayerCarSpam((AsyncPlayerChatEvent) event);
     }
 
-    @EventHandler
-    public void onPlayerCaps(AsyncPlayerChatEvent event) {
+    public void onPlayerCarSpam(AsyncPlayerChatEvent event) {
         String msg = event.getMessage();
-        Pattern pattern = Pattern.compile("(\\w)\\1{"+chatFilter.antiSpamAboveAmount+",}");
-        if (chatFilter.antiSpamEnabled)
-            if (event.getPlayer().hasPermission("chatfilter.bypass") || event.getPlayer().hasPermission("chatfilter.bypass.characters"))
+        if (chatFilter.antiSpamEnabled) {
+            if (event.getPlayer().hasPermission("chatfilter.bypass") || event.getPlayer().hasPermission("chatfilter.bypass.characters")) {
                 return;
-            if (isURL(msg))
+            }
+            if (isURL(msg)) {
                 return;
-        event.setMessage(pattern.matcher(msg).replaceAll(new String(new char[chatFilter.antiSpamReplaceAmount]).replace("\0", "$1")));
+            }
+            event.setMessage(chatFilter.antiSpamPattern.matcher(msg).replaceAll(new String(new char[chatFilter.antiSpamReplaceAmount]).replace("\0", "$1")));
+        }
     }
 
     public boolean isURL(String str) {

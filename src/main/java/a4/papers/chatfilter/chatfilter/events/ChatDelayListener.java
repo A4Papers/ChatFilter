@@ -3,8 +3,8 @@ package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.ChatData;
-import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import a4.papers.chatfilter.chatfilter.shared.StringSimilarity;
+import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -27,6 +27,7 @@ public class ChatDelayListener implements EventExecutor, Listener {
     public ChatDelayListener(ChatFilter instance) {
         chatFilter = instance;
     }
+
     @Override
     public void execute(final Listener listener, final Event event) throws EventException {
         this.onPlayerSpam((AsyncPlayerChatEvent) event);
@@ -40,7 +41,7 @@ public class ChatDelayListener implements EventExecutor, Listener {
         UUID playerUUID = p.getUniqueId();
         String msg = e.getMessage();
         chatmsgs.containsKey(playerUUID);
-        long configtime = (chatFilter.getConfig().getInt("settings.repeatDelay") * 1000L);
+        long configtime = chatFilter.repeatDelay * 1000L;
         if (!p.hasPermission("chatfilter.bypass") || !e.getPlayer().hasPermission("chatfilter.bypass.repeat") && chatFilter.antiRepeatEnabled) {
             if (chatmsgs.containsKey(playerUUID)) {
                 long time = chatmsgs.get(playerUUID).getLong();
@@ -49,15 +50,21 @@ public class ChatDelayListener implements EventExecutor, Listener {
                 if (sim > d.doubleValue()) {
                     if (time > System.currentTimeMillis()) {
                         e.setCancelled(true);
-                        p.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.chatRepeatMessage.s)));
+                        int remainingTime = Math.round((this.chatmsgs.get(playerUUID).getLong() - System.currentTimeMillis()) / 1000 * 10) / 10;
+                        String timeString = "";
+                        if (remainingTime >= 2) {
+                            timeString = remainingTime + " seconds";
+                        } else {
+                            timeString = 1 + " second";
+                        }
+                        p.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.chatRepeatMessage.s).replace("%time%", timeString)));
                     } else {
                         chatmsgs.put(playerUUID, new ChatData(msg, System.currentTimeMillis() + configtime));
                     }
                 } else {
                     chatmsgs.remove(playerUUID);
                 }
-            }
-            if (!cooldown.containsKey(playerUUID)) {
+            } else {
                 chatmsgs.put(playerUUID, new ChatData(msg, System.currentTimeMillis() + configtime));
             }
         }

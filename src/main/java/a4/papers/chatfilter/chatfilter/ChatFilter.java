@@ -82,8 +82,8 @@ public class ChatFilter extends JavaPlugin {
     public boolean defaultWordWarnConsole;
     public boolean defaultWordCancelChatCancel;
     public boolean defaultWordCancelReplace;
-    public int antiSpamAboveAmount;
     public int antiSpamReplaceAmount;
+    public int repeatDelay;
     public String defaultWordCancelReplaceWith;
     public String defaultIPCancelReplaceWith;
     public String CommandsOnSwearCommand;
@@ -94,6 +94,7 @@ public class ChatFilter extends JavaPlugin {
     public String percentage;
     public String cancelChatReplace;
     public String URL_REGEX;
+    public Pattern antiSpamPattern;
     private Integer blockedInt = 1;
     private File wordConfigFile;
     private File advertConfigFile;
@@ -193,10 +194,10 @@ public class ChatFilter extends JavaPlugin {
         this.cancelChatReplace = getConfig().getString("settings.cancelChatReplace");
         this.URL_REGEX = getConfig().getString("URL_REGEX");
         this.enableLeetSpeak = getConfig().getBoolean("enableLeetSpeak");
-        this.antiSpamEnabled = getConfig().getBoolean("antiSpam.enabled");
-        this.antiSpamAboveAmount = getConfig().getInt("antiSpam.aboveAmount");
+        this.antiSpamEnabled = getConfig().getBoolean("antiSpam.enable");
         this.antiSpamReplaceAmount = getConfig().getInt("antiSpam.replaceAmount");
 
+        this.repeatDelay = getConfig().getInt("settings.repeatDelay");
         this.defaultWordEnabled = getConfig().getBoolean("default.word.Enabled");
         this.defaultWordWarnStaff = getConfig().getBoolean("default.word.Warn.Staff");
         this.defaultWordWarnPlayer = getConfig().getBoolean("default.word.Warn.Player");
@@ -213,6 +214,8 @@ public class ChatFilter extends JavaPlugin {
         this.defaultIPCancelReplace = getConfig().getBoolean("default.ip.CancelChat.Replace");
         this.defaultIPCancelReplaceWith = getConfig().getString("default.ip.CancelChat.ReplaceWith");
         this.defaultIPAction = getConfig().getStringList("default.ip.Action");
+        this.antiSpamPattern = Pattern.compile("(\\S)\\1{" + getConfig().getInt("antiSpam.aboveAmount") + ",}");
+
     }
 
     public String colour(String s) {
@@ -257,7 +260,7 @@ public class ChatFilter extends JavaPlugin {
 
     public void sendStaffMessage(String str) {
         for (Player online : Bukkit.getServer().getOnlinePlayers()) {
-            if (online.hasPermission("chatfilter.view") || (online.isOp())) {
+            if (online.hasPermission("chatfilter.view")) {
                 online.sendMessage(str);
             }
         }

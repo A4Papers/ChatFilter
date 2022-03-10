@@ -21,11 +21,11 @@ public class CommandHandler {
                     if (s.contains("<SendMessage>")) {
                         p.sendMessage(chatFilter.colour(s.replace("<SendMessage>", "").replace("%player%", p.getName()).replace("%item%", firstWord)));
                     }
-                    if (s.contains("<SendCommand>")) {
+                    if (s.contains("<RunCommand>")) {
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-                                Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), s.replace("<SendCommand>", "").replace("%player%", p.getName()).replace("%item%", firstWord));
+                                Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), s.replace("<RunCommand>", "").replace("%player%", p.getName()).replace("%item%", firstWord));
                             }
                         }.runTask(chatFilter);
                     }

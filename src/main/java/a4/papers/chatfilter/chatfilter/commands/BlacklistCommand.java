@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BlacklistCommand implements CommandExecutor {
 
@@ -69,10 +70,11 @@ public class BlacklistCommand implements CommandExecutor {
                     for (String stringlist : chatFilter.regexWords.keySet()) {
                         strlist.add(chatFilter.regexWords.get(stringlist).getWord());
                     }
-                    Collections.sort(strlist);
+                    List<String> listWithoutDuplicates = strlist.stream().distinct().collect(Collectors.toList());
+                    Collections.sort(listWithoutDuplicates);
                     if (chatFilter.manager.supported("text-component")) {
                         ComponentBuilder message = new ComponentBuilder("");
-                        for (String words : strlist) {
+                        for (String words : listWithoutDuplicates) {
                             message.append(ChatColor.WHITE + " " + words + ", ");
                             message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf blacklist remove word " + words));
                             message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_1.s).replace("%word%", words)))));

@@ -18,7 +18,6 @@ public class LoadFilters {
     public void loadWordFilter() {
         for (String key : chatFilter.getWordConfig().getConfigurationSection("ChatFilter").getKeys(false)) {
             ConfigurationSection word = chatFilter.getWordConfig().getConfigurationSection("ChatFilter." + key);
-            String regex = word.getString("Regex");
             Boolean informConsole = word.getBoolean("Warn.Console");
             Boolean msgToStaff = word.getBoolean("Warn.Staff");
             Boolean msgToPlayer = word.getBoolean("Warn.Player");
@@ -27,15 +26,24 @@ public class LoadFilters {
             String replaceWith = word.getString("CancelChat.ReplaceWith");
             List<String> command = word.getStringList("Action");
             Boolean enabled = word.getBoolean("Enabled");
-            if (enabled)
-                chatFilter.regexWords.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+            if (word.getStringList("Regex").isEmpty()) {
+                String regex = word.getString("Regex");
+                if (enabled)
+                    chatFilter.regexWords.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+            } else {
+                List<String> regexList = word.getStringList("Regex");
+                for (String regex : regexList) {
+                    if (enabled)
+                        chatFilter.regexWords.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+                }
+            }
         }
+
     }
 
     public void loadAdvertFilter() {
         for (String key : chatFilter.getAdvertConfig().getConfigurationSection("ChatFilter").getKeys(false)) {
             ConfigurationSection word = chatFilter.getAdvertConfig().getConfigurationSection("ChatFilter." + key);
-            String regex = word.getString("Regex");
             Boolean informConsole = word.getBoolean("Warn.Console");
             Boolean msgToStaff = word.getBoolean("Warn.Staff");
             Boolean msgToPlayer = word.getBoolean("Warn.Player");
@@ -44,9 +52,21 @@ public class LoadFilters {
             String replaceWith = word.getString("CancelChat.ReplaceWith");
             List<String> command = word.getStringList("Action");
             Boolean enabled = word.getBoolean("Enabled");
-            if (enabled)
-                chatFilter.regexAdvert.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+
+            if (word.getStringList("Regex").isEmpty()) {
+                String regex = word.getString("Regex");
+                if (enabled)
+                    chatFilter.regexAdvert.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+            } else {
+                List<String> regexList = word.getStringList("Regex");
+                for (String regex : regexList) {
+                    if (enabled)
+                        chatFilter.regexAdvert.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+                }
+            }
         }
+
+
     }
 
     public void createWordFilter(String word, String sender) {
@@ -91,6 +111,7 @@ public class LoadFilters {
         loadAdvertFilter();
         loadWordFilter();
     }
+
     public void regexCompile() {
         for (String StringMatchedDNS : chatFilter.regexAdvert.keySet()) {
             Pattern p = Pattern.compile(StringMatchedDNS);
