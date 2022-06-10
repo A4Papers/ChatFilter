@@ -111,7 +111,7 @@ public class RegexpGenerator {
                         sb.append("u");
                         break;
                     case 'v':
-                        sb.append("w");
+                        sb.append("v");
                         break;
                     case 'w':
                         sb.append("w");

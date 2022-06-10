@@ -56,22 +56,22 @@ public class BooksListener implements EventExecutor, Listener {
                 resulted = true;
                 switch (type) {
                     case SWEAR:
-                        bookPageMatch.add(ChatColor.GOLD + "Page" + nom + ChatColor.WHITE + ": " + pageFilter);
+                        bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", nom+"") + pageFilter);
                         warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                         prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookSwear.s).replace("%player%", p.getName());
                         break;
                     case IP_DNS:
-                        bookPageMatch.add(ChatColor.GOLD + "Page" + nom + ChatColor.WHITE + ": " + pageFilter);
+                        bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", nom+"") + pageFilter);
                         warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                         prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookIP.s).replace("%player%", p.getName());
                         break;
                     case IP_SWEAR:
-                        bookPageMatch.add(ChatColor.GOLD + "Page" + nom + ChatColor.WHITE + ": " + pageFilter);
+                        bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", nom+"") + pageFilter);
                         warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                         prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookIPandSwear.s).replace("%player%", p.getName());
                         break;
                     case FONT:
-                        bookPageMatch.add(ChatColor.GOLD + "Page" + nom + ChatColor.WHITE + ": " + pageFilter);
+                        bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", nom+"") + pageFilter);
                         warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s));
                         prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookFont.s).replace("%player%", p.getName());
                         break;

@@ -1,8 +1,9 @@
+#Strictness level example found here - https://www.toptal.com/developers/hastebin/ifibidogum.yaml
 ChatFilter:
   a_cool_fun_word:
-    # Filter this word?
+    # Filter this word and/or group of words?
     Enabled: true
-    # The regex filter, You can enter your own or use the ingame creator
+    # The regex filter - You can enter your here or use the in-game generator.
     Regex: ingame_regex_generation
     #You can also enter a list of regex patterns
    # Regex:
@@ -11,7 +12,7 @@ ChatFilter:
     Warn:
       # Notify staff when the filter catches a player?
       Staff: true
-      # Send the player the default warning message? Custom message can be defined below. Set this to false if you are sending a custom message.
+      # Send the player the default warning message? Custom message can be defined below in actions. Set to false when using a custom message.
       Player: true
       # Send catch to console?
       Console: true
@@ -23,7 +24,7 @@ ChatFilter:
       # If the above is true, What do we replace the word with?
       ReplaceWith: Cookies
     # Run command or send a message to the player, Messages can be custom per filter item
-    # however it's recomended you disable warning the player in the warn section above(Warn.Player) to prevent sending a message twice.
+    # however it's recommended you disable warning the player in the warn section above(Warn.Player) to prevent sending a message twice.
     # <RunCommand> - Have the server run a command.
     # <SendMessage> Send a message to the player.
     Action:

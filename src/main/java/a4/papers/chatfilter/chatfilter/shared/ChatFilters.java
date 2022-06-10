@@ -36,6 +36,7 @@ public class ChatFilters {
         String lowercaseString = removeBypass(string.toLowerCase());
         Types type = Types.NOTYPE;
         List<String> groupWords = new ArrayList<String>();
+        List<String> regexUsed = new ArrayList<String>();
         if (!(player.hasPermission("chatfilter.bypass.swear"))) {
             for (Pattern p : chatFilter.wordRegexPattern) {
                 Matcher m = p.matcher(lowercaseString);
@@ -43,6 +44,7 @@ public class ChatFilters {
                     matched = true;
                     matchedSwear = true;
                     regex = p.pattern();
+                    regexUsed.add(p.pattern());
                     if (!groupWords.contains(m.group(0))) {
                         groupWords.add(m.group(0));
                     }
@@ -63,6 +65,7 @@ public class ChatFilters {
                 }
             }
         }
+
         if (!(player.hasPermission("chatfilter.bypass.url"))) {
             if (!chatFilter.settingsAllowURL) {
                 Pattern p = Pattern.compile(chatFilter.URL_REGEX);
@@ -75,6 +78,7 @@ public class ChatFilters {
                 regexMap.put(chatFilter.URL_REGEX, new FilterWrapper("URL", Collections.singletonList("none"), chatFilter.URL_REGEX, true, false, "", false, true, false));
             }
         }
+
         if (matchedURL) {
             matched = true;
             type = Types.URL;
@@ -100,7 +104,7 @@ public class ChatFilters {
         groupWords.toArray(array);
         regexMap.putAll(chatFilter.regexWords);
         regexMap.putAll(chatFilter.regexAdvert);
-        return new Result(matched, array, type, regexMap.get(regex));
+        return new Result(matched, array, type, regexMap.get(regex), regexUsed);
     }
 
     public boolean isFont(String string) {

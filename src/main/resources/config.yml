@@ -2,9 +2,11 @@
 #                                                                 #
 #                  ChatFilter config file                         #
 #                                                                 #
-#   If you need any help with this plugin or have any problems    #
-#   feel free to join the support discord:                        #
+#   If you need any support or have any problems feel free        #
+#   to join the support discord:                                  #
 #   https://discord.gg/VKCwEh94hN                                 #
+#                                                                 #
+#   https://github.com/A4Papers/ChatFilter                        #
 #                                                                 #
 ###################################################################
 
@@ -14,6 +16,7 @@
 #  /cf blacklist (list/ip/word) <args/word> - chatfilter.blacklist
 #  /cf whitelist (list/ip/word) <args/word> - chatfilter.whitelist
 #  /cf pause - chatfilter.pause
+#  /cf clear - chatfilter.clear
 
 #  Other permissions:
 #  chatfilter.bypass - bypass all filters(inc: chat, books, signs and anvils)
@@ -32,35 +35,37 @@
 #  chatfilter.blacklist.remove - Able to remove words via the list
 #  chatfilter.whitelist.remove - Able to remove words via the list
 
-#  chatfilter.import - /cf import - import plain text words from data.txt file
+#  chatfilter.import - /cf import - import plain text words from a data.txt file
 
-
-# Alvalable languages: - If you make a custom lang file, Feel free to contact me and I'll add it to the plugin for others
-
+# Available languages: - If you have made a custom lang file, Feel free to contact me, and I'll add it to the plugin for others
 # en = English
 # zh = Chinese
 # es = Spanish
 # pl = Polish
 # da = Danish
 
+#############################
+
 # Message customisation is done in the messages_(yourlang).properties File
+
+#############################
 
 locale: en
 
 settings:
-  # Block fancy text? Often used with hacked clients
+  # Block fancy text? Often used with hacked clients.
   blockFancyChat: true
 
-  # Prevent repeat message spam?
+  # Prevent same or repeated messages
   antiRepeatEnabled: true
   
-  # How long till the player can say the same message again (In seconds)
+  # How long till the player can say the repeated message again (In seconds)
   repeatDelay: 5
   
-  # How similar does the players message need be before it's considered repeating? 0-100%
+  # How similar does the players repeat message need be before it's considered repeating? 0-100%
   similarMessagePercent: 60%
   
-  # Remove excessive caps? Names are exempt
+  # Remove excessive UPPERCASE? Names are exempt
   deCap: true
 
   # How many UPPERCASE letters before we lowercase the message?
@@ -69,15 +74,18 @@ settings:
   # Allow URLs? If set to false all URLs will be handled as advertising
   allowURL: true
   
-  # Colour we use to highlight the matched swear.
+  # What format/colour for items the filter catches.
   swearHighLight: "&c%catch%&r"
+
 
 # Anti characters spam - 'aaaaaaaaaaaaaaaaaaaa' to 'aaaa'
 antiSpam:
   # Enable Anti characters spam?
   enable: true
+
   # If the string of repeat characters is above this amount it is then counted as spam
   aboveAmount: 4
+
   # The amount of characters we replace the spam with.
   replaceAmount: 4
 
@@ -100,8 +108,8 @@ EventPriority:
   BookListener: NORMAL
   AdvilListener: NORMAL
 
-# Set up the presets for when adding via /cf blacklist
-# This makes adding in game far simpler as you won't have to set each individual filter up.
+# Presets for when adding via /cf blacklist
+# Setting up presets will make adding in-game far simpler as you won't need customise each word/ip filter..
 default:
   word:
     Enabled: true
@@ -148,7 +156,7 @@ checkCommands: false
 commands:
   # Command name
   command-name-here: #This is the command we want to filter
-    # Check the commad for swearing?
+    # Check the command for swearing?
     swear: false
     # Check the command for ips?
     ip: true

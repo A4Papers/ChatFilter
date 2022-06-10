@@ -1,6 +1,5 @@
 #List of words that you wish to whitelist
 bypassWords:
-  - an alt
   - mean a legit
   - analytics
   - just watching
@@ -9,13 +8,172 @@ bypassWords:
   - it's excellent
   - ain't it
   - isn't it
-  - cocky
-  - cockroach
-  - cocktail
   - staff say
   - stuffs
   - wasn't it
-
+  - cocky
+  - cockroach
+  - cocktail
+  - off so
+  - off some
+  - /sh it
+  - open once
+  - to ss
+  - staff say
+  - beetroot
+  - stuffs
+  - wasn't it
+  - off, s
+  - n't it
+  - ok noobs
+  - knock noobs
+  - spastic
+  - warped roots
+  - mc until
+  - don't watch
+  - who remember
+  - an all
+  - haven't watched
+  - tho /t
+  - with other
+  - than once
+  - an alright
+  - who retired
+  - a favor
+  - crimson roots
+  - an alien
+  - bongo
+  - it's expired
+  - it's expensive
+  - wt for
+  - tho thats
+  - wouldn't - it
+  - scum
+  - on once
+  - jewelry
+  - jewellery
+  - vacuum
+  - who's excited
+  - want hot
+  - it's exactly
+  - cucumber
+  - an usa
+  - roots
+  - tho, thats
+  - '''s perms'
+  - bit cheap
+  - tho the
+  - boo boo
+  - '''s permission'
+  - poor nameless
+  - trash at
+  - who removed
+  - poor nub
+  - tho tbh
+  - tho, tbh
+  - see xd
+  - jerky
+  - might hotspot
+  - who read
+  - tho two
+  - d 100k
+  - who report
+  - '''s extra'
+  - '''s exactly'
+  - '''s hat'
+  - '''s expression'
+  - open is
+  - virginia
+  - '''t hot'
+  - who really
+  - skink
+  - booboo
+  - bamboo being
+  - who restock
+  - bit cheat
+  - p3p
+  - '''s extreme'
+  - f agetha
+  - coon cheese
+  - bamboo b
+  - up or not
+  - that's explained
+  - boo bye
+  - moon get
+  - racc00nfeet
+  - '''t watching'
+  - gpu because
+  - warp or n
+  - see xpfarm
+  - it's perm
+  - trash artist
+  - pvp or no
+  - far knockback
+  - poor noot
+  - that's expensive
+  - poor night
+  - she's excused
+  - poor now
+  - fantastic little
+  - apple
+  - a p p l e
+  - bbs
+  - map or nah
+  - poor neck
+  - poor net
+  - turtle's extended
+  - 80's hit
+  - cpu be
+  - trashy t
+  - it's exquisite
+  - plushy tbh
+  - marshy thing
+  - mil from
+  - '''s expect'
+  - button
+  - bit charitable
+  - me than all
+  - woo gg
+  - '''t water'
+  - it's exploit
+  - it's exciting
+  - bit challenging
+  - bit cheers
+  - op or not
+  - golden gaytime
+  - '''s extinct'
+  - tf2
+  - mrrac00n
+  - fishy t
+  - s exempt
+  - bit chilly
+  - rapper
+  - can't watch
+  - cook
+  - help or n
+  - '''s excited'
+  - prickly
+  - get it
+  - trapped
+  - hashtag
+  - can use
+  - as laggy
+  - his lag
+  - afk t
+  - then once
+  - document
+  - expensive
+  - bitten once
+  - crap is this
+  - who realises
+  - nvm ill
+  - afk during
+  - bishop
+  - nonce
+  - min once
+  - bit chonky
+  - in once
+  - peed on
 #List of ip/websites you wish to whitelist
 bypassIP:
   - youtube.com

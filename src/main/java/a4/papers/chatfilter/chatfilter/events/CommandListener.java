@@ -75,7 +75,17 @@ public class CommandListener implements EventExecutor, Listener {
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixCmdIPandSwear.s).replace("%player%", p.getName());
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                 }
-                event.setCancelled(true);
+                if (filterWrapper.getCancelChat()) {
+                    event.setCancelled(true);
+                } else {
+                    String msg = event.getMessage();
+                    for (String oneWord : stringArray) {
+                        if (filterWrapper.getCancelChatReplace()) {
+                            msg = msg.replace(oneWord, filterWrapper.getReplace());
+                        }
+                    }
+                    event.setMessage(msg);
+                }
                 chatFilter.commandHandler.runCommand(p, stringArray, filterWrapper);
                 if (filterWrapper.getLogToConsole()) {
                     chatFilter.sendConsole(type, cmd, p, filterWrapper.getRegex(), "Command");

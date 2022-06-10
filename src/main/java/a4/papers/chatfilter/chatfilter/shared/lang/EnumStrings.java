@@ -80,6 +80,7 @@ public enum EnumStrings {
     signLine2("signLine2"),
     signLine3("signLine3"),
     signLine4("signLine4"),
+    bookPage("bookPage"),
     clearChatMessage("clearChatMessage"),
     prefixAnvilFont("prefixAnvilFont"),
     prefixAnvilIPandSwear("prefixAnvilIPandSwear"),
