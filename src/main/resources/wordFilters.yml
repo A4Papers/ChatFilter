@@ -73,7 +73,7 @@ ChatFilter:
     Action:
       - none
     AddedBy: ChatFilter
-  PresetWords(Edit In Config):
+  PresetWordsList:
     Enabled: true
     Regex:
       - ((w)+(\W|_)*(h)+(\W|_)*(0|o)+(\W|_)*(r)+(\W|_)*(3|e)+(\W|_)*) #Whore

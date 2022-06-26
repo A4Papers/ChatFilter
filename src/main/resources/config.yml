@@ -108,7 +108,14 @@ EventPriority:
   BookListener: NORMAL
   AdvilListener: NORMAL
 
-# Presets for when adding via /cf blacklist
+
+perWordOptions:
+  # Create per-word options?
+  enabled: true
+  # If 'false' what list will all words created be added to?
+  nameOfList: PresetWordsList
+
+# Presets for when adding via /cf blacklist (These are Per-word options)
 # Setting up presets will make adding in-game far simpler as you won't need customise each word/ip filter..
 default:
   word:

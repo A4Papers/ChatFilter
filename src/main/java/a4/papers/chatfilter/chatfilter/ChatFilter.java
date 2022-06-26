@@ -82,8 +82,11 @@ public class ChatFilter extends JavaPlugin {
     public boolean defaultWordWarnConsole;
     public boolean defaultWordCancelChatCancel;
     public boolean defaultWordCancelReplace;
+    public boolean perWordOptionsEnable;
+
     public int antiSpamReplaceAmount;
     public int repeatDelay;
+
     public String defaultWordCancelReplaceWith;
     public String defaultIPCancelReplaceWith;
     public String CommandsOnSwearCommand;
@@ -94,6 +97,8 @@ public class ChatFilter extends JavaPlugin {
     public String percentage;
     public String cancelChatReplace;
     public String URL_REGEX;
+    public String perWordOptionsString;
+
     public Pattern antiSpamPattern;
     private Integer blockedInt = 1;
     private File wordConfigFile;
@@ -215,7 +220,8 @@ public class ChatFilter extends JavaPlugin {
         this.defaultIPCancelReplaceWith = getConfig().getString("default.ip.CancelChat.ReplaceWith");
         this.defaultIPAction = getConfig().getStringList("default.ip.Action");
         this.antiSpamPattern = Pattern.compile("(\\S)\\1{" + getConfig().getInt("antiSpam.aboveAmount") + ",}");
-
+        this.perWordOptionsEnable = getConfig().getBoolean("perWordOptions.enabled");
+        this.perWordOptionsString = getConfig().getString("perWordOptions.nameOfList");
     }
 
     public String colour(String s) {

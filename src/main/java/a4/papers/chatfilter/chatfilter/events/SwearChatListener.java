@@ -3,6 +3,7 @@ package a4.papers.chatfilter.chatfilter.events;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
+import a4.papers.chatfilter.chatfilter.shared.LowerCaseReplace;
 import a4.papers.chatfilter.chatfilter.shared.Result;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
@@ -32,7 +33,7 @@ public class SwearChatListener implements EventExecutor, Listener {
         Player p = event.getPlayer();
         String chatMessage = ChatColor.stripColor(event.getMessage()).toLowerCase();
         String prefix = "";
-        String warnPlayerMessage = "";
+        String warnPlayerMessage =  "";
         if (p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.chat"))
             return;
         if (event.isCancelled())
@@ -85,7 +86,7 @@ public class SwearChatListener implements EventExecutor, Listener {
                 String msg = event.getMessage();
                 for (String oneWord : stringArray) {
                     if (filterWrapper.getCancelChatReplace()) {
-                        msg = msg.replace(oneWord, filterWrapper.getReplace());
+                       msg = LowerCaseReplace.replace(msg, oneWord, filterWrapper.getReplace());
                     }
                 }
                 event.setMessage(msg);
