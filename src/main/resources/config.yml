@@ -30,6 +30,8 @@
 #  chatfilter.bypass.pause - bypass paused chat only
 #  chatfilter.bypass.swear - bypass all swear filters
 #  chatfilter.bypass.ip - bypass all ip filters
+#  chatfilter.bypass.swear.<config entry> – Allows the player to bypass set config entries
+#  chatfilter.bypass.ip.<config entry> – Allows the player to bypass set config entries
 
 #  chatfilter.view - players with this perm can view filtered messages
 #  chatfilter.blacklist.remove - Able to remove words via the list

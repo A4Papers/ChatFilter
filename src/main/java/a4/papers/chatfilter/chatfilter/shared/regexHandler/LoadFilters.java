@@ -2,10 +2,8 @@ package a4.papers.chatfilter.chatfilter.shared.regexHandler;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -83,7 +81,7 @@ public class LoadFilters {
             chatFilter.getWordConfig().set("ChatFilter." + word + ".AddedBy", sender);
         } else if (!chatFilter.perWordOptionsEnable) {
             ConfigurationSection key = chatFilter.getWordConfig().getConfigurationSection("ChatFilter." + chatFilter.perWordOptionsString);
-            if (key == null){
+            if (key == null) {
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString, "");
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".Enabled", chatFilter.defaultWordEnabled);
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".Regex", regex);
@@ -98,7 +96,7 @@ public class LoadFilters {
             } else {
                 List<String> regexList = key.getStringList("Regex");
                 regexList.add(regex);
-                chatFilter.getWordConfig().set("ChatFilter." +  chatFilter.perWordOptionsString + ".Regex", regexList);
+                chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".Regex", regexList);
             }
         }
         chatFilter.save();
@@ -128,8 +126,11 @@ public class LoadFilters {
     public void reloadFilters() {
         chatFilter.regexAdvert.clear();
         chatFilter.regexWords.clear();
+        chatFilter.advertRegexPattern.clear();
+        chatFilter.wordRegexPattern.clear();
         loadAdvertFilter();
         loadWordFilter();
+        regexCompile();
     }
 
     public void regexCompile() {

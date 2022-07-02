@@ -41,6 +41,7 @@ public class ChatFilters {
             for (Pattern p : chatFilter.wordRegexPattern) {
                 Matcher m = p.matcher(lowercaseString);
                 while (m.find()) {
+                    if (!player.hasPermission("chatfilter.bypass.swear." + m.group(0)))
                     matched = true;
                     matchedSwear = true;
                     regex = p.pattern();
@@ -56,7 +57,8 @@ public class ChatFilters {
             for (Pattern p : chatFilter.advertRegexPattern) {
                 Matcher m = p.matcher(lowercaseString);
                 while (m.find()) {
-                    matched = true;
+                    if (!player.hasPermission("chatfilter.bypass.ip." + m.group(0)))
+                        matched = true;
                     matchedIP = true;
                     regex = p.pattern();
                     if (!groupWords.contains(m.group(0))) {
