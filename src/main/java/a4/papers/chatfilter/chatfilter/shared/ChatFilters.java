@@ -1,6 +1,7 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -42,7 +43,7 @@ public class ChatFilters {
                 Matcher m = p.matcher(lowercaseString);
                 while (m.find()) {
                     if (!player.hasPermission("chatfilter.bypass.swear." + m.group(0)))
-                    matched = true;
+                        matched = true;
                     matchedSwear = true;
                     regex = p.pattern();
                     regexUsed.add(p.pattern());
@@ -111,9 +112,21 @@ public class ChatFilters {
 
     public boolean isFont(String string) {
         boolean matchedFont = false;
+        for (String s : chatFilter.unicodeWhitelist) {
+            if (string.contains(s)) {
+                string = string.replace(s, "");
+            }
+        }
         if (chatFilter.settingsBlockFancyChat) {
-            if (string.contains("\uff41") || string.contains("\uff42") || string.contains("\uff43") || string.contains("\uff44") || string.contains("\uff45") || string.contains("\uff46") || string.contains("\uff47") || string.contains("\uff48") || string.contains("\uff49") || string.contains("\uff4a") || string.contains("\uff4b") || string.contains("\uff4c") || string.contains("\uff4d") || string.contains("\uff4e") || string.contains("\uff4f") || string.contains("\uff50") || string.contains("\uff52") || string.contains("\uff53") || string.contains("\uff54") || string.contains("\uff55") || string.contains("\uff57") || string.contains("\uff58") || string.contains("\uff59") || string.contains("\uff5a") || string.contains("\uff21") || string.contains("\uff22") || string.contains("\uff23") || string.contains("\uff24") || string.contains("\uff25") || string.contains("\uff26") || string.contains("\uff27") || string.contains("\uff28") || string.contains("\uff29") || string.contains("\uff2a") || string.contains("\uff2b") || string.contains("\uff2c") || string.contains("\uff2d") || string.contains("\uff2e") || string.contains("\uff2f") || string.contains("\uff30") || string.contains("\uff32") || string.contains("\uff33") || string.contains("\uff34") || string.contains("\uff35") || string.contains("\uff37") || string.contains("\uff38") || string.contains("\uff39") || string.contains("\uff3a") || string.contains("\u24d0") || string.contains("\u24b6") || string.contains("\u24b7") || string.contains("\u24d1") || string.contains("\u24d2") || string.contains("\u24b8") || string.contains("\u24d3") || string.contains("\u24b9") || string.contains("\u24d4") || string.contains("\u24ba") || string.contains("\u24d5") || string.contains("\u24bb") || string.contains("\u24d6") || string.contains("\u24bc") || string.contains("\u24bd") || string.contains("\u24d7") || string.contains("\u24be") || string.contains("\u24d8") || string.contains("\u24bf") || string.contains("\u24d9") || string.contains("\u24c0") || string.contains("\u24da") || string.contains("\u24c1") || string.contains("\u24db") || string.contains("\u24c2") || string.contains("\u24dc") || string.contains("\u24c3") || string.contains("\u24dd") || string.contains("\u24c4") || string.contains("\u24de") || string.contains("\u24c5") || string.contains("\u24df") || string.contains("\u24c7") || string.contains("\u24e1") || string.contains("\u24c8") || string.contains("\u24e2") || string.contains("\u24c9") || string.contains("\u24e3") || string.contains("\u24ca") || string.contains("\u24e4") || string.contains("\u24cc") || string.contains("\u24e6") || string.contains("\u24cd") || string.contains("\u24e7") || string.contains("\u24ce") || string.contains("\u24e8") || string.contains("\u24cf") || string.contains("\u24e9")) {
-                matchedFont = true;
+            for (String s : chatFilter.unicodeBlacklist.keySet()) {
+                int UrangeLow = Integer.parseInt(chatFilter.unicodeBlacklist.get(s).getStart(), 16);
+                int UrangeHigh = Integer.parseInt(chatFilter.unicodeBlacklist.get(s).getEnd(), 16);
+                for (int iLetter = 0; iLetter < string.length(); iLetter++) {
+                    int cp = string.codePointAt(iLetter);
+                    if (cp >= UrangeLow && cp <= UrangeHigh) {
+                        matchedFont = true;
+                    }
+                }
             }
         }
         return matchedFont;

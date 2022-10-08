@@ -1,0 +1,16 @@
+Unicode:
+  whitelist:
+    - ｃｈａｔｆｉｌｔｅｒ
+
+  blacklist:
+    font-A: # https://www.compart.com/en/unicode/block/U+FF00
+      range-start: FF21
+      range-end: FF3A
+    font-b: # https://www.compart.com/en/unicode/block/U+FF00
+      range-start: FF41
+      range-end: FF5A
+    font-c: # https://www.compart.com/en/unicode/block/U+2460
+      range-start: 24D0
+      range-end: 24CF
+
+

@@ -2,6 +2,7 @@ package a4.papers.chatfilter.chatfilter.shared.regexHandler;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
+import a4.papers.chatfilter.chatfilter.shared.UnicodeWrapper;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.List;
@@ -63,6 +64,26 @@ public class LoadFilters {
                         chatFilter.regexAdvert.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
                 }
             }
+        }
+    }
+
+    public void loadUnicodeFilter() {
+        loadUnicodeWhitelist();
+        for (String key : chatFilter.getUnicodeConfig().getConfigurationSection("Unicode.blacklist").getKeys(false)) {
+            ConfigurationSection word = chatFilter.getUnicodeConfig().getConfigurationSection("Unicode.blacklist." + key);
+            assert word != null;
+            String start = word.getString("range-start");
+            String end = word.getString("range-end");
+            chatFilter.unicodeBlacklist.put(key, new UnicodeWrapper(start, end));
+        }
+    }
+    public void loadUnicodeWhitelist() {
+        if (chatFilter.getUnicodeConfig().getStringList("Unicode.whitelist").isEmpty()) {
+            String s = chatFilter.getUnicodeConfig().getString("Unicode.whitelist");
+            chatFilter.unicodeWhitelist.add(s);
+        } else {
+            List<String> List = chatFilter.getUnicodeConfig().getStringList("Unicode.whitelist");
+            chatFilter.unicodeWhitelist.addAll(List);
         }
     }
 

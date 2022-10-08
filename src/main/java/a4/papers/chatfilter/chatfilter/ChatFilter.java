@@ -8,6 +8,7 @@ import a4.papers.chatfilter.chatfilter.events.*;
 import a4.papers.chatfilter.chatfilter.shared.ChatFilters;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Types;
+import a4.papers.chatfilter.chatfilter.shared.UnicodeWrapper;
 import a4.papers.chatfilter.chatfilter.shared.lang.LangManager;
 import a4.papers.chatfilter.chatfilter.shared.regexHandler.LoadFilters;
 import a4.papers.chatfilter.chatfilter.shared.regexHandler.RegexpGenerator;
@@ -46,16 +47,20 @@ public class ChatFilter extends JavaPlugin {
     public LangManager langManager;
     public LoadFilters loadFilters;
     public FilterWrapper filterWrapper;
+    public UnicodeWrapper unicodeWrapper;
     public RegexpGenerator regexpGenerator;
     public Manager manager;
     public List<Pattern> wordRegexPattern = new ArrayList<>();
     public List<Pattern> advertRegexPattern = new ArrayList<>();
     public Map<String, FilterWrapper> regexWords;
     public Map<String, FilterWrapper> regexAdvert;
+    public Map<String, UnicodeWrapper> unicodeBlacklist;
     public List<String> byPassWords;
     public List<String> byPassDNS;
     public List<String> defaultWordAction;
     public List<String> defaultIPAction;
+    public List<String> unicodeWhitelist;
+
     public int capsAmount;
     public boolean CommandsOnSwearEnabled;
     public boolean CommandsOnAdvertisesEnabled;
@@ -104,14 +109,18 @@ public class ChatFilter extends JavaPlugin {
     private File wordConfigFile;
     private File advertConfigFile;
     private File whitelistConfigFile;
+    private File unicodeConfigFile;
     private FileConfiguration whitelistConfig;
     private FileConfiguration wordConfig;
     private FileConfiguration advertConfig;
+    private FileConfiguration unicodeConfig;
 
 
     public void onEnable() {
         regexWords = new HashMap<>();
         regexAdvert = new HashMap<>();
+        unicodeBlacklist = new HashMap<>();
+        unicodeWhitelist = new ArrayList<>();
         chatFilters = new ChatFilters(this);
         commandHandler = new CommandHandler(this);
         langManager = new LangManager(this);
@@ -150,6 +159,7 @@ public class ChatFilter extends JavaPlugin {
         saveDefaultConfig();
         getFilters().loadWordFilter();
         getFilters().loadAdvertFilter();
+        getFilters().loadUnicodeFilter();
         getFilters().regexCompile();
         logMsg("[ChatFilter] Loaded using locale: " + getLang().locale);
         logMsg("[ChatFilter] " + regexWords.size() + " Enabled word filters.");
@@ -260,6 +270,10 @@ public class ChatFilter extends JavaPlugin {
         return this.whitelistConfig;
     }
 
+    public FileConfiguration getUnicodeConfig() {
+        return this.unicodeConfig;
+    }
+
     public RegexpGenerator regexpGenerator() {
         return this.regexpGenerator;
     }
@@ -285,6 +299,8 @@ public class ChatFilter extends JavaPlugin {
         wordConfigFile = new File(getDataFolder(), "wordFilters.yml");
         advertConfigFile = new File(getDataFolder(), "advertFilters.yml");
         whitelistConfigFile = new File(getDataFolder(), "whitelisted.yml");
+        unicodeConfigFile = new File(getDataFolder(), "unicodeFilters.yml");
+
         if (!whitelistConfigFile.exists()) {
             whitelistConfigFile.getParentFile().mkdirs();
             saveResource("whitelisted.yml", false);
@@ -297,13 +313,21 @@ public class ChatFilter extends JavaPlugin {
             advertConfigFile.getParentFile().mkdirs();
             saveResource("advertFilters.yml", false);
         }
+        if (!unicodeConfigFile.exists()) {
+            unicodeConfigFile.getParentFile().mkdirs();
+            saveResource("unicodeFilters.yml", false);
+        }
         whitelistConfig = new YamlConfiguration();
         wordConfig = new YamlConfiguration();
         advertConfig = new YamlConfiguration();
+        unicodeConfig = new YamlConfiguration();
+
         try {
             whitelistConfig.load(whitelistConfigFile);
             advertConfig.load(advertConfigFile);
             wordConfig.load(wordConfigFile);
+            unicodeConfig.load(unicodeConfigFile);
+
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
@@ -314,6 +338,7 @@ public class ChatFilter extends JavaPlugin {
             whitelistConfig.save(whitelistConfigFile);
             advertConfig.save(advertConfigFile);
             wordConfig.save(wordConfigFile);
+            unicodeConfig.save(unicodeConfigFile);
         } catch (IOException ignored) {
         }
     }
@@ -322,5 +347,6 @@ public class ChatFilter extends JavaPlugin {
         whitelistConfig.load(whitelistConfigFile);
         advertConfig.load(advertConfigFile);
         wordConfig.load(wordConfigFile);
+        unicodeConfig.load(unicodeConfigFile);
     }
 }

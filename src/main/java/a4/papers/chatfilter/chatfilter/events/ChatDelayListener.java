@@ -35,6 +35,9 @@ public class ChatDelayListener implements EventExecutor, Listener {
 
     @EventHandler
     public void onPlayerSpam(AsyncPlayerChatEvent e) {
+        if (!chatFilter.antiRepeatEnabled) {
+            return;
+        }
         if (e.getPlayer().hasPermission("chatfilter.bypass") || e.getPlayer().hasPermission("chatfilter.bypass.repeat"))
             return;
         Player p = e.getPlayer();
