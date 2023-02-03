@@ -34,6 +34,7 @@ public class SignListener implements EventExecutor, Listener {
         if (p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.sign")) {
             return;
         }
+        boolean broken = false;
         String prefix = "";
         String warnPlayerMessage = "";
 
@@ -74,10 +75,10 @@ public class SignListener implements EventExecutor, Listener {
                 default:
                     throw new IllegalStateException("Unexpected value: " + type);
             }
-
-            for (String l : result.getRegexList())
-                if (chatFilter.regexWords.get(l).getCancelChat())
-                    event.getBlock().breakNaturally();
+            if (filterWrapper.getCancelChat()) {
+                event.getBlock().breakNaturally();
+                broken = true;
+            }
             if (filterWrapper.getLogToConsole())
                 chatFilter.sendConsole(type, lines, p, filterWrapper.getRegex(), "Sign");
             if (filterWrapper.getWarnPlayer())
@@ -90,43 +91,47 @@ public class SignListener implements EventExecutor, Listener {
                     line0 = line0.replace(oneWord.replace(" ", ""), chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
                     line0Sign = line0Sign.replace(oneWord, filterWrapper.getReplace());
                 }
-                event.setLine(0,line0Sign);
+                if (!broken && filterWrapper.getCancelChatReplace())
+                    event.setLine(0, line0Sign);
+                if (filterWrapper.getSendStaff()) {
+                        chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine1.s)) + line0);
+                    }
+                }
 
-                if (filterWrapper.getSendStaff()) {
-                    chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine1.s)) + line0);
+                if (!event.getLine(1).isEmpty()) {
+                    for (String oneWord : stringArray) {
+                        line1 = line1.replace(oneWord.replace(" ", ""), chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
+                        line1Sign = line1Sign.replace(oneWord, filterWrapper.getReplace());
+                    }
+                    if (!broken && filterWrapper.getCancelChatReplace())
+                        event.setLine(1, line1Sign);
+                    if (filterWrapper.getSendStaff()) {
+                        chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine2.s)) + line1);
+                    }
                 }
-            }
-            if (!event.getLine(1).isEmpty()) {
-                for (String oneWord : stringArray) {
-                    line1 = line1.replace(oneWord.replace(" ", ""), chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
-                    line1Sign = line1Sign.replace(oneWord, filterWrapper.getReplace());
+                if (!event.getLine(2).isEmpty()) {
+                    for (String oneWord : stringArray) {
+                        line2 = line2.replace(oneWord.replace(" ", ""), chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
+                        line2Sign = line2Sign.replace(oneWord, filterWrapper.getReplace());
+                    }
+                    if (!broken && filterWrapper.getCancelChatReplace())
+                        event.setLine(2, line2Sign);
+                    if (filterWrapper.getSendStaff()) {
+                        chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine3.s)) + line2);
+                    }
                 }
-                event.setLine(1,line1Sign);
-                if (filterWrapper.getSendStaff()) {
-                    chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine2.s)) + line1);
-                }
-            }
-            if (!event.getLine(2).isEmpty()) {
-                for (String oneWord : stringArray) {
-                    line2 = line2.replace(oneWord.replace(" ", ""), chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
-                    line2Sign = line2Sign.replace(oneWord, filterWrapper.getReplace());
-                }
-                event.setLine(2,line2Sign);
-                if (filterWrapper.getSendStaff()) {
-                    chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine3.s)) + line2);
-                }
-            }
-            if (!event.getLine(3).isEmpty()) {
-                for (String oneWord : stringArray) {
-                    line3 = line3.replace(oneWord.replace(" ", ""), chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
-                    line3Sign = line3Sign.replace(oneWord, filterWrapper.getReplace());
-                }
-                event.setLine(3,line3Sign);
-                if (filterWrapper.getSendStaff()) {
-                    chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine4.s)) + line3);
-                }
-            }
+                if (!event.getLine(3).isEmpty()) {
+                    for (String oneWord : stringArray) {
+                        line3 = line3.replace(oneWord.replace(" ", ""), chatFilter.colour(chatFilter.settingsSwearHighLight.replace("%catch%", oneWord)));
+                        line3Sign = line3Sign.replace(oneWord, filterWrapper.getReplace());
+                    }
+                    if (!broken && filterWrapper.getCancelChatReplace())
+                        event.setLine(3, line3Sign);
+                    if (filterWrapper.getSendStaff()) {
+                        chatFilter.sendStaffMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.signLine4.s)) + line3);
+                    }
 
+            }
         }
     }
 }
