@@ -172,6 +172,12 @@ commands:
   msg:
     swear: false
     ip: true
+  w:
+    swear: false
+    ip: true
+  tell:
+    swear: false
+    ip: true    
   r:
     swear: false
     ip: true
