@@ -4,6 +4,7 @@ main: a4.papers.chatfilter.chatfilter.ChatFilter
 api-version: 1.13
 authors: [ A4_Papers ]
 description: Basic Regex chat, book and anvil filter
+folia-supported: true
 commands:
   chatfilter:
     aliases: [cf]
