@@ -12,6 +12,9 @@ import a4.papers.chatfilter.chatfilter.shared.UnicodeWrapper;
 import a4.papers.chatfilter.chatfilter.shared.lang.LangManager;
 import a4.papers.chatfilter.chatfilter.shared.regexHandler.LoadFilters;
 import a4.papers.chatfilter.chatfilter.shared.regexHandler.RegexpGenerator;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
+import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -167,18 +170,9 @@ public class ChatFilter extends JavaPlugin {
         logMsg("[ChatFilter] " + (byPassWords.size() + byPassWords.size()) + " whitelisted items.");
         int pluginId = 13946;
         Metrics metrics = new Metrics(this, pluginId);
-        metrics.addCustomChart(new Metrics.SimplePie("used_language", () -> {
-            return getLang().locale.toString();
-        }));
-        metrics.addCustomChart(new Metrics.SimplePie("total_filters", () -> {
-            return String.valueOf(regexWords.size() + regexAdvert.size());
-        }));
-        metrics.addCustomChart(new Metrics.SingleLineChart("block", new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return blockedInt;
-            }
-        }));
+        metrics.addCustomChart(new SimplePie("used_language", () -> getLang().locale.toString()));
+        metrics.addCustomChart(new SimplePie("total_filters", () -> String.valueOf(regexWords.size() + regexAdvert.size())));
+        metrics.addCustomChart(new SingleLineChart("block", () -> blockedInt));
     }
 
     @Override
@@ -288,7 +282,7 @@ public class ChatFilter extends JavaPlugin {
 
     public void sendConsole(Types type, String msg, Player p, String regexUsed, String pl) {
         if (!type.equals(Types.NOTYPE)) {
-            blockedInt = new Integer(blockedInt.intValue() + 1);
+            blockedInt = blockedInt + 1;
             consoleSender.sendMessage("------- Match Type: " + type.id + " ~ " + pl.toUpperCase());
             consoleSender.sendMessage("Match: " + regexUsed);
             consoleSender.sendMessage("Catch > " + p.getName() + ": " + msg);

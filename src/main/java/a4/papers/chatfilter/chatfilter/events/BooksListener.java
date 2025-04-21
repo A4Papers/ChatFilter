@@ -5,7 +5,7 @@ import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Result;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
-import org.bukkit.ChatColor;
+import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -14,7 +14,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.EventExecutor;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,14 +82,13 @@ public class BooksListener implements EventExecutor, Listener {
         }
         if (resulted) {
             if (event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.WRITABLE_BOOK)) {
-                event.getPlayer().getInventory().getItemInMainHand().setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
-
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        event.getPlayer().getInventory().setItemInMainHand(new ItemStack(Material.WRITABLE_BOOK, 1));
-                    }
-                }.runTaskLater(chatFilter, 1);
+                Player player = event.getPlayer();
+                player.getInventory().getItemInMainHand().setAmount(event.getPlayer().getInventory().getItemInMainHand().getAmount() - 1);
+                Scheduler.plugin(chatFilter).sync().runEntityTaskLater(
+                        player,
+                        () -> player.getInventory().addItem(new ItemStack(Material.WRITABLE_BOOK, 1)),
+                        1
+                );
             }
             if (filterWrapper.getLogToConsole())
                 chatFilter.sendConsole(type, bookPagesList.get(nom - 1), p, filterWrapper.getRegex(), "Book");
