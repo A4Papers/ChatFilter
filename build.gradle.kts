@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "a4.papers.chatfilter"
-version = "2.1.1"
+version = "2.0.16"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
