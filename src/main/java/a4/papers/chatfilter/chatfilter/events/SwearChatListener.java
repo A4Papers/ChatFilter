@@ -15,11 +15,14 @@ import a4.papers.chatfilter.chatfilter.shared.Result;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class SwearChatListener implements EventExecutor, Listener {
 
+    private static final String DENY_MESSAGE = "&cYour message was not sent due to containing disallowed characters.";
     ChatFilter chatFilter;
+    private volatile BaseComponent[] denyActionbar;
 
     public SwearChatListener(ChatFilter instance) {
         chatFilter = instance;
@@ -32,38 +35,41 @@ public class SwearChatListener implements EventExecutor, Listener {
 
 
     public void onPlayerSwear(AsyncChatEvent event) {
-        Player p = event.getPlayer();
-        String rawMessage = chatFilter.plainMessage(event);
-        String chatMessage = ChatColor.stripColor(rawMessage).toLowerCase();
-        String prefix = "";
-        String warnPlayerMessage =  "";
-        if (p.isOp() || p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.chat"))
-            return;
         if (event.isCancelled())
             return;
         if (chatFilter.chatPause)
             return;
-        // Early check for non-English letters if enabled (after bypass/pause checks)
+        Player p = event.getPlayer();
+        if (p.isOp() || p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.chat"))
+            return;
+        String rawMessage = chatFilter.plainMessage(event);
+        String strippedMessage = ChatColor.stripColor(rawMessage);
         if (chatFilter.settingsBlockCustomSybols) {
-            String strippedRawMessage = ChatColor.stripColor(rawMessage);
-            if (chatFilter.getChatFilters().containsNonEnglishLetters(strippedRawMessage)) {
-                String deny = "&cYour message was not sent due to containing disallowed characters.";
-                p.sendMessage(chatFilter.colour(deny));
+            if (chatFilter.getChatFilters().containsNonEnglishLetters(strippedMessage)) {
+                String deny = chatFilter.colour(DENY_MESSAGE);
+                p.sendMessage(deny);
+                BaseComponent[] actionbar = denyActionbar;
+                if (actionbar == null) {
+                    actionbar = TextComponent.fromLegacyText(deny);
+                    denyActionbar = actionbar;
+                }
                 try {
-                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(chatFilter.colour(deny)));
+                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, actionbar);
                 } catch (Throwable ignored) {
-                    // Fallback silently if actionbar is unavailable
                 }
                 event.setCancelled(true);
                 return;
             }
         }
-        Result result = chatFilter.getChatFilters().validResult(chatMessage, p);
+        String chatMessage = strippedMessage.toLowerCase();
+        Result result = chatFilter.getChatFilters().validResult(strippedMessage, p);
         if (result.getResult()) {
             Types type = result.getType();
             String[] stringArray = result.getStringArray();
             FilterWrapper filterWrapper = result.getFilterWrapper();
             chatFilter.commandHandler.runCommand(p, stringArray, filterWrapper);
+            String prefix;
+            String warnPlayerMessage;
             switch (type) {
                 case SWEAR:
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixChatSwear.s).replace("%player%", p.getName());
@@ -94,8 +100,8 @@ public class SwearChatListener implements EventExecutor, Listener {
                 p.sendMessage(chatFilter.colour(warnPlayerMessage));
             if (filterWrapper.getSendStaff()) {
                 String highlightColored = chatFilter.colour(chatFilter.settingsSwearHighLight);
-                for (String oneWord : stringArray) {
-                    chatMessage = chatMessage.replace(oneWord, highlightColored.replace("%catch%", oneWord));
+                for (int i = 0; i < stringArray.length; i++) {
+                    chatMessage = chatMessage.replace(stringArray[i], highlightColored.replace("%catch%", stringArray[i]));
                 }
                 chatFilter.sendStaffMessage(chatFilter.colour(prefix + chatMessage));
             }
@@ -103,9 +109,10 @@ public class SwearChatListener implements EventExecutor, Listener {
                 event.setCancelled(true);
             } else {
                 String msg = rawMessage;
-                for (String oneWord : stringArray) {
-                    if (filterWrapper.getCancelChatReplace()) {
-                       msg = LowerCaseReplace.replace(msg, oneWord, filterWrapper.getReplace());
+                if (filterWrapper.getCancelChatReplace()) {
+                    String replace = filterWrapper.getReplace();
+                    for (int i = 0; i < stringArray.length; i++) {
+                        msg = LowerCaseReplace.replace(msg, stringArray[i], replace);
                     }
                 }
                 chatFilter.setPlainMessage(event, msg);

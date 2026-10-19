@@ -16,6 +16,9 @@ public class ChatFilters {
 
     private static final FilterWrapper URL_FILTER = new FilterWrapper("URL", Collections.singletonList("none"), "URL", true, false, "", false, true, false);
     private static final FilterWrapper FONT_FILTER = new FilterWrapper("unicode", Collections.singletonList("none"), "unicode", true, false, "", true, true, true);
+    private static final String[] EMPTY_MATCHES = new String[0];
+    private static final List<String> EMPTY_REGEX_LIST = Collections.emptyList();
+    private static final Result NOTYPE_RESULT = new Result(false, EMPTY_MATCHES, Types.NOTYPE, null, EMPTY_REGEX_LIST);
 
     ChatFilter chatFilter;
 
@@ -24,47 +27,66 @@ public class ChatFilters {
     }
 
     private String removeBypass(String s) {
-        for (String removewording : chatFilter.byPassWords) {
-            if (s.contains(removewording)) {
-                s = s.replace(removewording, " ");
+        List<String> byPassWords = chatFilter.byPassWords;
+        if (!byPassWords.isEmpty()) {
+            for (int i = 0, size = byPassWords.size(); i < size; i++) {
+                String removewording = byPassWords.get(i);
+                if (s.contains(removewording)) {
+                    s = s.replace(removewording, " ");
+                }
             }
         }
-        for (String removewording : chatFilter.byPassDNS) {
-            if (s.contains(removewording)) {
-                s = s.replace(removewording, " ");
+        List<String> byPassDNS = chatFilter.byPassDNS;
+        if (!byPassDNS.isEmpty()) {
+            for (int i = 0, size = byPassDNS.size(); i < size; i++) {
+                String removewording = byPassDNS.get(i);
+                if (s.contains(removewording)) {
+                    s = s.replace(removewording, " ");
+                }
             }
         }
         return s;
     }
 
     public Result validResult(String string, Player player) {
+        CompiledFilter[] wordCompiled = chatFilter.wordCompiled;
+        CompiledFilter[] advertCompiled = chatFilter.advertCompiled;
+        boolean isOp = player.isOp();
+        boolean canBypassSwear = isOp || player.hasPermission("chatfilter.bypass.swear");
+        boolean canBypassIP = isOp || player.hasPermission("chatfilter.bypass.ip");
+        boolean canBypassURL = isOp || player.hasPermission("chatfilter.bypass.url");
+        boolean fontCheckNeeded = chatFilter.settingsBlockFancyChat && !chatFilter.unicodeBlacklist.isEmpty();
+
+        if ((canBypassSwear || wordCompiled.length == 0)
+                && (canBypassIP || advertCompiled.length == 0)
+                && (canBypassURL || chatFilter.settingsAllowURL)
+                && !fontCheckNeeded) {
+            return NOTYPE_RESULT;
+        }
+
         String lowercaseString = removeBypass(string.toLowerCase());
-        
+
         boolean matched = false;
         boolean matchedSwear = false;
         boolean matchedIP = false;
         boolean matchedURL = false;
         String regex = null;
         FilterWrapper matchedWrapper = null;
-        boolean isOp = player.isOp();
-        boolean canBypassSwear = isOp || player.hasPermission("chatfilter.bypass.swear");
-        boolean canBypassIP = isOp || player.hasPermission("chatfilter.bypass.ip");
-        boolean canBypassURL = isOp || player.hasPermission("chatfilter.bypass.url");
-        
+
         Set<String> groupWords = new LinkedHashSet<>();
         List<String> regexUsed = new ArrayList<>();
-        
-        // Check swear words
-        if (!canBypassSwear && !chatFilter.wordRegexPattern.isEmpty()) {
-            for (Pattern p : chatFilter.wordRegexPattern) {
-                Matcher m = p.matcher(lowercaseString);
+
+        if (!canBypassSwear && wordCompiled.length > 0) {
+            for (int i = 0; i < wordCompiled.length; i++) {
+                CompiledFilter compiled = wordCompiled[i];
+                Matcher m = compiled.getPattern().matcher(lowercaseString);
                 while (m.find()) {
                     String match = m.group(0);
                     if (!player.hasPermission("chatfilter.bypass.swear." + match)) {
                         matched = true;
                         matchedSwear = true;
-                        regex = p.pattern();
-                        matchedWrapper = chatFilter.regexWords.get(regex);
+                        regex = compiled.getPattern().pattern();
+                        matchedWrapper = compiled.getWrapper();
                         regexUsed.add(regex);
                         groupWords.add(match);
                     }
@@ -72,23 +94,23 @@ public class ChatFilters {
             }
         }
 
-        if (!canBypassIP && !chatFilter.advertRegexPattern.isEmpty()) {
-            for (Pattern p : chatFilter.advertRegexPattern) {
-                Matcher m = p.matcher(lowercaseString);
+        if (!canBypassIP && advertCompiled.length > 0) {
+            for (int i = 0; i < advertCompiled.length; i++) {
+                CompiledFilter compiled = advertCompiled[i];
+                Matcher m = compiled.getPattern().matcher(lowercaseString);
                 while (m.find()) {
                     String match = m.group(0);
                     if (!player.hasPermission("chatfilter.bypass.ip." + match)) {
                         matched = true;
                         matchedIP = true;
-                        regex = p.pattern();
-                        matchedWrapper = chatFilter.regexAdvert.get(regex);
+                        regex = compiled.getPattern().pattern();
+                        matchedWrapper = compiled.getWrapper();
                         groupWords.add(match);
                     }
                 }
             }
         }
-        
-        // Check URL
+
         if (!canBypassURL && !chatFilter.settingsAllowURL) {
             Matcher m = chatFilter.urlPattern.matcher(lowercaseString);
             if (m.find()) {
@@ -101,16 +123,14 @@ public class ChatFilters {
             }
         }
 
-        // Check font
-        if (isFont(string)) {
+        if (fontCheckNeeded && isFont(string)) {
             matched = true;
             regex = "unicode";
             if (matchedWrapper == null) {
                 matchedWrapper = FONT_FILTER;
             }
         }
-        
-        // Determine type
+
         Types type;
         if (matchedSwear && matchedIP) {
             type = Types.IP_SWEAR;
@@ -126,7 +146,7 @@ public class ChatFilters {
             type = Types.NOTYPE;
         }
 
-        String[] array = groupWords.toArray(new String[0]);
+        String[] array = groupWords.toArray(EMPTY_MATCHES);
         if (matchedWrapper == null && regex != null) {
             matchedWrapper = chatFilter.regexWords.get(regex);
             if (matchedWrapper == null) {
@@ -140,33 +160,36 @@ public class ChatFilters {
         if (!chatFilter.settingsBlockFancyChat || chatFilter.unicodeBlacklist.isEmpty()) {
             return false;
         }
-        
-        // Remove whitelisted characters first
+
         String processedString = string;
-        for (String s : chatFilter.unicodeWhitelist) {
-            if (processedString.contains(s)) {
-                processedString = processedString.replace(s, "");
+        List<String> unicodeWhitelist = chatFilter.unicodeWhitelist;
+        if (!unicodeWhitelist.isEmpty()) {
+            for (int i = 0, size = unicodeWhitelist.size(); i < size; i++) {
+                String s = unicodeWhitelist.get(i);
+                if (processedString.indexOf(s) >= 0) {
+                    processedString = processedString.replace(s, "");
+                }
             }
         }
-        
-        // Early exit if string is now empty
+
         if (processedString.isEmpty()) {
             return false;
         }
-        
-        // Check unicode ranges
-        for (UnicodeWrapper wrapper : chatFilter.unicodeBlacklist.values()) {
-            int urangeLow = wrapper.getStartInt();
-            int urangeHigh = wrapper.getEndInt();
-            
-            int length = processedString.length();
-            for (int i = 0; i < length; ) {
-                int cp = processedString.codePointAt(i);
-                if (cp >= urangeLow && cp <= urangeHigh) {
+
+        int[] ranges = chatFilter.unicodeRanges;
+        if (ranges.length == 0) {
+            return false;
+        }
+        int rangeCount = ranges.length >> 1;
+        int length = processedString.length();
+        for (int i = 0; i < length; ) {
+            int cp = processedString.codePointAt(i);
+            for (int r = 0; r < rangeCount; r++) {
+                if (cp >= ranges[r << 1] && cp <= ranges[(r << 1) + 1]) {
                     return true;
                 }
-                i += Character.charCount(cp);
             }
+            i += Character.charCount(cp);
         }
         return false;
     }
@@ -179,9 +202,8 @@ public class ChatFilters {
             return false;
         }
         int length = string.length();
-        for (int i = 0; i < length;) {
+        for (int i = 0; i < length; ) {
             int cp = string.codePointAt(i);
-            // Only consider letters; allow digits, symbols, whitespace
             if (Character.isLetter(cp)) {
                 if (!((cp >= 'A' && cp <= 'Z') || (cp >= 'a' && cp <= 'z'))) {
                     return true;

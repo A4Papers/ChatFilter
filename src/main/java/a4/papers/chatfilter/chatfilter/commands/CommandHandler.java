@@ -13,18 +13,23 @@ public class CommandHandler {
     }
 
     public void runCommand(Player p, String[] word, FilterWrapper filterWrapper) {
-        if (word != null && word.length > 0) {
-            String firstWord = word[0];
-            if (filterWrapper.getActionList() != null) {
-                for (String s : filterWrapper.getActionList()) {
-                    if (s.contains("<SendMessage>")) {
-                        p.sendMessage(chatFilter.colour(s.replace("<SendMessage>", "").replace("%player%", p.getName()).replace("%item%", firstWord)));
-                    }
-                    if (s.contains("<RunCommand>")) {
-                        String command = s.replace("<RunCommand>", "").replace("%player%", p.getName()).replace("%item%", firstWord);
-                        Bukkit.getScheduler().runTask(chatFilter, () -> Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command));
-                    }
-                }
+        if (word == null || word.length == 0) {
+            return;
+        }
+        String firstWord = word[0];
+        java.util.List<String> actions = filterWrapper.getActionList();
+        if (actions == null || actions.isEmpty()) {
+            return;
+        }
+        String playerName = p.getName();
+        for (int i = 0, size = actions.size(); i < size; i++) {
+            String s = actions.get(i);
+            if (s.contains("<SendMessage>")) {
+                p.sendMessage(chatFilter.colour(s.replace("<SendMessage>", "").replace("%player%", playerName).replace("%item%", firstWord)));
+            }
+            if (s.contains("<RunCommand>")) {
+                String command = s.replace("<RunCommand>", "").replace("%player%", playerName).replace("%item%", firstWord);
+                ChatFilter.runTask(() -> Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command));
             }
         }
     }

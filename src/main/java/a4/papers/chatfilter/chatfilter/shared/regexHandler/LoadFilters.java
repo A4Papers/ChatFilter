@@ -1,11 +1,14 @@
 package a4.papers.chatfilter.chatfilter.shared.regexHandler;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.bukkit.configuration.ConfigurationSection;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import a4.papers.chatfilter.chatfilter.shared.CompiledFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.UnicodeWrapper;
 
@@ -18,51 +21,68 @@ public class LoadFilters {
     }
 
     public void loadWordFilter() {
-        for (String key : chatFilter.getWordConfig().getConfigurationSection("ChatFilter").getKeys(false)) {
-            ConfigurationSection word = chatFilter.getWordConfig().getConfigurationSection("ChatFilter." + key);
-            Boolean informConsole = word.getBoolean("Warn.Console");
-            Boolean msgToStaff = word.getBoolean("Warn.Staff");
-            Boolean msgToPlayer = word.getBoolean("Warn.Player");
-            Boolean cancelChat = word.getBoolean("CancelChat.Cancel");
-            Boolean cancelChatReplace = word.getBoolean("CancelChat.Replace");
+        ConfigurationSection section = chatFilter.getWordConfig().getConfigurationSection("ChatFilter");
+        if (section == null) {
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection word = section.getConfigurationSection(key);
+            if (word == null) {
+                continue;
+            }
+            boolean informConsole = word.getBoolean("Warn.Console");
+            boolean msgToStaff = word.getBoolean("Warn.Staff");
+            boolean msgToPlayer = word.getBoolean("Warn.Player");
+            boolean cancelChat = word.getBoolean("CancelChat.Cancel");
+            boolean cancelChatReplace = word.getBoolean("CancelChat.Replace");
             String replaceWith = word.getString("CancelChat.ReplaceWith");
             List<String> command = word.getStringList("Action");
-            Boolean enabled = word.getBoolean("Enabled");
-            if (word.getStringList("Regex").isEmpty()) {
+            boolean enabled = word.getBoolean("Enabled");
+            if (!enabled) {
+                continue;
+            }
+            List<String> regexList = word.getStringList("Regex");
+            if (regexList.isEmpty()) {
                 String regex = word.getString("Regex");
-                if (enabled)
-                    chatFilter.regexWords.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+                chatFilter.regexWords.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
             } else {
-                List<String> regexList = word.getStringList("Regex");
-                for (String regex : regexList) {
-                    if (enabled)
-                        chatFilter.regexWords.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+                for (int i = 0, size = regexList.size(); i < size; i++) {
+                    String regex = regexList.get(i);
+                    chatFilter.regexWords.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
                 }
             }
         }
     }
 
     public void loadAdvertFilter() {
-        for (String key : chatFilter.getAdvertConfig().getConfigurationSection("ChatFilter").getKeys(false)) {
-            ConfigurationSection word = chatFilter.getAdvertConfig().getConfigurationSection("ChatFilter." + key);
-            Boolean informConsole = word.getBoolean("Warn.Console");
-            Boolean msgToStaff = word.getBoolean("Warn.Staff");
-            Boolean msgToPlayer = word.getBoolean("Warn.Player");
-            Boolean cancelChat = word.getBoolean("CancelChat.Cancel");
-            Boolean cancelChatReplace = word.getBoolean("CancelChat.Replace");
+        ConfigurationSection section = chatFilter.getAdvertConfig().getConfigurationSection("ChatFilter");
+        if (section == null) {
+            return;
+        }
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection word = section.getConfigurationSection(key);
+            if (word == null) {
+                continue;
+            }
+            boolean informConsole = word.getBoolean("Warn.Console");
+            boolean msgToStaff = word.getBoolean("Warn.Staff");
+            boolean msgToPlayer = word.getBoolean("Warn.Player");
+            boolean cancelChat = word.getBoolean("CancelChat.Cancel");
+            boolean cancelChatReplace = word.getBoolean("CancelChat.Replace");
             String replaceWith = word.getString("CancelChat.ReplaceWith");
             List<String> command = word.getStringList("Action");
-            Boolean enabled = word.getBoolean("Enabled");
-
-            if (word.getStringList("Regex").isEmpty()) {
+            boolean enabled = word.getBoolean("Enabled");
+            if (!enabled) {
+                continue;
+            }
+            List<String> regexList = word.getStringList("Regex");
+            if (regexList.isEmpty()) {
                 String regex = word.getString("Regex");
-                if (enabled)
-                    chatFilter.regexAdvert.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+                chatFilter.regexAdvert.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
             } else {
-                List<String> regexList = word.getStringList("Regex");
-                for (String regex : regexList) {
-                    if (enabled)
-                        chatFilter.regexAdvert.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
+                for (int i = 0, size = regexList.size(); i < size; i++) {
+                    String regex = regexList.get(i);
+                    chatFilter.regexAdvert.put(regex, new FilterWrapper(key, command, regex, cancelChat, cancelChatReplace, replaceWith, msgToStaff, informConsole, msgToPlayer));
                 }
             }
         }
@@ -70,25 +90,59 @@ public class LoadFilters {
 
     public void loadUnicodeFilter() {
         loadUnicodeWhitelist();
-        for (String key : chatFilter.getUnicodeConfig().getConfigurationSection("Unicode.blacklist").getKeys(false)) {
-            ConfigurationSection word = chatFilter.getUnicodeConfig().getConfigurationSection("Unicode.blacklist." + key);
-            assert word != null;
-            String start = word.getString("range-start");
-            String end = word.getString("range-end");
-            chatFilter.unicodeBlacklist.put(key, new UnicodeWrapper(start, end));
+        ConfigurationSection section = chatFilter.getUnicodeConfig().getConfigurationSection("Unicode.blacklist");
+        if (section != null) {
+            for (String key : section.getKeys(false)) {
+                ConfigurationSection word = section.getConfigurationSection(key);
+                if (word == null) {
+                    continue;
+                }
+                String start = word.getString("range-start");
+                String end = word.getString("range-end");
+                chatFilter.unicodeBlacklist.put(key, new UnicodeWrapper(start, end));
+            }
         }
+        rebuildUnicodeRanges();
     }
+
+    private void rebuildUnicodeRanges() {
+        Map<String, UnicodeWrapper> blacklist = chatFilter.unicodeBlacklist;
+        int size = blacklist.size();
+        int[] ranges = new int[size << 1];
+        int index = 0;
+        for (UnicodeWrapper wrapper : blacklist.values()) {
+            ranges[index++] = wrapper.getStartInt();
+            ranges[index++] = wrapper.getEndInt();
+        }
+        chatFilter.unicodeRanges = ranges;
+    }
+
     public void loadUnicodeWhitelist() {
+        chatFilter.unicodeWhitelist.clear();
         if (chatFilter.getUnicodeConfig().getStringList("Unicode.whitelist").isEmpty()) {
             String s = chatFilter.getUnicodeConfig().getString("Unicode.whitelist");
             chatFilter.unicodeWhitelist.add(s);
         } else {
-            List<String> List = chatFilter.getUnicodeConfig().getStringList("Unicode.whitelist");
-            chatFilter.unicodeWhitelist.addAll(List);
+            List<String> whitelist = chatFilter.getUnicodeConfig().getStringList("Unicode.whitelist");
+            chatFilter.unicodeWhitelist.addAll(whitelist);
         }
     }
 
     public void createWordFilter(String word, String sender) {
+        writeWordFilter(word, sender);
+        chatFilter.save();
+        reloadFilters();
+    }
+
+    public void importWordFilters(List<String> words, String sender) {
+        for (int i = 0, size = words.size(); i < size; i++) {
+            writeWordFilter(words.get(i), sender);
+        }
+        chatFilter.save();
+        reloadFilters();
+    }
+
+    private void writeWordFilter(String word, String sender) {
         String regex = chatFilter.regexpGenerator().generateRegexp(word);
         if (chatFilter.perWordOptionsEnable) {
             chatFilter.getWordConfig().set("ChatFilter." + word + ".Enabled", chatFilter.defaultWordEnabled);
@@ -101,7 +155,7 @@ public class LoadFilters {
             chatFilter.getWordConfig().set("ChatFilter." + word + ".CancelChat.ReplaceWith", chatFilter.defaultWordCancelReplaceWith);
             chatFilter.getWordConfig().set("ChatFilter." + word + ".Action", chatFilter.defaultWordAction);
             chatFilter.getWordConfig().set("ChatFilter." + word + ".AddedBy", sender);
-        } else if (!chatFilter.perWordOptionsEnable) {
+        } else {
             ConfigurationSection key = chatFilter.getWordConfig().getConfigurationSection("ChatFilter." + chatFilter.perWordOptionsString);
             if (key == null) {
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString, "");
@@ -116,18 +170,20 @@ public class LoadFilters {
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".Action", chatFilter.defaultWordAction);
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".AddedBy", sender);
             } else {
-                List<String> regexList = key.getStringList("Regex");
+                List<String> regexList = new ArrayList<>(key.getStringList("Regex"));
                 regexList.add(regex);
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".Regex", regexList);
             }
         }
-        chatFilter.save();
-        reloadFilters();
-        Pattern p = Pattern.compile(regex);
-        chatFilter.wordRegexPattern.add(p);
     }
 
     public void createAdvertFilter(String s, String sender) {
+        writeAdvertFilter(s, sender);
+        chatFilter.save();
+        reloadFilters();
+    }
+
+    private void writeAdvertFilter(String s, String sender) {
         String notDot = s.replace(".", "");
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Enabled", chatFilter.defaultIPEnabled);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Regex", s);
@@ -139,10 +195,6 @@ public class LoadFilters {
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".CancelChat.ReplaceWith", chatFilter.defaultIPCancelReplaceWith);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".Action", chatFilter.defaultIPAction);
         chatFilter.getAdvertConfig().set("ChatFilter." + notDot + ".AddedBy", sender);
-        chatFilter.save();
-        reloadFilters();
-        Pattern p = Pattern.compile(s);
-        chatFilter.advertRegexPattern.add(p);
     }
 
     public void reloadFilters() {
@@ -156,11 +208,23 @@ public class LoadFilters {
     }
 
     public void regexCompile() {
-        for (String pattern : chatFilter.regexAdvert.keySet()) {
-            chatFilter.advertRegexPattern.add(Pattern.compile(pattern));
+        Map<String, FilterWrapper> adverts = chatFilter.regexAdvert;
+        CompiledFilter[] advertCompiled = new CompiledFilter[adverts.size()];
+        int i = 0;
+        for (Map.Entry<String, FilterWrapper> entry : adverts.entrySet()) {
+            Pattern pattern = Pattern.compile(entry.getKey());
+            chatFilter.advertRegexPattern.add(pattern);
+            advertCompiled[i++] = new CompiledFilter(pattern, entry.getValue());
         }
-        for (String pattern : chatFilter.regexWords.keySet()) {
-            chatFilter.wordRegexPattern.add(Pattern.compile(pattern));
+        Map<String, FilterWrapper> words = chatFilter.regexWords;
+        CompiledFilter[] wordCompiled = new CompiledFilter[words.size()];
+        i = 0;
+        for (Map.Entry<String, FilterWrapper> entry : words.entrySet()) {
+            Pattern pattern = Pattern.compile(entry.getKey());
+            chatFilter.wordRegexPattern.add(pattern);
+            wordCompiled[i++] = new CompiledFilter(pattern, entry.getValue());
         }
+        chatFilter.advertCompiled = advertCompiled;
+        chatFilter.wordCompiled = wordCompiled;
     }
 }

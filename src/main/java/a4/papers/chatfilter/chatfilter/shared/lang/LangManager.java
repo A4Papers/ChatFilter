@@ -15,7 +15,7 @@ import a4.papers.chatfilter.chatfilter.ChatFilter;
 public class LangManager {
 
     public Locale locale;
-    public Map convertedStrings = new HashMap();
+    public Map<String, String> convertedStrings = new HashMap<>();
     ChatFilter chatFilter;
     private Locale SpanishLocale = new Locale("es");
     private Locale PolishLocale = new Locale("pl");
@@ -26,7 +26,7 @@ public class LangManager {
     }
 
     public String mapToString(String s) {
-        return convertedStrings.get(s).toString();
+        return convertedStrings.get(s);
     }
 
     public String stringArrayToString(String[] strArr) {
@@ -34,15 +34,19 @@ public class LangManager {
             return "";
         }
         if (strArr.length == 1) {
-            return strArr[0].replace(" ", "");
+            return stripSpaces(strArr[0]);
         }
-        
+
         StringBuilder sb = new StringBuilder(strArr.length * 10);
-        sb.append(strArr[0].replace(" ", ""));
+        sb.append(stripSpaces(strArr[0]));
         for (int i = 1; i < strArr.length; i++) {
-            sb.append(", ").append(strArr[i].replace(" ", ""));
+            sb.append(", ").append(stripSpaces(strArr[i]));
         }
         return sb.toString();
+    }
+
+    private static String stripSpaces(String s) {
+        return s.indexOf(' ') >= 0 ? s.replace(" ", "") : s;
     }
 
     public ResourceBundle fromClassLoader() throws MalformedURLException {

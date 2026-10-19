@@ -67,13 +67,11 @@ public class BlacklistCommand implements CommandExecutor {
                     }
                 }
                 if (args[2].equals("word")) {
-                    List<String> strlist = new ArrayList<>();
+                    Set<String> dedup = new java.util.LinkedHashSet<>();
                     for (FilterWrapper wrapper : chatFilter.regexWords.values()) {
-                        String word = wrapper.getWord();
-                        if (!strlist.contains(word)) {
-                            strlist.add(word);
-                        }
+                        dedup.add(wrapper.getWord());
                     }
+                    List<String> strlist = new ArrayList<>(dedup);
                     Collections.sort(strlist);
                     if (chatFilter.manager.supported("text-component")) {
                         ComponentBuilder message = new ComponentBuilder("");

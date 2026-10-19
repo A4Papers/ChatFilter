@@ -22,20 +22,21 @@ public class RepeatCharListener implements EventExecutor, Listener {
     }
 
     public void onPlayerCarSpam(AsyncChatEvent event) {
-        String msg = chatFilter.plainMessage(event);
-        if (chatFilter.antiSpamEnabled) {
-            org.bukkit.entity.Player player = event.getPlayer();
-            if (player.isOp() || player.hasPermission("chatfilter.bypass") || player.hasPermission("chatfilter.bypass.characters")) {
-                return;
-            }
-            if (isURL(msg)) {
-                return;
-            }
-            chatFilter.setPlainMessage(event, chatFilter.antiSpamPattern.matcher(msg).replaceAll(chatFilter.getAntiSpamReplacementToken()));
+        if (!chatFilter.antiSpamEnabled) {
+            return;
         }
-    }
-
-    public boolean isURL(String str) {
-        return chatFilter.urlPattern.matcher(str).find();
+        org.bukkit.entity.Player player = event.getPlayer();
+        if (player.isOp() || player.hasPermission("chatfilter.bypass") || player.hasPermission("chatfilter.bypass.characters")) {
+            return;
+        }
+        String msg = chatFilter.plainMessage(event);
+        java.util.regex.Matcher matcher = chatFilter.antiSpamPattern.matcher(msg);
+        if (!matcher.find()) {
+            return;
+        }
+        if (chatFilter.urlPattern.matcher(msg).find()) {
+            return;
+        }
+        chatFilter.setPlainMessage(event, matcher.replaceAll(chatFilter.getAntiSpamReplacementToken()));
     }
 }

@@ -24,34 +24,34 @@ public class CapsChatListener implements EventExecutor, Listener {
     }
 
     public void onPlayerCaps(AsyncChatEvent event) {
+        if (!chatFilter.deCap) {
+            return;
+        }
         String msg = chatFilter.plainMessage(event);
-        if (chatFilter.deCap) {
-            Player player = event.getPlayer();
-            if (player.isOp() || player.hasPermission("chatfilter.bypass") || player.hasPermission("chatfilter.bypass.caps"))
-                return;
-            if (isURL(msg))
-                return;
-            char[] charArray = msg.toCharArray();
-            int counter = 0;
-            for (char c : charArray) {
-                if (Character.isUpperCase(c)) counter++;
+        Player player = event.getPlayer();
+        if (player.isOp() || player.hasPermission("chatfilter.bypass") || player.hasPermission("chatfilter.bypass.caps"))
+            return;
+        if (chatFilter.urlPattern.matcher(msg).find())
+            return;
+        int length = msg.length();
+        int counter = 0;
+        for (int i = 0; i < length; i++) {
+            if (Character.isUpperCase(msg.charAt(i))) counter++;
+        }
+        if (counter >= chatFilter.capsAmount) {
+            msg = msg.charAt(0) + msg.substring(1).toLowerCase();
+        }
+        String msgLower = msg.toLowerCase();
+        String newmsg = msg;
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            String playerName = onlinePlayer.getName();
+            String playerNameLower = playerName.toLowerCase();
+            if (msgLower.contains(playerNameLower)) {
+                newmsg = newmsg.replace(playerNameLower, playerName);
             }
-            if (counter >= chatFilter.capsAmount) {
-                msg = msg.charAt(0) + msg.substring(1).toLowerCase();
-            }
-            String newmsg = msg;
-            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                String playerName = onlinePlayer.getName();
-
-                if (msg.toLowerCase().contains(playerName.toLowerCase())) {
-                    newmsg = newmsg.replace(playerName.toLowerCase(), playerName);
-                }
-            }
+        }
+        if (!newmsg.equals(msg)) {
             chatFilter.setPlainMessage(event, newmsg);
         }
-    }
-
-    public boolean isURL(String str) {
-        return chatFilter.urlPattern.matcher(str).find();
     }
 }

@@ -1,7 +1,6 @@
 package a4.papers.chatfilter.chatfilter.events;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +26,7 @@ public class BooksListener implements EventExecutor, Listener {
     public BooksListener(ChatFilter instance) {
         chatFilter = instance;
     }
+
     @Override
     public void execute(final Listener listener, final Event event) throws EventException {
         this.onBookEvent((PlayerEditBookEvent) event);
@@ -45,7 +45,6 @@ public class BooksListener implements EventExecutor, Listener {
         Types type = Types.NOTYPE;
         boolean resulted = false;
         int nom = 0;
-        String[] stringArray;
         for (int i = 0; i < bookPagesList.size(); i++) {
             String pageFilter = bookPagesList.get(i);
             Result result = chatFilter.getChatFilters().validResult(pageFilter, p);
@@ -53,41 +52,43 @@ public class BooksListener implements EventExecutor, Listener {
                 continue;
             }
             type = result.getType();
-            stringArray = result.getStringArray();
+            String[] stringArray = result.getStringArray();
             filterWrapper = result.getFilterWrapper();
             chatFilter.commandHandler.runCommand(p, stringArray, filterWrapper);
             nom = i + 1;
             resulted = true;
             switch (type) {
                 case SWEAR:
-                    bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", nom+"") + pageFilter);
+                    bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", String.valueOf(nom)) + pageFilter);
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookSwear.s).replace("%player%", p.getName());
                     break;
                 case IP_DNS:
-                    bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", nom+"") + pageFilter);
+                    bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", String.valueOf(nom)) + pageFilter);
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookIP.s).replace("%player%", p.getName());
                     break;
                 case IP_SWEAR:
-                    bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", nom+"") + pageFilter);
+                    bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", String.valueOf(nom)) + pageFilter);
                     warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookIPandSwear.s).replace("%player%", p.getName());
                     break;
                 case FONT:
-                    bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", nom+"") + pageFilter);
+                    bookPageMatch.add(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.bookPage.s)).replace("%num%", String.valueOf(nom)) + pageFilter);
                     warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s));
                     prefix = chatFilter.getLang().mapToString(EnumStrings.prefixBookFont.s).replace("%player%", p.getName());
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + type);
             }
-            catchMatch.addAll(Arrays.asList(stringArray));
+            for (int j = 0; j < stringArray.length; j++) {
+                catchMatch.add(stringArray[j]);
+            }
         }
         if (resulted) {
             if (p.getInventory().getItemInMainHand().getType().equals(Material.WRITABLE_BOOK)) {
                 p.getInventory().getItemInMainHand().setAmount(p.getInventory().getItemInMainHand().getAmount() - 1);
-                ChatFilter.runTaskLater(() -> p.getInventory().setItemInMainHand(new ItemStack(Material.WRITABLE_BOOK, 1)), 1L);
+                p.getScheduler().run(chatFilter, entity -> p.getInventory().setItemInMainHand(new ItemStack(Material.WRITABLE_BOOK, 1)), null);
             }
             if (filterWrapper.getLogToConsole())
                 chatFilter.sendConsole(type, bookPagesList.get(nom - 1), p, filterWrapper.getRegex(), "Book");
@@ -97,7 +98,8 @@ public class BooksListener implements EventExecutor, Listener {
             if (filterWrapper.getSendStaff()) {
                 chatFilter.sendStaffMessage(chatFilter.colour(prefix));
                 String highlightColored = chatFilter.colour(chatFilter.settingsSwearHighLight);
-                for (String page : bookPageMatch) {
+                for (int i = 0; i < bookPageMatch.size(); i++) {
+                    String page = bookPageMatch.get(i);
                     for (String oneWord : catchMatch) {
                         page = page.replace(oneWord, highlightColored.replace("%catch%", oneWord));
                     }

@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.EventExecutor;
 import io.papermc.paper.event.player.AsyncChatEvent;
 
-import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -28,19 +27,21 @@ public class ChatDelayListener implements EventExecutor, Listener {
     }
     public final Map<UUID, ChatData> chatmsgs = new ConcurrentHashMap<>();
     ChatFilter chatFilter;
-    private Double similarityThreshold;
+    private volatile double similarityThreshold = -1.0;
     private int cleanupCounter;
 
     public ChatDelayListener(ChatFilter instance) {
         chatFilter = instance;
     }
-    
+
     private double getSimilarityThreshold() {
-        if (similarityThreshold == null) {
+        double threshold = similarityThreshold;
+        if (threshold < 0.0) {
             String percent = chatFilter.percentage.trim().replace("%", "");
-            similarityThreshold = new BigDecimal(percent).divide(BigDecimal.valueOf(100)).doubleValue();
+            threshold = Double.parseDouble(percent) / 100.0;
+            similarityThreshold = threshold;
         }
-        return similarityThreshold;
+        return threshold;
     }
 
     @EventHandler
@@ -68,30 +69,30 @@ public class ChatDelayListener implements EventExecutor, Listener {
         if (!chatFilter.antiRepeatEnabled) {
             return;
         }
-        
+
         Player p = e.getPlayer();
         if (p.isOp() || p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.repeat")) {
             return;
         }
-        
+
         UUID playerUUID = p.getUniqueId();
-        String msg = chatFilter.plainMessage(e);
+        String msg = chatFilter.plainMessage(e).toLowerCase();
         long currentTime = System.currentTimeMillis();
         long configtime = chatFilter.repeatDelay * 1000L;
 
         if ((++cleanupCounter & (CLEANUP_INTERVAL - 1)) == 0) {
             pruneExpiredEntries(currentTime);
         }
-        
+
         ChatData chatData = chatmsgs.get(playerUUID);
         if (chatData == null) {
             chatmsgs.put(playerUUID, new ChatData(msg, currentTime + configtime));
             return;
         }
-        
+
         long expiryTime = chatData.getLong();
         double sim = StringSimilarity.similarity(msg, chatData.getString());
-        
+
         if (sim > getSimilarityThreshold()) {
             if (expiryTime > currentTime) {
                 e.setCancelled(true);

@@ -27,12 +27,33 @@ public class AnvilListener implements EventExecutor, Listener {
     public AnvilListener(ChatFilter instance) {
         chatFilter = instance;
     }
+
     @Override
     public void execute(final Listener listener, final Event event) throws EventException {
         this.onInventoryClick((InventoryClickEvent) event);
     }
 
     public void onInventoryClick(InventoryClickEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+        Inventory inv = event.getInventory();
+        if (!(inv instanceof AnvilInventory)) {
+            return;
+        }
+        InventoryView view = event.getView();
+        int rawSlot = event.getRawSlot();
+        if (rawSlot != view.convertSlot(rawSlot) || rawSlot != 2) {
+            return;
+        }
+        ItemStack item = event.getCurrentItem();
+        if (item == null) {
+            return;
+        }
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasDisplayName()) {
+            return;
+        }
         HumanEntity ent = event.getWhoClicked();
         if (!(ent instanceof Player)) {
             return;
@@ -40,66 +61,48 @@ public class AnvilListener implements EventExecutor, Listener {
         Player p = (Player) ent;
         if (p.isOp() || p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.anvil"))
             return;
-        if (!event.isCancelled()) {
-                Inventory inv = event.getInventory();
-                if (inv instanceof AnvilInventory) {
-                    InventoryView view = event.getView();
-                    int rawSlot = event.getRawSlot();
-                    if (rawSlot == view.convertSlot(rawSlot)) {
-                        if (rawSlot == 2) {
-                            ItemStack item = event.getCurrentItem();
-                            if (item != null) {
-                                ItemMeta meta = item.getItemMeta();
-                                if (meta != null) {
-                                    if (meta.hasDisplayName()) {
-                                        String displayName = ChatColor.stripColor(meta.getDisplayName());
-                                        String prefix = "";
-                                        String warnPlayerMessage = "";
-                                        Result result = chatFilter.getChatFilters().validResult(displayName, p);
-                                        if (result.getResult()) {
-                                            Types type = result.getType();
-                                            String[] stringArray = result.getStringArray();
-                                            FilterWrapper filterWrapper = result.getFilterWrapper();
-                                            chatFilter.commandHandler.runCommand(p, stringArray, filterWrapper);
-                                            event.setCancelled(true);
-                                            switch (type) {
-                                                case SWEAR:
-                                                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilSwear.s).replace("%player%", p.getName());
-                                                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
-                                                    break;
-                                                case IP_DNS:
-                                                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilIP.s).replace("%player%", p.getName());
-                                                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
-                                                    break;
-                                                case IP_SWEAR:
-                                                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilIPandSwear.s).replace("%player%", p.getName());
-                                                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
-                                                    break;
-                                                case FONT:
-                                                    prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilFont.s).replace("%player%", p.getName());
-                                                    warnPlayerMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray))));
-                                                    break;
-                                                default:
-                                                    throw new IllegalStateException("Unexpected value: " + type);
-                                            }
-                                            if (filterWrapper.getWarnPlayer())
-                                                p.sendMessage(chatFilter.colour(warnPlayerMessage));
-                                            if (filterWrapper.getLogToConsole())
-                                                chatFilter.sendConsole(type, displayName, p, filterWrapper.getRegex(), "Anvil");
-                                            if (filterWrapper.getSendStaff()) {
-                                                String highlightColored = chatFilter.colour(chatFilter.settingsSwearHighLight);
-                                                for (String oneWord : stringArray) {
-                                                    displayName = displayName.replace(oneWord, highlightColored.replace("%catch%", oneWord));
-                                                }
-                                                chatFilter.sendStaffMessage(chatFilter.colour(prefix + displayName));
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        String displayName = ChatColor.stripColor(meta.getDisplayName());
+        Result result = chatFilter.getChatFilters().validResult(displayName, p);
+        if (!result.getResult()) {
+            return;
+        }
+        Types type = result.getType();
+        String[] stringArray = result.getStringArray();
+        FilterWrapper filterWrapper = result.getFilterWrapper();
+        chatFilter.commandHandler.runCommand(p, stringArray, filterWrapper);
+        event.setCancelled(true);
+        String prefix;
+        String warnPlayerMessage;
+        switch (type) {
+            case SWEAR:
+                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilSwear.s).replace("%player%", p.getName());
+                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                break;
+            case IP_DNS:
+                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilIP.s).replace("%player%", p.getName());
+                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                break;
+            case IP_SWEAR:
+                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilIPandSwear.s).replace("%player%", p.getName());
+                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnSwearAndIPMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                break;
+            case FONT:
+                prefix = chatFilter.getLang().mapToString(EnumStrings.prefixAnvilFont.s).replace("%player%", p.getName());
+                warnPlayerMessage = chatFilter.getLang().mapToString(EnumStrings.warnFontMessage.s).replace("%placeHolder%", (chatFilter.getLang().stringArrayToString(stringArray)));
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
+        if (filterWrapper.getWarnPlayer())
+            p.sendMessage(chatFilter.colour(warnPlayerMessage));
+        if (filterWrapper.getLogToConsole())
+            chatFilter.sendConsole(type, displayName, p, filterWrapper.getRegex(), "Anvil");
+        if (filterWrapper.getSendStaff()) {
+            String highlightColored = chatFilter.colour(chatFilter.settingsSwearHighLight);
+            for (int i = 0; i < stringArray.length; i++) {
+                displayName = displayName.replace(stringArray[i], highlightColored.replace("%catch%", stringArray[i]));
+            }
+            chatFilter.sendStaffMessage(chatFilter.colour(prefix + displayName));
         }
     }
 }

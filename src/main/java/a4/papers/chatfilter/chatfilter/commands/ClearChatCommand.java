@@ -25,16 +25,17 @@ public class ClearChatCommand implements CommandExecutor {
     public boolean clearChat(CommandSender sender) {
         if (!sender.hasPermission("chatfilter.clear")) {
             sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.NO_PERMISSION.s)));
-        } else if (sender.hasPermission("chatfilter.clear")) {
-            for (Player noPermissionPlayer : Bukkit.getServer().getOnlinePlayers()) {
-                if (!noPermissionPlayer.hasPermission("chatfilter.bypass"))
-                    for (int i = 0; i < 100; i++) {
-                        noPermissionPlayer.sendMessage(" ");
-                    }
+            return false;
+        }
+        String clearMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.clearChatMessage.s).replace("%player%", sender.getName()));
+        for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
+            if (!onlinePlayer.hasPermission("chatfilter.bypass")) {
+                for (int i = 0; i < 100; i++) {
+                    onlinePlayer.sendMessage(" ");
+                }
             }
-            for (Player PermissionPlayer : Bukkit.getServer().getOnlinePlayers()) {
-                if (PermissionPlayer.hasPermission("chatfilter.bypass") || PermissionPlayer.hasPermission("chatfilter.view"))
-                    PermissionPlayer.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.clearChatMessage.s).replace("%player%", sender.getName())));
+            if (onlinePlayer.hasPermission("chatfilter.bypass") || onlinePlayer.hasPermission("chatfilter.view")) {
+                onlinePlayer.sendMessage(clearMessage);
             }
         }
         return false;

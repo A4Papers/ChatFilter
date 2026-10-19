@@ -13,12 +13,11 @@ public class RegexpGenerator {
         StringBuilder stringBuilder = new StringBuilder(s.length() * 15);
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            String chars = String.valueOf(c);
-            if (chars.equals(" ")) {
+            if (c == ' ') {
                 String reg = "(%SPACE%+)+(\\W|_)*";
                 stringBuilder.append(reg);
             }
-            if (chars.equals("#")) {
+            if (c == '#') {
                 String reg = "#";
                 stringBuilder.append(reg);
             } else {

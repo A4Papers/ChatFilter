@@ -3,6 +3,8 @@ package a4.papers.chatfilter.chatfilter.commands;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -26,9 +28,7 @@ public class ImportCommand implements CommandExecutor {
             sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.NO_PERMISSION.s)));
             return true;
         }
-        if (sender.hasPermission("chatfilter.import")) {
-            load(sender);
-        }
+        load(sender);
         return false;
     }
 
@@ -38,22 +38,25 @@ public class ImportCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "data.txt file is not found");
             return;
         }
-        
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileObj))) {
-            String line;
-            int count = 0;
-            String importedBy = "Imported by " + sender.getName();
-            
-            while ((line = reader.readLine()) != null) {
-                String word = line.trim().toLowerCase();
-                if (!word.isEmpty() && word.length() > 1) {
-                    chatFilter.getFilters().createWordFilter(word, importedBy);
-                    count++;
+        String importedBy = "Imported by " + sender.getName();
+        ChatFilter.runTaskAsync(() -> {
+            List<String> words = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(fileObj))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String word = line.trim().toLowerCase();
+                    if (!word.isEmpty() && word.length() > 1) {
+                        words.add(word);
+                    }
                 }
+            } catch (Exception e) {
+                ChatFilter.runTask(() -> sender.sendMessage(ChatColor.RED + "Error reading data.txt: " + e.getMessage()));
+                return;
             }
-            sender.sendMessage(ChatColor.GOLD + "Successfully imported " + count + " words to filter.");
-        } catch (Exception e) {
-            sender.sendMessage(ChatColor.RED + "Error reading data.txt: " + e.getMessage());
-        }
+            ChatFilter.runTask(() -> {
+                chatFilter.getFilters().importWordFilters(words, importedBy);
+                sender.sendMessage(ChatColor.GOLD + "Successfully imported " + words.size() + " words to filter.");
+            });
+        });
     }
 }

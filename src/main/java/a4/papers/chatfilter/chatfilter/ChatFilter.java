@@ -2,11 +2,12 @@ package a4.papers.chatfilter.chatfilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
@@ -42,6 +43,7 @@ import a4.papers.chatfilter.chatfilter.events.RepeatCharListener;
 import a4.papers.chatfilter.chatfilter.events.SignListener;
 import a4.papers.chatfilter.chatfilter.events.SwearChatListener;
 import a4.papers.chatfilter.chatfilter.shared.ChatFilters;
+import a4.papers.chatfilter.chatfilter.shared.CompiledFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.UnicodeWrapper;
@@ -54,7 +56,10 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 @SuppressWarnings("deprecation")
 public class ChatFilter extends JavaPlugin {
 
-    private static TaskScheduler scheduler;
+    private static final CompiledFilter[] EMPTY_COMPILED = new CompiledFilter[0];
+    private static final ThreadLocal<WeakReference<AsyncChatEvent>> PLAIN_CACHED_EVENT = new ThreadLocal<>();
+    private static final ThreadLocal<String> PLAIN_CACHED_TEXT = new ThreadLocal<>();
+    private static volatile TaskScheduler scheduler;
     private static ChatFilter instance;
     private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
     private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER = PlainTextComponentSerializer.plainText();
@@ -69,21 +74,25 @@ public class ChatFilter extends JavaPlugin {
     public UnicodeWrapper unicodeWrapper;
     public RegexpGenerator regexpGenerator;
     public Manager manager;
-    public List<Pattern> wordRegexPattern = new ArrayList<>();
-    public List<Pattern> advertRegexPattern = new ArrayList<>();
+    public volatile List<Pattern> wordRegexPattern = new CopyOnWriteArrayList<>();
+    public volatile List<Pattern> advertRegexPattern = new CopyOnWriteArrayList<>();
+    public volatile CompiledFilter[] wordCompiled = EMPTY_COMPILED;
+    public volatile CompiledFilter[] advertCompiled = EMPTY_COMPILED;
     public Map<String, FilterWrapper> regexWords;
     public Map<String, FilterWrapper> regexAdvert;
     public Map<String, UnicodeWrapper> unicodeBlacklist;
-    public List<String> byPassWords;
-    public List<String> byPassDNS;
+    public volatile List<String> byPassWords;
+    public volatile List<String> byPassDNS;
     public List<String> defaultWordAction;
     public List<String> defaultIPAction;
-    public List<String> unicodeWhitelist;
+    public volatile List<String> unicodeWhitelist;
+    public volatile int[] unicodeRanges = new int[0];
 
     public int capsAmount;
     public boolean CommandsOnSwearEnabled;
     public boolean CommandsOnAdvertisesEnabled;
     public boolean antiRepeatEnabled;
+    public volatile boolean chatPause = false;
     public boolean cancelChat;
     public boolean CommandsOnSwearAndAdvertisesEnabled;
     public boolean settingsAllowURL;
@@ -91,7 +100,6 @@ public class ChatFilter extends JavaPlugin {
     public boolean settingsBlockCustomSybols;
     public boolean CommandsOnFontEnabled;
     public boolean deCap;
-    public boolean chatPause = false;
     public boolean cmdCheck;
     public boolean enableLeetSpeak;
     public boolean antiSpamEnabled;
@@ -127,7 +135,7 @@ public class ChatFilter extends JavaPlugin {
 
     public Pattern antiSpamPattern;
     public Pattern urlPattern;
-    private int blockedInt = 1;
+    public volatile int blockedInt = 1;
     private File wordConfigFile;
     private File advertConfigFile;
     private File whitelistConfigFile;
@@ -140,10 +148,10 @@ public class ChatFilter extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        regexWords = new HashMap<>();
-        regexAdvert = new HashMap<>();
-        unicodeBlacklist = new HashMap<>();
-        unicodeWhitelist = new ArrayList<>();
+        regexWords = new ConcurrentHashMap<>();
+        regexAdvert = new ConcurrentHashMap<>();
+        unicodeBlacklist = new ConcurrentHashMap<>();
+        unicodeWhitelist = new CopyOnWriteArrayList<>();
         chatFilters = new ChatFilters(this);
         commandHandler = new CommandHandler(this);
         langManager = new LangManager(this);
@@ -206,10 +214,16 @@ public class ChatFilter extends JavaPlugin {
     @Override
     public void onDisable() {
         Bukkit.getScheduler().cancelTasks(this);
+        TaskScheduler currentScheduler = scheduler;
+        if (currentScheduler != null) {
+            currentScheduler.cancelTasks();
+        }
         scheduler = null;
         instance = null;
         wordRegexPattern.clear();
         advertRegexPattern.clear();
+        wordCompiled = EMPTY_COMPILED;
+        advertCompiled = EMPTY_COMPILED;
         regexWords.clear();
         regexAdvert.clear();
         unicodeBlacklist.clear();
@@ -218,8 +232,8 @@ public class ChatFilter extends JavaPlugin {
     }
 
     public void loadVariables() {
-        this.byPassWords = getWhitelistConfig().getStringList("bypassWords");
-        this.byPassDNS = getWhitelistConfig().getStringList("bypassIP");
+        this.byPassWords = new CopyOnWriteArrayList<>(getWhitelistConfig().getStringList("bypassWords"));
+        this.byPassDNS = new CopyOnWriteArrayList<>(getWhitelistConfig().getStringList("bypassIP"));
         this.CommandsOnFontEnabled = getConfig().getBoolean("CommandsOnFont.enabled");
         this.CommandsOnFontCommand = getConfig().getString("CommandsOnFont.command");
         this.CommandsOnSwearEnabled = getConfig().getBoolean("CommandsOnSwear.enabled");
@@ -271,11 +285,12 @@ public class ChatFilter extends JavaPlugin {
 
     public String colour(String s) {
         if (manager.supported("hex")) {
-            String result = Manager.colorStringHex(s);
-            return result;
+            if (s.indexOf('&') < 0) {
+                return s;
+            }
+            return Manager.colorStringHex(s);
         } else {
-            String deserialized = LEGACY_SERIALIZER.serialize(LEGACY_SERIALIZER.deserialize(s));
-            return deserialized;
+            return LEGACY_SERIALIZER.serialize(LEGACY_SERIALIZER.deserialize(s));
         }
     }
 
@@ -388,17 +403,29 @@ public class ChatFilter extends JavaPlugin {
     }
 
     public static Object runTask(Runnable runnable) {
-        if (scheduler != null) {
-            return scheduler.runTask(runnable);
+        TaskScheduler currentScheduler = scheduler;
+        if (currentScheduler != null) {
+            return currentScheduler.runTask(runnable);
         } else {
             Bukkit.getScheduler().runTask(instance, runnable);
             return null;
         }
     }
 
+    public static Object runTaskAsync(Runnable runnable) {
+        TaskScheduler currentScheduler = scheduler;
+        if (currentScheduler != null) {
+            return currentScheduler.runTaskAsynchronously(runnable);
+        } else {
+            Bukkit.getScheduler().runTaskAsynchronously(instance, runnable);
+            return null;
+        }
+    }
+
     public static Object runTaskLater(Runnable runnable, long delay) {
-        if (scheduler != null) {
-            return scheduler.runTaskLater(runnable, delay);
+        TaskScheduler currentScheduler = scheduler;
+        if (currentScheduler != null) {
+            return currentScheduler.runTaskLater(runnable, delay);
         } else {
             Bukkit.getScheduler().runTaskLater(instance, runnable, delay);
             return null;
@@ -406,8 +433,9 @@ public class ChatFilter extends JavaPlugin {
     }
 
     public static Object runTaskTimer(Runnable runnable, long delay, long period) {
-        if (scheduler != null) {
-            return scheduler.runTaskTimer(runnable, delay, period);
+        TaskScheduler currentScheduler = scheduler;
+        if (currentScheduler != null) {
+            return currentScheduler.runTaskTimer(runnable, delay, period);
         } else {
             Bukkit.getScheduler().runTaskTimer(instance, runnable, delay, period);
             return null;
@@ -423,10 +451,22 @@ public class ChatFilter extends JavaPlugin {
     }
 
     public String plainMessage(AsyncChatEvent event) {
-        return PLAIN_TEXT_SERIALIZER.serialize(event.message());
+        WeakReference<AsyncChatEvent> cachedEventRef = PLAIN_CACHED_EVENT.get();
+        if (cachedEventRef != null && cachedEventRef.get() == event) {
+            String cachedText = PLAIN_CACHED_TEXT.get();
+            if (cachedText != null) {
+                return cachedText;
+            }
+        }
+        String text = PLAIN_TEXT_SERIALIZER.serialize(event.message());
+        PLAIN_CACHED_EVENT.set(new WeakReference<>(event));
+        PLAIN_CACHED_TEXT.set(text);
+        return text;
     }
 
     public void setPlainMessage(AsyncChatEvent event, String message) {
         event.message(Component.text(message));
+        PLAIN_CACHED_EVENT.set(new WeakReference<>(event));
+        PLAIN_CACHED_TEXT.set(message);
     }
 }
