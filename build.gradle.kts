@@ -22,9 +22,17 @@ repositories {
 dependencies {
     paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
     implementation("com.github.Anon8281:UniversalScheduler:0.1.7")
+    testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
 }
 
 tasks {
+    test {
+        useJUnitPlatform()
+    }
+
     compileJava {
         options.encoding = "UTF-8"
     }

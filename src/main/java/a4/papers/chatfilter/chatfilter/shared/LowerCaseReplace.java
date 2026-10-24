@@ -4,7 +4,7 @@ public class LowerCaseReplace
 {
     public static String replace(String source, String target, String replacement)
     {
-        if (source == null || target == null || replacement == null) {
+        if (source == null || target == null || replacement == null || target.isEmpty()) {
             return source;
         }
         

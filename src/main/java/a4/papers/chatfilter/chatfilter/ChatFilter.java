@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,6 +24,8 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEditBookEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -43,8 +46,11 @@ import a4.papers.chatfilter.chatfilter.events.RepeatCharListener;
 import a4.papers.chatfilter.chatfilter.events.SignListener;
 import a4.papers.chatfilter.chatfilter.events.SwearChatListener;
 import a4.papers.chatfilter.chatfilter.shared.ChatFilters;
+import a4.papers.chatfilter.chatfilter.shared.CodePointIndex;
+import a4.papers.chatfilter.chatfilter.shared.LiteralReplacements;
 import a4.papers.chatfilter.chatfilter.shared.CompiledFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
+import a4.papers.chatfilter.chatfilter.shared.FilterSnapshot;
 import a4.papers.chatfilter.chatfilter.shared.Types;
 import a4.papers.chatfilter.chatfilter.shared.UnicodeWrapper;
 import a4.papers.chatfilter.chatfilter.shared.lang.LangManager;
@@ -57,8 +63,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 public class ChatFilter extends JavaPlugin {
 
     private static final CompiledFilter[] EMPTY_COMPILED = new CompiledFilter[0];
-    private static final ThreadLocal<WeakReference<AsyncChatEvent>> PLAIN_CACHED_EVENT = new ThreadLocal<>();
-    private static final ThreadLocal<String> PLAIN_CACHED_TEXT = new ThreadLocal<>();
+    private static final ThreadLocal<WeakReference<PlainMessage>> PLAIN_CACHE = new ThreadLocal<>();
     private static volatile TaskScheduler scheduler;
     private static ChatFilter instance;
     private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
@@ -78,6 +83,7 @@ public class ChatFilter extends JavaPlugin {
     public volatile List<Pattern> advertRegexPattern = new CopyOnWriteArrayList<>();
     public volatile CompiledFilter[] wordCompiled = EMPTY_COMPILED;
     public volatile CompiledFilter[] advertCompiled = EMPTY_COMPILED;
+    public volatile FilterSnapshot compiledFilters = FilterSnapshot.EMPTY;
     public Map<String, FilterWrapper> regexWords;
     public Map<String, FilterWrapper> regexAdvert;
     public Map<String, UnicodeWrapper> unicodeBlacklist;
@@ -87,6 +93,13 @@ public class ChatFilter extends JavaPlugin {
     public List<String> defaultIPAction;
     public volatile List<String> unicodeWhitelist;
     public volatile int[] unicodeRanges = new int[0];
+    public volatile CodePointIndex unicodeIndex = CodePointIndex.EMPTY;
+    public volatile LiteralReplacements bypassReplacements = LiteralReplacements.EMPTY;
+    public volatile LiteralReplacements unicodeReplacements = LiteralReplacements.EMPTY;
+    public volatile double repeatSimilarityThreshold;
+    private ChatDelayListener chatDelayListener;
+    private CapsChatListener capsChatListener;
+    private Metrics metrics;
 
     public int capsAmount;
     public boolean CommandsOnSwearEnabled;
@@ -175,10 +188,12 @@ public class ChatFilter extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         SwearChatListener scl = new SwearChatListener(this);
         CapsChatListener ccl = new CapsChatListener(this);
+        capsChatListener = ccl;
         BooksListener bl = new BooksListener(this);
         SignListener sl = new SignListener(this);
         AnvilListener al = new AnvilListener(this);
         ChatDelayListener cdl = new ChatDelayListener(this);
+        chatDelayListener = cdl;
         PauseChat pc = new PauseChat(this);
         CommandListener cl = new CommandListener(this);
         RepeatCharListener rcl = new RepeatCharListener(this);
@@ -188,6 +203,22 @@ public class ChatFilter extends JavaPlugin {
         pm.registerEvent(SignChangeEvent.class, sl, EventPriority.valueOf(getConfig().getString("EventPriority.SignListener")), sl, this, true);
         pm.registerEvent(InventoryClickEvent.class, al, EventPriority.valueOf(getConfig().getString("EventPriority.AdvilListener")), al, this, true);
         pm.registerEvent(AsyncChatEvent.class, cdl, EventPriority.valueOf(getConfig().getString("EventPriority.ChatDelayListener")), cdl, this, true);
+        pm.registerEvent(PlayerJoinEvent.class, cdl, EventPriority.MONITOR,
+                (listener, event) -> {
+                    PlayerJoinEvent join = (PlayerJoinEvent) event;
+                    cdl.onJoin(join);
+                    ccl.track(join.getPlayer());
+                }, this);
+        pm.registerEvent(PlayerQuitEvent.class, cdl, EventPriority.MONITOR,
+                (listener, event) -> {
+                    PlayerQuitEvent quit = (PlayerQuitEvent) event;
+                    cdl.onQuit(quit);
+                    ccl.untrack(quit.getPlayer().getUniqueId());
+                }, this);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            cdl.track(player);
+            ccl.track(player);
+        }
         pm.registerEvent(AsyncChatEvent.class, pc, EventPriority.valueOf(getConfig().getString("EventPriority.PauseChatListener")), pc, this, true);
         pm.registerEvent(PlayerCommandPreprocessEvent.class, cl, EventPriority.valueOf(getConfig().getString("EventPriority.CommandListener")), cl, this, true);
         pm.registerEvent(AsyncChatEvent.class, rcl, EventPriority.valueOf(getConfig().getString("EventPriority.RepeatCharListener")), rcl, this, true);
@@ -201,7 +232,7 @@ public class ChatFilter extends JavaPlugin {
         logMsg("[ChatFilter] " + regexAdvert.size() + " Enabled advertising filters.");
         logMsg("[ChatFilter] " + (byPassWords.size() + byPassWords.size()) + " whitelisted items.");
         int pluginId = 13946;
-        Metrics metrics = new Metrics(this, pluginId);
+        metrics = new Metrics(this, pluginId);
         metrics.addCustomChart(new Metrics.SimplePie("used_language", () -> {
             return getLang().locale.toString();
         }));
@@ -213,6 +244,17 @@ public class ChatFilter extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (metrics != null) {
+            metrics.shutdown();
+            metrics = null;
+        }
+        if (chatDelayListener != null) {
+            chatDelayListener.clear();
+        }
+        if (capsChatListener != null) {
+            capsChatListener.clear();
+        }
+        PLAIN_CACHE.remove();
         Bukkit.getScheduler().cancelTasks(this);
         TaskScheduler currentScheduler = scheduler;
         if (currentScheduler != null) {
@@ -224,16 +266,21 @@ public class ChatFilter extends JavaPlugin {
         advertRegexPattern.clear();
         wordCompiled = EMPTY_COMPILED;
         advertCompiled = EMPTY_COMPILED;
+        compiledFilters = FilterSnapshot.EMPTY;
         regexWords.clear();
         regexAdvert.clear();
         unicodeBlacklist.clear();
         unicodeWhitelist.clear();
+        unicodeIndex = CodePointIndex.EMPTY;
+        bypassReplacements = LiteralReplacements.EMPTY;
+        unicodeReplacements = LiteralReplacements.EMPTY;
         saveDefaultConfig();
     }
 
     public void loadVariables() {
         this.byPassWords = new CopyOnWriteArrayList<>(getWhitelistConfig().getStringList("bypassWords"));
         this.byPassDNS = new CopyOnWriteArrayList<>(getWhitelistConfig().getStringList("bypassIP"));
+        rebuildBypassReplacements();
         this.CommandsOnFontEnabled = getConfig().getBoolean("CommandsOnFont.enabled");
         this.CommandsOnFontCommand = getConfig().getString("CommandsOnFont.command");
         this.CommandsOnSwearEnabled = getConfig().getBoolean("CommandsOnSwear.enabled");
@@ -250,6 +297,7 @@ public class ChatFilter extends JavaPlugin {
         this.capsAmount = getConfig().getInt("settings.capsAmount");
         this.deCap = getConfig().getBoolean("settings.deCap");
         this.percentage = getConfig().getString("settings.similarMessagePercent");
+        this.repeatSimilarityThreshold = Double.parseDouble(this.percentage.trim().replace("%", "")) / 100.0;
         this.antiRepeatEnabled = getConfig().getBoolean("settings.antiRepeatEnabled");
         this.cancelChat = getConfig().getBoolean("settings.cancelChat");
         this.cancelChatReplace = getConfig().getString("settings.cancelChatReplace");
@@ -292,6 +340,12 @@ public class ChatFilter extends JavaPlugin {
         } else {
             return LEGACY_SERIALIZER.serialize(LEGACY_SERIALIZER.deserialize(s));
         }
+    }
+
+    public void rebuildBypassReplacements() {
+        List<String> bypass = new ArrayList<>(byPassWords);
+        bypass.addAll(byPassDNS);
+        bypassReplacements = new LiteralReplacements(bypass);
     }
 
     public void logMsg(String message) {
@@ -386,11 +440,27 @@ public class ChatFilter extends JavaPlugin {
     }
 
     public void save() {
+        saveWhitelist();
+        saveAdvertFilters();
+        saveWordFilters();
+        saveConfiguration(unicodeConfig, unicodeConfigFile);
+    }
+
+    public void saveWhitelist() {
+        saveConfiguration(whitelistConfig, whitelistConfigFile);
+    }
+
+    public void saveWordFilters() {
+        saveConfiguration(wordConfig, wordConfigFile);
+    }
+
+    public void saveAdvertFilters() {
+        saveConfiguration(advertConfig, advertConfigFile);
+    }
+
+    private void saveConfiguration(FileConfiguration configuration, File file) {
         try {
-            whitelistConfig.save(whitelistConfigFile);
-            advertConfig.save(advertConfigFile);
-            wordConfig.save(wordConfigFile);
-            unicodeConfig.save(unicodeConfigFile);
+            configuration.save(file);
         } catch (IOException ignored) {
         }
     }
@@ -451,22 +521,23 @@ public class ChatFilter extends JavaPlugin {
     }
 
     public String plainMessage(AsyncChatEvent event) {
-        WeakReference<AsyncChatEvent> cachedEventRef = PLAIN_CACHED_EVENT.get();
-        if (cachedEventRef != null && cachedEventRef.get() == event) {
-            String cachedText = PLAIN_CACHED_TEXT.get();
-            if (cachedText != null) {
-                return cachedText;
-            }
+        Component message = event.message();
+        WeakReference<PlainMessage> reference = PLAIN_CACHE.get();
+        PlainMessage cached = reference == null ? null : reference.get();
+        if (cached != null && cached.component() == message) {
+            return cached.text();
         }
-        String text = PLAIN_TEXT_SERIALIZER.serialize(event.message());
-        PLAIN_CACHED_EVENT.set(new WeakReference<>(event));
-        PLAIN_CACHED_TEXT.set(text);
+        String text = PLAIN_TEXT_SERIALIZER.serialize(message);
+        PLAIN_CACHE.set(new WeakReference<>(new PlainMessage(message, text)));
         return text;
     }
 
     public void setPlainMessage(AsyncChatEvent event, String message) {
-        event.message(Component.text(message));
-        PLAIN_CACHED_EVENT.set(new WeakReference<>(event));
-        PLAIN_CACHED_TEXT.set(message);
+        Component component = Component.text(message);
+        event.message(component);
+        PLAIN_CACHE.set(new WeakReference<>(new PlainMessage(component, message)));
+    }
+
+    private record PlainMessage(Component component, String text) {
     }
 }

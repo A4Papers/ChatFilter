@@ -29,12 +29,13 @@ public class ClearChatCommand implements CommandExecutor {
         }
         String clearMessage = chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.clearChatMessage.s).replace("%player%", sender.getName()));
         for (Player onlinePlayer : Bukkit.getServer().getOnlinePlayers()) {
-            if (!onlinePlayer.hasPermission("chatfilter.bypass")) {
+            boolean bypass = onlinePlayer.hasPermission("chatfilter.bypass");
+            if (!bypass) {
                 for (int i = 0; i < 100; i++) {
                     onlinePlayer.sendMessage(" ");
                 }
             }
-            if (onlinePlayer.hasPermission("chatfilter.bypass") || onlinePlayer.hasPermission("chatfilter.view")) {
+            if (bypass || onlinePlayer.hasPermission("chatfilter.view")) {
                 onlinePlayer.sendMessage(clearMessage);
             }
         }

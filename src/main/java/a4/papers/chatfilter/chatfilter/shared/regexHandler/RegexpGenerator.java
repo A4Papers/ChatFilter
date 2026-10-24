@@ -1,9 +1,11 @@
 package a4.papers.chatfilter.chatfilter.shared.regexHandler;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import java.util.regex.Pattern;
 
 public class RegexpGenerator {
-    static ChatFilter chatFilter;
+    private final ChatFilter chatFilter;
+    private static final Pattern STRIPPED_CHARACTERS = Pattern.compile("\\[|\\]|,|\\s");
 
     public RegexpGenerator(ChatFilter instance) {
         chatFilter = instance;
@@ -25,7 +27,7 @@ public class RegexpGenerator {
                 stringBuilder.append(reg);
             }
         }
-        String regexString = toLeetSpeak(stringBuilder.toString().replaceAll("\\[|\\]|,|\\s", "").replaceAll("%SPACE%", " "));
+        String regexString = toLeetSpeak(STRIPPED_CHARACTERS.matcher(stringBuilder).replaceAll("").replace("%SPACE%", " "));
         if (!regexString.contains("#")) {
             regexString = "(" + regexString + ")";
         } else if (regexString.startsWith("#") && regexString.endsWith("#")) {
@@ -46,7 +48,8 @@ public class RegexpGenerator {
             return speak;
         }
         StringBuilder sb = new StringBuilder(speak.length() * 2);
-        for (char c : speak.toCharArray()) {
+        for (int i = 0; i < speak.length(); i++) {
+                char c = speak.charAt(i);
                 switch (c) {
                     case 'a':
                         sb.append("@|a|4");

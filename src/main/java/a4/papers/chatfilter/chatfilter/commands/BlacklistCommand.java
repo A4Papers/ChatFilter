@@ -125,7 +125,7 @@ public class BlacklistCommand implements CommandExecutor {
                         sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_REMOVE_WORD_REMOVED.s).replace("%word%", ArgsString)));
                         chatFilter.regexWords.remove(ArgsString);
                         config.set(ArgsString, null);
-                        chatFilter.save();
+                        chatFilter.saveWordFilters();
                         chatFilter.getFilters().reloadFilters();
                     }
                     return true;
@@ -140,7 +140,7 @@ public class BlacklistCommand implements CommandExecutor {
                         sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_REMOVE_IP_REMOVED.s).replace("%ip%", args[3])));
                         chatFilter.regexWords.remove(args[3].toLowerCase());
                         config.set(args[3].toLowerCase(), null);
-                        chatFilter.save();
+                        chatFilter.saveAdvertFilters();
                         chatFilter.getFilters().reloadFilters();
                         return true;
                     }
@@ -192,8 +192,9 @@ public class BlacklistCommand implements CommandExecutor {
 
     private boolean matchStringAdd(String args) {
         ConfigurationSection config = chatFilter.getWordConfig().getConfigurationSection("ChatFilter");
+        String normalized = args.replace("#", "");
         for (String s : config.getKeys(false)) {
-            if (s.replace("#", "").equals(args.replace("#", ""))) {
+            if (s.replace("#", "").equals(normalized)) {
                 return true;
             }
         }

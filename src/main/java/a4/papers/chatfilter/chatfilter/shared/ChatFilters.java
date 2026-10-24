@@ -27,35 +27,18 @@ public class ChatFilters {
     }
 
     private String removeBypass(String s) {
-        List<String> byPassWords = chatFilter.byPassWords;
-        if (!byPassWords.isEmpty()) {
-            for (int i = 0, size = byPassWords.size(); i < size; i++) {
-                String removewording = byPassWords.get(i);
-                if (s.contains(removewording)) {
-                    s = s.replace(removewording, " ");
-                }
-            }
-        }
-        List<String> byPassDNS = chatFilter.byPassDNS;
-        if (!byPassDNS.isEmpty()) {
-            for (int i = 0, size = byPassDNS.size(); i < size; i++) {
-                String removewording = byPassDNS.get(i);
-                if (s.contains(removewording)) {
-                    s = s.replace(removewording, " ");
-                }
-            }
-        }
-        return s;
+        return chatFilter.bypassReplacements.replace(s, " ");
     }
 
     public Result validResult(String string, Player player) {
-        CompiledFilter[] wordCompiled = chatFilter.wordCompiled;
-        CompiledFilter[] advertCompiled = chatFilter.advertCompiled;
+        FilterSnapshot snapshot = chatFilter.compiledFilters;
+        CompiledFilter[] wordCompiled = snapshot.words();
+        CompiledFilter[] advertCompiled = snapshot.adverts();
         boolean isOp = player.isOp();
         boolean canBypassSwear = isOp || player.hasPermission("chatfilter.bypass.swear");
         boolean canBypassIP = isOp || player.hasPermission("chatfilter.bypass.ip");
         boolean canBypassURL = isOp || player.hasPermission("chatfilter.bypass.url");
-        boolean fontCheckNeeded = chatFilter.settingsBlockFancyChat && !chatFilter.unicodeBlacklist.isEmpty();
+        boolean fontCheckNeeded = chatFilter.settingsBlockFancyChat && !chatFilter.unicodeIndex.isEmpty();
 
         if ((canBypassSwear || wordCompiled.length == 0)
                 && (canBypassIP || advertCompiled.length == 0)
@@ -65,6 +48,15 @@ public class ChatFilters {
         }
 
         String lowercaseString = removeBypass(string.toLowerCase());
+        long lowCharacters = 0;
+        long highCharacters = 0;
+        if ((!canBypassSwear && wordCompiled.length > 0) || (!canBypassIP && advertCompiled.length > 0)) {
+            for (int i = 0; i < lowercaseString.length(); i++) {
+                char c = lowercaseString.charAt(i);
+                if (c < 64) lowCharacters |= 1L << c;
+                else if (c < 128) highCharacters |= 1L << (c - 64);
+            }
+        }
 
         boolean matched = false;
         boolean matchedSwear = false;
@@ -73,12 +65,15 @@ public class ChatFilters {
         String regex = null;
         FilterWrapper matchedWrapper = null;
 
-        Set<String> groupWords = new LinkedHashSet<>();
-        List<String> regexUsed = new ArrayList<>();
+        Set<String> groupWords = null;
+        List<String> regexUsed = null;
 
         if (!canBypassSwear && wordCompiled.length > 0) {
             for (int i = 0; i < wordCompiled.length; i++) {
                 CompiledFilter compiled = wordCompiled[i];
+                if (!compiled.mightMatch(lowCharacters, highCharacters)) {
+                    continue;
+                }
                 Matcher m = compiled.getPattern().matcher(lowercaseString);
                 while (m.find()) {
                     String match = m.group(0);
@@ -87,6 +82,12 @@ public class ChatFilters {
                         matchedSwear = true;
                         regex = compiled.getPattern().pattern();
                         matchedWrapper = compiled.getWrapper();
+                        if (regexUsed == null) {
+                            regexUsed = new ArrayList<>();
+                        }
+                        if (groupWords == null) {
+                            groupWords = new LinkedHashSet<>();
+                        }
                         regexUsed.add(regex);
                         groupWords.add(match);
                     }
@@ -97,6 +98,9 @@ public class ChatFilters {
         if (!canBypassIP && advertCompiled.length > 0) {
             for (int i = 0; i < advertCompiled.length; i++) {
                 CompiledFilter compiled = advertCompiled[i];
+                if (!compiled.mightMatch(lowCharacters, highCharacters)) {
+                    continue;
+                }
                 Matcher m = compiled.getPattern().matcher(lowercaseString);
                 while (m.find()) {
                     String match = m.group(0);
@@ -105,6 +109,9 @@ public class ChatFilters {
                         matchedIP = true;
                         regex = compiled.getPattern().pattern();
                         matchedWrapper = compiled.getWrapper();
+                        if (groupWords == null) {
+                            groupWords = new LinkedHashSet<>();
+                        }
                         groupWords.add(match);
                     }
                 }
@@ -146,48 +153,36 @@ public class ChatFilters {
             type = Types.NOTYPE;
         }
 
-        String[] array = groupWords.toArray(EMPTY_MATCHES);
+        if (!matched) {
+            return NOTYPE_RESULT;
+        }
+        String[] array = groupWords == null ? EMPTY_MATCHES : groupWords.toArray(EMPTY_MATCHES);
         if (matchedWrapper == null && regex != null) {
             matchedWrapper = chatFilter.regexWords.get(regex);
             if (matchedWrapper == null) {
                 matchedWrapper = chatFilter.regexAdvert.get(regex);
             }
         }
-        return new Result(matched, array, type, matchedWrapper, regexUsed);
+        return new Result(true, array, type, matchedWrapper, regexUsed == null ? EMPTY_REGEX_LIST : regexUsed);
     }
 
     public boolean isFont(String string) {
-        if (!chatFilter.settingsBlockFancyChat || chatFilter.unicodeBlacklist.isEmpty()) {
+        CodePointIndex index = chatFilter.unicodeIndex;
+        if (!chatFilter.settingsBlockFancyChat || index.isEmpty()) {
             return false;
         }
 
-        String processedString = string;
-        List<String> unicodeWhitelist = chatFilter.unicodeWhitelist;
-        if (!unicodeWhitelist.isEmpty()) {
-            for (int i = 0, size = unicodeWhitelist.size(); i < size; i++) {
-                String s = unicodeWhitelist.get(i);
-                if (processedString.indexOf(s) >= 0) {
-                    processedString = processedString.replace(s, "");
-                }
-            }
-        }
+        String processedString = chatFilter.unicodeReplacements.replace(string, "");
 
         if (processedString.isEmpty()) {
             return false;
         }
 
-        int[] ranges = chatFilter.unicodeRanges;
-        if (ranges.length == 0) {
-            return false;
-        }
-        int rangeCount = ranges.length >> 1;
         int length = processedString.length();
         for (int i = 0; i < length; ) {
             int cp = processedString.codePointAt(i);
-            for (int r = 0; r < rangeCount; r++) {
-                if (cp >= ranges[r << 1] && cp <= ranges[(r << 1) + 1]) {
-                    return true;
-                }
+            if (index.contains(cp)) {
+                return true;
             }
             i += Character.charCount(cp);
         }

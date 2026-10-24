@@ -90,14 +90,17 @@ public class SignListener implements EventExecutor, Listener {
         String highlightColored = sendStaff ? chatFilter.colour(chatFilter.settingsSwearHighLight) : null;
         String replace = filterWrapper.getReplace();
         boolean cancelChatReplace = filterWrapper.getCancelChatReplace();
+        int transformations = sendStaff || (!broken && cancelChatReplace) ? stringArray.length : 0;
 
         if (!line0Sign.isEmpty()) {
-            for (int i = 0; i < stringArray.length; i++) {
+            for (int i = 0; i < transformations; i++) {
                 String oneWord = stringArray[i];
                 if (sendStaff) {
                     line0 = line0.replace(oneWord.replace(" ", ""), highlightColored.replace("%catch%", oneWord));
                 }
-                line0Sign = line0Sign.replace(oneWord, replace);
+                if (!broken && cancelChatReplace) {
+                    line0Sign = line0Sign.replace(oneWord, replace);
+                }
             }
             if (!broken && cancelChatReplace)
                 event.setLine(0, line0Sign);
@@ -107,12 +110,14 @@ public class SignListener implements EventExecutor, Listener {
         }
 
         if (!line1Sign.isEmpty()) {
-            for (int i = 0; i < stringArray.length; i++) {
+            for (int i = 0; i < transformations; i++) {
                 String oneWord = stringArray[i];
                 if (sendStaff) {
                     line1 = line1.replace(oneWord.replace(" ", ""), highlightColored.replace("%catch%", oneWord));
                 }
-                line1Sign = line1Sign.replace(oneWord, replace);
+                if (!broken && cancelChatReplace) {
+                    line1Sign = line1Sign.replace(oneWord, replace);
+                }
             }
             if (!broken && cancelChatReplace)
                 event.setLine(1, line1Sign);
@@ -122,12 +127,14 @@ public class SignListener implements EventExecutor, Listener {
         }
 
         if (!line2Sign.isEmpty()) {
-            for (int i = 0; i < stringArray.length; i++) {
+            for (int i = 0; i < transformations; i++) {
                 String oneWord = stringArray[i];
                 if (sendStaff) {
                     line2 = line2.replace(oneWord.replace(" ", ""), highlightColored.replace("%catch%", oneWord));
                 }
-                line2Sign = line2Sign.replace(oneWord, replace);
+                if (!broken && cancelChatReplace) {
+                    line2Sign = line2Sign.replace(oneWord, replace);
+                }
             }
             if (!broken && cancelChatReplace)
                 event.setLine(2, line2Sign);
@@ -137,12 +144,14 @@ public class SignListener implements EventExecutor, Listener {
         }
 
         if (!line3Sign.isEmpty()) {
-            for (int i = 0; i < stringArray.length; i++) {
+            for (int i = 0; i < transformations; i++) {
                 String oneWord = stringArray[i];
                 if (sendStaff) {
                     line3 = line3.replace(oneWord.replace(" ", ""), highlightColored.replace("%catch%", oneWord));
                 }
-                line3Sign = line3Sign.replace(oneWord, replace);
+                if (!broken && cancelChatReplace) {
+                    line3Sign = line3Sign.replace(oneWord, replace);
+                }
             }
             if (!broken && cancelChatReplace)
                 event.setLine(3, line3Sign);

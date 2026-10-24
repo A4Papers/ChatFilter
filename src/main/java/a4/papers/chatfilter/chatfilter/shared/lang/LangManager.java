@@ -1,6 +1,7 @@
 package a4.papers.chatfilter.chatfilter.shared.lang;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -15,7 +16,7 @@ import a4.papers.chatfilter.chatfilter.ChatFilter;
 public class LangManager {
 
     public Locale locale;
-    public Map<String, String> convertedStrings = new HashMap<>();
+    public volatile Map<String, String> convertedStrings = Map.of();
     ChatFilter chatFilter;
     private Locale SpanishLocale = new Locale("es");
     private Locale PolishLocale = new Locale("pl");
@@ -53,14 +54,21 @@ public class LangManager {
         String bundleName = "messages";
         File file = new File(chatFilter.getDataFolder().getAbsolutePath());
         URL[] urls = {file.toURI().toURL()};
-        ClassLoader loader = new URLClassLoader(urls);
-        return ResourceBundle.getBundle(bundleName, locale, loader);
+        try (URLClassLoader loader = new URLClassLoader(urls, null)) {
+            try {
+                return ResourceBundle.getBundle(bundleName, locale, loader);
+            } finally {
+                ResourceBundle.clearCache(loader);
+            }
+        } catch (IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
     }
 
     public void loadLang() throws MalformedURLException {
         setupLanguageFiles();
         ResourceBundle resource = fromClassLoader();
-        convertedStrings = convertResourceBundleToMap(resource);
+        convertedStrings = Map.copyOf(convertResourceBundleToMap(resource));
     }
 
     Map<String, String> convertResourceBundleToMap(ResourceBundle resource) {

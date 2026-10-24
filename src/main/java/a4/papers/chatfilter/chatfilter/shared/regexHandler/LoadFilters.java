@@ -1,15 +1,20 @@
 package a4.papers.chatfilter.chatfilter.shared.regexHandler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import org.bukkit.configuration.ConfigurationSection;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.CompiledFilter;
+import a4.papers.chatfilter.chatfilter.shared.CodePointIndex;
+import a4.papers.chatfilter.chatfilter.shared.LiteralReplacements;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
+import a4.papers.chatfilter.chatfilter.shared.FilterSnapshot;
 import a4.papers.chatfilter.chatfilter.shared.UnicodeWrapper;
 
 public class LoadFilters {
@@ -115,30 +120,48 @@ public class LoadFilters {
             ranges[index++] = wrapper.getEndInt();
         }
         chatFilter.unicodeRanges = ranges;
+        chatFilter.unicodeIndex = new CodePointIndex(blacklist.values());
     }
 
     public void loadUnicodeWhitelist() {
-        chatFilter.unicodeWhitelist.clear();
-        if (chatFilter.getUnicodeConfig().getStringList("Unicode.whitelist").isEmpty()) {
+        List<String> whitelist = chatFilter.getUnicodeConfig().getStringList("Unicode.whitelist");
+        if (whitelist.isEmpty()) {
             String s = chatFilter.getUnicodeConfig().getString("Unicode.whitelist");
-            chatFilter.unicodeWhitelist.add(s);
-        } else {
-            List<String> whitelist = chatFilter.getUnicodeConfig().getStringList("Unicode.whitelist");
-            chatFilter.unicodeWhitelist.addAll(whitelist);
+            if (s != null) {
+                whitelist.add(s);
+            }
         }
+        chatFilter.unicodeWhitelist = new CopyOnWriteArrayList<>(whitelist);
+        chatFilter.unicodeReplacements = new LiteralReplacements(whitelist);
     }
 
     public void createWordFilter(String word, String sender) {
         writeWordFilter(word, sender);
-        chatFilter.save();
+        chatFilter.saveWordFilters();
         reloadFilters();
     }
 
     public void importWordFilters(List<String> words, String sender) {
-        for (int i = 0, size = words.size(); i < size; i++) {
-            writeWordFilter(words.get(i), sender);
+        if (!chatFilter.perWordOptionsEnable && !words.isEmpty()) {
+            writeWordFilter(words.get(0), sender);
+            String path = "ChatFilter." + chatFilter.perWordOptionsString + ".Regex";
+            List<String> regexes = chatFilter.getWordConfig().getStringList(path);
+            if (regexes.isEmpty()) {
+                String first = chatFilter.getWordConfig().getString(path);
+                if (first != null) {
+                    regexes.add(first);
+                }
+            }
+            for (int i = 1; i < words.size(); i++) {
+                regexes.add(chatFilter.regexpGenerator().generateRegexp(words.get(i)));
+            }
+            chatFilter.getWordConfig().set(path, regexes);
+        } else {
+            for (int i = 0, size = words.size(); i < size; i++) {
+                writeWordFilter(words.get(i), sender);
+            }
         }
-        chatFilter.save();
+        chatFilter.saveWordFilters();
         reloadFilters();
     }
 
@@ -170,7 +193,13 @@ public class LoadFilters {
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".Action", chatFilter.defaultWordAction);
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".AddedBy", sender);
             } else {
-                List<String> regexList = new ArrayList<>(key.getStringList("Regex"));
+                List<String> regexList = key.getStringList("Regex");
+                if (regexList.isEmpty()) {
+                    String existing = key.getString("Regex");
+                    if (existing != null) {
+                        regexList.add(existing);
+                    }
+                }
                 regexList.add(regex);
                 chatFilter.getWordConfig().set("ChatFilter." + chatFilter.perWordOptionsString + ".Regex", regexList);
             }
@@ -179,7 +208,7 @@ public class LoadFilters {
 
     public void createAdvertFilter(String s, String sender) {
         writeAdvertFilter(s, sender);
-        chatFilter.save();
+        chatFilter.saveAdvertFilters();
         reloadFilters();
     }
 
@@ -200,31 +229,42 @@ public class LoadFilters {
     public void reloadFilters() {
         chatFilter.regexAdvert.clear();
         chatFilter.regexWords.clear();
-        chatFilter.advertRegexPattern.clear();
-        chatFilter.wordRegexPattern.clear();
         loadAdvertFilter();
         loadWordFilter();
         regexCompile();
     }
 
     public void regexCompile() {
-        Map<String, FilterWrapper> adverts = chatFilter.regexAdvert;
-        CompiledFilter[] advertCompiled = new CompiledFilter[adverts.size()];
-        int i = 0;
-        for (Map.Entry<String, FilterWrapper> entry : adverts.entrySet()) {
-            Pattern pattern = Pattern.compile(entry.getKey());
-            chatFilter.advertRegexPattern.add(pattern);
-            advertCompiled[i++] = new CompiledFilter(pattern, entry.getValue());
+        Map<String, Pattern> patterns = new HashMap<>();
+        for (CompiledFilter filter : chatFilter.advertCompiled) {
+            patterns.put(filter.getPattern().pattern(), filter.getPattern());
         }
-        Map<String, FilterWrapper> words = chatFilter.regexWords;
-        CompiledFilter[] wordCompiled = new CompiledFilter[words.size()];
-        i = 0;
-        for (Map.Entry<String, FilterWrapper> entry : words.entrySet()) {
-            Pattern pattern = Pattern.compile(entry.getKey());
-            chatFilter.wordRegexPattern.add(pattern);
-            wordCompiled[i++] = new CompiledFilter(pattern, entry.getValue());
+        for (CompiledFilter filter : chatFilter.wordCompiled) {
+            patterns.put(filter.getPattern().pattern(), filter.getPattern());
         }
+        CompiledFilter[] advertCompiled = compile(chatFilter.regexAdvert, patterns);
+        CompiledFilter[] wordCompiled = compile(chatFilter.regexWords, patterns);
+        chatFilter.advertRegexPattern = patternList(advertCompiled);
+        chatFilter.wordRegexPattern = patternList(wordCompiled);
         chatFilter.advertCompiled = advertCompiled;
         chatFilter.wordCompiled = wordCompiled;
+        chatFilter.compiledFilters = new FilterSnapshot(wordCompiled, advertCompiled);
+    }
+
+    private static CompiledFilter[] compile(Map<String, FilterWrapper> filters, Map<String, Pattern> patterns) {
+        List<CompiledFilter> compiled = new ArrayList<>(filters.size());
+        for (Map.Entry<String, FilterWrapper> entry : filters.entrySet()) {
+            Pattern pattern = patterns.computeIfAbsent(entry.getKey(), Pattern::compile);
+            compiled.add(new CompiledFilter(pattern, entry.getValue()));
+        }
+        return compiled.toArray(CompiledFilter[]::new);
+    }
+
+    private static List<Pattern> patternList(CompiledFilter[] compiled) {
+        List<Pattern> patterns = new ArrayList<>(compiled.length);
+        for (CompiledFilter filter : compiled) {
+            patterns.add(filter.getPattern());
+        }
+        return new CopyOnWriteArrayList<>(patterns);
     }
 }

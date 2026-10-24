@@ -1,6 +1,6 @@
 package a4.papers.chatfilter.chatfilter.events;
 
-import org.bukkit.Bukkit;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -9,13 +9,27 @@ import org.bukkit.plugin.EventExecutor;
 import io.papermc.paper.event.player.AsyncChatEvent;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import a4.papers.chatfilter.chatfilter.shared.PlayerNameIndex;
 
 public class CapsChatListener implements EventExecutor, Listener {
 
     ChatFilter chatFilter;
+    private final PlayerNameIndex playerNames = new PlayerNameIndex();
 
     public CapsChatListener(ChatFilter instance) {
         this.chatFilter = instance;
+    }
+
+    public void track(Player player) {
+        playerNames.join(player.getUniqueId(), player.getName());
+    }
+
+    public void untrack(UUID player) {
+        playerNames.quit(player);
+    }
+
+    public void clear() {
+        playerNames.clear();
     }
 
     @Override
@@ -27,29 +41,26 @@ public class CapsChatListener implements EventExecutor, Listener {
         if (!chatFilter.deCap) {
             return;
         }
-        String msg = chatFilter.plainMessage(event);
         Player player = event.getPlayer();
         if (player.isOp() || player.hasPermission("chatfilter.bypass") || player.hasPermission("chatfilter.bypass.caps"))
             return;
+        String msg = chatFilter.plainMessage(event);
+        if (msg.isEmpty()) {
+            return;
+        }
         if (chatFilter.urlPattern.matcher(msg).find())
             return;
         int length = msg.length();
         int counter = 0;
         for (int i = 0; i < length; i++) {
-            if (Character.isUpperCase(msg.charAt(i))) counter++;
+            if (Character.isUpperCase(msg.charAt(i)) && ++counter >= chatFilter.capsAmount) {
+                break;
+            }
         }
         if (counter >= chatFilter.capsAmount) {
             msg = msg.charAt(0) + msg.substring(1).toLowerCase();
         }
-        String msgLower = msg.toLowerCase();
-        String newmsg = msg;
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            String playerName = onlinePlayer.getName();
-            String playerNameLower = playerName.toLowerCase();
-            if (msgLower.contains(playerNameLower)) {
-                newmsg = newmsg.replace(playerNameLower, playerName);
-            }
-        }
+        String newmsg = playerNames.restore(msg);
         if (!newmsg.equals(msg)) {
             chatFilter.setPlainMessage(event, newmsg);
         }

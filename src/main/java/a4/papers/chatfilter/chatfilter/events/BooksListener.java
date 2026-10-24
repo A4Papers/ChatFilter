@@ -36,8 +36,8 @@ public class BooksListener implements EventExecutor, Listener {
         Player p = event.getPlayer();
         if (p.isOp() || p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.book"))
             return;
-        Set<String> catchMatch = new LinkedHashSet<>();
-        List<String> bookPageMatch = new ArrayList<>();
+        Set<String> catchMatch = null;
+        List<String> bookPageMatch = null;
         List<String> bookPagesList = event.getNewBookMeta().getPages();
         String prefix = "Error";
         String warnPlayerMessage = "Error";
@@ -50,6 +50,10 @@ public class BooksListener implements EventExecutor, Listener {
             Result result = chatFilter.getChatFilters().validResult(pageFilter, p);
             if (!result.getResult()) {
                 continue;
+            }
+            if (catchMatch == null) {
+                catchMatch = new LinkedHashSet<>();
+                bookPageMatch = new ArrayList<>();
             }
             type = result.getType();
             String[] stringArray = result.getStringArray();

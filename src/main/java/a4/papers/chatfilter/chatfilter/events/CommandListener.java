@@ -36,8 +36,8 @@ public class CommandListener implements EventExecutor, Listener {
             return;
 
         String cmd = ChatColor.stripColor(event.getMessage().toLowerCase());
-        String[] array = cmd.split(" ");
-        String commandName = array[0].replace("/", "");
+        int space = cmd.indexOf(' ');
+        String commandName = (space < 0 ? cmd : cmd.substring(0, space)).replace("/", "");
 
         Configuration config = chatFilter.getConfig();
         if (!config.isSet("commands." + commandName)) {

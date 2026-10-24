@@ -61,9 +61,9 @@ public class SwearChatListener implements EventExecutor, Listener {
                 return;
             }
         }
-        String chatMessage = strippedMessage.toLowerCase();
         Result result = chatFilter.getChatFilters().validResult(strippedMessage, p);
         if (result.getResult()) {
+            String chatMessage = strippedMessage.toLowerCase();
             Types type = result.getType();
             String[] stringArray = result.getStringArray();
             FilterWrapper filterWrapper = result.getFilterWrapper();
