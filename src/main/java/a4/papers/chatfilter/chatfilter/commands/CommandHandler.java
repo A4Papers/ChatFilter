@@ -2,8 +2,9 @@ package a4.papers.chatfilter.chatfilter.commands;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
 import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommandHandler {
     ChatFilter chatFilter;
@@ -22,6 +23,7 @@ public class CommandHandler {
             return;
         }
         String playerName = p.getName();
+        List<String> commands = null;
         for (int i = 0, size = actions.size(); i < size; i++) {
             String s = actions.get(i);
             if (s.contains("<SendMessage>")) {
@@ -29,8 +31,14 @@ public class CommandHandler {
             }
             if (s.contains("<RunCommand>")) {
                 String command = s.replace("<RunCommand>", "").replace("%player%", playerName).replace("%item%", firstWord);
-                ChatFilter.runTask(() -> Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), command));
+                if (commands == null) {
+                    commands = new ArrayList<>();
+                }
+                commands.add(command);
             }
+        }
+        if (commands != null) {
+            chatFilter.tasks().commands(commands);
         }
     }
 }

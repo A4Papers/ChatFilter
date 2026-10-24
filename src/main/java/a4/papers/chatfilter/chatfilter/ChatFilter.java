@@ -29,8 +29,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.github.Anon8281.universalScheduler.UniversalScheduler;
-import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
+import a4.papers.chatfilter.chatfilter.scheduling.PluginScheduler;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 import a4.papers.chatfilter.chatfilter.commands.ClearChatCommand;
 import a4.papers.chatfilter.chatfilter.commands.CommandHandler;
@@ -64,8 +64,8 @@ public class ChatFilter extends JavaPlugin {
 
     private static final CompiledFilter[] EMPTY_COMPILED = new CompiledFilter[0];
     private static final ThreadLocal<WeakReference<PlainMessage>> PLAIN_CACHE = new ThreadLocal<>();
-    private static volatile TaskScheduler scheduler;
-    private static ChatFilter instance;
+    private static volatile PluginScheduler scheduler;
+    private PluginScheduler taskScheduler;
     private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
     private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER = PlainTextComponentSerializer.plainText();
 
@@ -177,8 +177,8 @@ public class ChatFilter extends JavaPlugin {
             e.printStackTrace();
         }
 
-        scheduler = UniversalScheduler.getScheduler(this);
-        instance = this;
+        taskScheduler = new PluginScheduler(this);
+        scheduler = taskScheduler;
 
         createCustomConfig();
         loadVariables();
@@ -255,13 +255,11 @@ public class ChatFilter extends JavaPlugin {
             capsChatListener.clear();
         }
         PLAIN_CACHE.remove();
-        Bukkit.getScheduler().cancelTasks(this);
-        TaskScheduler currentScheduler = scheduler;
-        if (currentScheduler != null) {
-            currentScheduler.cancelTasks();
-        }
+        PluginScheduler currentScheduler = taskScheduler;
         scheduler = null;
-        instance = null;
+        if (currentScheduler != null) {
+            currentScheduler.close();
+        }
         wordRegexPattern.clear();
         advertRegexPattern.clear();
         wordCompiled = EMPTY_COMPILED;
@@ -472,47 +470,31 @@ public class ChatFilter extends JavaPlugin {
         unicodeConfig.load(unicodeConfigFile);
     }
 
-    public static Object runTask(Runnable runnable) {
-        TaskScheduler currentScheduler = scheduler;
-        if (currentScheduler != null) {
-            return currentScheduler.runTask(runnable);
-        } else {
-            Bukkit.getScheduler().runTask(instance, runnable);
-            return null;
-        }
+    public PluginScheduler tasks() {
+        return taskScheduler;
     }
 
-    public static Object runTaskAsync(Runnable runnable) {
-        TaskScheduler currentScheduler = scheduler;
-        if (currentScheduler != null) {
-            return currentScheduler.runTaskAsynchronously(runnable);
-        } else {
-            Bukkit.getScheduler().runTaskAsynchronously(instance, runnable);
-            return null;
-        }
+    public static ScheduledTask runTask(Runnable runnable) {
+        PluginScheduler current = scheduler;
+        return current == null ? null : current.global(runnable);
     }
 
-    public static Object runTaskLater(Runnable runnable, long delay) {
-        TaskScheduler currentScheduler = scheduler;
-        if (currentScheduler != null) {
-            return currentScheduler.runTaskLater(runnable, delay);
-        } else {
-            Bukkit.getScheduler().runTaskLater(instance, runnable, delay);
-            return null;
-        }
+    public static ScheduledTask runTaskAsync(Runnable runnable) {
+        PluginScheduler current = scheduler;
+        return current == null ? null : current.async(runnable);
     }
 
-    public static Object runTaskTimer(Runnable runnable, long delay, long period) {
-        TaskScheduler currentScheduler = scheduler;
-        if (currentScheduler != null) {
-            return currentScheduler.runTaskTimer(runnable, delay, period);
-        } else {
-            Bukkit.getScheduler().runTaskTimer(instance, runnable, delay, period);
-            return null;
-        }
+    public static ScheduledTask runTaskLater(Runnable runnable, long delay) {
+        PluginScheduler current = scheduler;
+        return current == null ? null : current.globalLater(runnable, delay);
     }
 
-    public static TaskScheduler getScheduler() {
+    public static ScheduledTask runTaskTimer(Runnable runnable, long delay, long period) {
+        PluginScheduler current = scheduler;
+        return current == null ? null : current.globalTimer(runnable, delay, period);
+    }
+
+    public static PluginScheduler getScheduler() {
         return scheduler;
     }
 

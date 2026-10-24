@@ -92,7 +92,7 @@ public class BooksListener implements EventExecutor, Listener {
         if (resulted) {
             if (p.getInventory().getItemInMainHand().getType().equals(Material.WRITABLE_BOOK)) {
                 p.getInventory().getItemInMainHand().setAmount(p.getInventory().getItemInMainHand().getAmount() - 1);
-                p.getScheduler().run(chatFilter, entity -> p.getInventory().setItemInMainHand(new ItemStack(Material.WRITABLE_BOOK, 1)), null);
+                chatFilter.tasks().entity(p, () -> p.getInventory().setItemInMainHand(new ItemStack(Material.WRITABLE_BOOK, 1)));
             }
             if (filterWrapper.getLogToConsole())
                 chatFilter.sendConsole(type, bookPagesList.get(nom - 1), p, filterWrapper.getRegex(), "Book");
