@@ -1,8 +1,7 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
 import java.util.regex.Pattern;
-import java.util.ArrayList;
-import java.util.List;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 
 public final class CompiledFilter {
     private static final String SEPARATOR = ")+(\\W|_)*";
@@ -43,7 +42,7 @@ public final class CompiledFilter {
         if (!body.startsWith("(") || !body.endsWith(")")) {
             return NO_REQUIRED_CHARACTERS;
         }
-        List<Long> masks = new ArrayList<>();
+        LongArrayList masks = new LongArrayList();
         int position = 1;
         int end = body.length() - 1;
         while (position < end) {
@@ -73,8 +72,6 @@ public final class CompiledFilter {
             masks.add(high);
         }
         if (position != end) return NO_REQUIRED_CHARACTERS;
-        long[] result = new long[masks.size()];
-        for (int i = 0; i < result.length; i++) result[i] = masks.get(i);
-        return result;
+        return masks.toLongArray();
     }
 }

@@ -19,6 +19,7 @@ public class ChatFilters {
     private static final String[] EMPTY_MATCHES = new String[0];
     private static final List<String> EMPTY_REGEX_LIST = Collections.emptyList();
     private static final Result NOTYPE_RESULT = new Result(false, EMPTY_MATCHES, Types.NOTYPE, null, EMPTY_REGEX_LIST);
+    private static final Result FONT_RESULT = new Result(true, EMPTY_MATCHES, Types.FONT, FONT_FILTER, EMPTY_REGEX_LIST);
 
     ChatFilter chatFilter;
 
@@ -35,22 +36,19 @@ public class ChatFilters {
         CompiledFilter[] wordCompiled = snapshot.words();
         CompiledFilter[] advertCompiled = snapshot.adverts();
         boolean isOp = player.isOp();
-        boolean canBypassSwear = isOp || player.hasPermission("chatfilter.bypass.swear");
-        boolean canBypassIP = isOp || player.hasPermission("chatfilter.bypass.ip");
-        boolean canBypassURL = isOp || player.hasPermission("chatfilter.bypass.url");
+        boolean checkWords = wordCompiled.length != 0 && !isOp && !player.hasPermission("chatfilter.bypass.swear");
+        boolean checkAdverts = advertCompiled.length != 0 && !isOp && !player.hasPermission("chatfilter.bypass.ip");
+        boolean checkURL = !chatFilter.settingsAllowURL && !isOp && !player.hasPermission("chatfilter.bypass.url");
         boolean fontCheckNeeded = chatFilter.settingsBlockFancyChat && !chatFilter.unicodeIndex.isEmpty();
 
-        if ((canBypassSwear || wordCompiled.length == 0)
-                && (canBypassIP || advertCompiled.length == 0)
-                && (canBypassURL || chatFilter.settingsAllowURL)
-                && !fontCheckNeeded) {
-            return NOTYPE_RESULT;
+        if (!checkWords && !checkAdverts && !checkURL) {
+            return fontCheckNeeded && isFont(string) ? FONT_RESULT : NOTYPE_RESULT;
         }
 
         String lowercaseString = removeBypass(string.toLowerCase());
         long lowCharacters = 0;
         long highCharacters = 0;
-        if ((!canBypassSwear && wordCompiled.length > 0) || (!canBypassIP && advertCompiled.length > 0)) {
+        if (checkWords || checkAdverts) {
             for (int i = 0; i < lowercaseString.length(); i++) {
                 char c = lowercaseString.charAt(i);
                 if (c < 64) lowCharacters |= 1L << c;
@@ -68,7 +66,7 @@ public class ChatFilters {
         Set<String> groupWords = null;
         List<String> regexUsed = null;
 
-        if (!canBypassSwear && wordCompiled.length > 0) {
+        if (checkWords) {
             for (int i = 0; i < wordCompiled.length; i++) {
                 CompiledFilter compiled = wordCompiled[i];
                 if (!compiled.mightMatch(lowCharacters, highCharacters)) {
@@ -95,7 +93,7 @@ public class ChatFilters {
             }
         }
 
-        if (!canBypassIP && advertCompiled.length > 0) {
+        if (checkAdverts) {
             for (int i = 0; i < advertCompiled.length; i++) {
                 CompiledFilter compiled = advertCompiled[i];
                 if (!compiled.mightMatch(lowCharacters, highCharacters)) {
@@ -118,7 +116,7 @@ public class ChatFilters {
             }
         }
 
-        if (!canBypassURL && !chatFilter.settingsAllowURL) {
+        if (checkURL) {
             Matcher m = chatFilter.urlPattern.matcher(lowercaseString);
             if (m.find()) {
                 matched = true;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -79,8 +81,8 @@ public class ChatFilter extends JavaPlugin {
     public UnicodeWrapper unicodeWrapper;
     public RegexpGenerator regexpGenerator;
     public Manager manager;
-    public volatile List<Pattern> wordRegexPattern = new CopyOnWriteArrayList<>();
-    public volatile List<Pattern> advertRegexPattern = new CopyOnWriteArrayList<>();
+    public volatile List<Pattern> wordRegexPattern = List.of();
+    public volatile List<Pattern> advertRegexPattern = List.of();
     public volatile CompiledFilter[] wordCompiled = EMPTY_COMPILED;
     public volatile CompiledFilter[] advertCompiled = EMPTY_COMPILED;
     public volatile FilterSnapshot compiledFilters = FilterSnapshot.EMPTY;
@@ -164,7 +166,7 @@ public class ChatFilter extends JavaPlugin {
         regexWords = new ConcurrentHashMap<>();
         regexAdvert = new ConcurrentHashMap<>();
         unicodeBlacklist = new ConcurrentHashMap<>();
-        unicodeWhitelist = new CopyOnWriteArrayList<>();
+        unicodeWhitelist = List.of();
         chatFilters = new ChatFilters(this);
         commandHandler = new CommandHandler(this);
         langManager = new LangManager(this);
@@ -215,10 +217,11 @@ public class ChatFilter extends JavaPlugin {
                     cdl.onQuit(quit);
                     ccl.untrack(quit.getPlayer().getUniqueId());
                 }, this);
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+        for (Player player : onlinePlayers) {
             cdl.track(player);
-            ccl.track(player);
         }
+        ccl.trackAll(onlinePlayers);
         pm.registerEvent(AsyncChatEvent.class, pc, EventPriority.valueOf(getConfig().getString("EventPriority.PauseChatListener")), pc, this, true);
         pm.registerEvent(PlayerCommandPreprocessEvent.class, cl, EventPriority.valueOf(getConfig().getString("EventPriority.CommandListener")), cl, this, true);
         pm.registerEvent(AsyncChatEvent.class, rcl, EventPriority.valueOf(getConfig().getString("EventPriority.RepeatCharListener")), rcl, this, true);
@@ -260,15 +263,15 @@ public class ChatFilter extends JavaPlugin {
         if (currentScheduler != null) {
             currentScheduler.close();
         }
-        wordRegexPattern.clear();
-        advertRegexPattern.clear();
+        wordRegexPattern = List.of();
+        advertRegexPattern = List.of();
         wordCompiled = EMPTY_COMPILED;
         advertCompiled = EMPTY_COMPILED;
         compiledFilters = FilterSnapshot.EMPTY;
         regexWords.clear();
         regexAdvert.clear();
         unicodeBlacklist.clear();
-        unicodeWhitelist.clear();
+        unicodeWhitelist = List.of();
         unicodeIndex = CodePointIndex.EMPTY;
         bypassReplacements = LiteralReplacements.EMPTY;
         unicodeReplacements = LiteralReplacements.EMPTY;
@@ -504,6 +507,9 @@ public class ChatFilter extends JavaPlugin {
 
     public String plainMessage(AsyncChatEvent event) {
         Component message = event.message();
+        if (message instanceof TextComponent text && message.children().isEmpty()) {
+            return text.content();
+        }
         WeakReference<PlainMessage> reference = PLAIN_CACHE.get();
         PlainMessage cached = reference == null ? null : reference.get();
         if (cached != null && cached.component() == message) {
@@ -515,9 +521,7 @@ public class ChatFilter extends JavaPlugin {
     }
 
     public void setPlainMessage(AsyncChatEvent event, String message) {
-        Component component = Component.text(message);
-        event.message(component);
-        PLAIN_CACHE.set(new WeakReference<>(new PlainMessage(component, message)));
+        event.message(Component.text(message));
     }
 
     private record PlainMessage(Component component, String text) {

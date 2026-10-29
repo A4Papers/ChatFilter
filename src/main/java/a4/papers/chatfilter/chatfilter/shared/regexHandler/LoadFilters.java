@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import org.bukkit.configuration.ConfigurationSection;
@@ -131,7 +130,7 @@ public class LoadFilters {
                 whitelist.add(s);
             }
         }
-        chatFilter.unicodeWhitelist = new CopyOnWriteArrayList<>(whitelist);
+        chatFilter.unicodeWhitelist = List.copyOf(whitelist);
         chatFilter.unicodeReplacements = new LiteralReplacements(whitelist);
     }
 
@@ -265,6 +264,6 @@ public class LoadFilters {
         for (CompiledFilter filter : compiled) {
             patterns.add(filter.getPattern());
         }
-        return new CopyOnWriteArrayList<>(patterns);
+        return List.copyOf(patterns);
     }
 }

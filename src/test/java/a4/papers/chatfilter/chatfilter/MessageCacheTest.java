@@ -10,6 +10,25 @@ import static org.mockito.Mockito.*;
 
 class MessageCacheTest {
     @Test
+    void simpleTextUsesItsContentAndComplexComponentsStillObserveChanges() {
+        ChatFilter plugin = mock(ChatFilter.class);
+        doCallRealMethod().when(plugin).plainMessage(any());
+        doCallRealMethod().when(plugin).setPlainMessage(any(), anyString());
+        String content = new String("plain content");
+        Component simple = Component.text(content);
+        AsyncChatEvent event = new AsyncChatEvent(true, mock(Player.class), Set.of(),
+                (player, name, message, viewer) -> message, simple, simple, null);
+        assertSame(content, plugin.plainMessage(event));
+        event.message(Component.text("first").append(Component.text(" child")));
+        assertEquals("first child", plugin.plainMessage(event));
+        assertEquals("first child", plugin.plainMessage(event));
+        plugin.setPlainMessage(event, content);
+        assertSame(content, plugin.plainMessage(event));
+        event.message(Component.text("second").append(Component.text(" child")));
+        assertEquals("second child", plugin.plainMessage(event));
+    }
+
+    @Test
     void observesComponentChangesMadeByOtherListeners() {
         ChatFilter plugin = mock(ChatFilter.class);
         doCallRealMethod().when(plugin).plainMessage(any());

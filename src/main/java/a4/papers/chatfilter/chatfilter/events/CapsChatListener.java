@@ -1,6 +1,8 @@
 package a4.papers.chatfilter.chatfilter.events;
 
 import java.util.UUID;
+import java.util.Collection;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -22,6 +24,12 @@ public class CapsChatListener implements EventExecutor, Listener {
 
     public void track(Player player) {
         playerNames.join(player.getUniqueId(), player.getName());
+    }
+
+    public void trackAll(Collection<? extends Player> players) {
+        var names = new Object2ObjectLinkedOpenHashMap<UUID, String>(players.size());
+        for (Player player : players) names.put(player.getUniqueId(), player.getName());
+        playerNames.replaceAll(names);
     }
 
     public void untrack(UUID player) {

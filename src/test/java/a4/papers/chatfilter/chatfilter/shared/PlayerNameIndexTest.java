@@ -2,10 +2,29 @@ package a4.papers.chatfilter.chatfilter.shared;
 
 import org.junit.jupiter.api.Test;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerNameIndexTest {
+    @Test
+    void bulkInitializationPreservesOrderAndReplacesPreviousPlayers() {
+        PlayerNameIndex index = new PlayerNameIndex();
+        UUID player = UUID.randomUUID();
+        index.join(player, "OldPlayer");
+        var players = new LinkedHashMap<UUID, String>();
+        players.put(player, "Ann");
+        players.put(UUID.randomUUID(), "Anna");
+        index.replaceAll(players);
+        assertEquals("Anna and oldplayer", index.restore("anna and oldplayer"));
+        index.join(player, "Ann");
+        assertEquals("Anna", index.restore("anna"));
+        index.join(player, "ANN");
+        assertEquals("ANNa", index.restore("anna"));
+        index.clear();
+        assertSame("anna", index.restore("anna"));
+    }
+
     @Test
     void matchesOrderedNameRestorationIncludingOverlaps() {
         PlayerNameIndex index = new PlayerNameIndex();
