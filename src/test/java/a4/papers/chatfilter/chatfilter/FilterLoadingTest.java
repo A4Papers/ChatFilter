@@ -19,7 +19,7 @@ class FilterLoadingTest {
         ChatFilter plugin = plugin();
         plugin.settingsBlockFancyChat = true;
         plugin.unicodeIndex = new CodePointIndex(List.of(new UnicodeWrapper("1F600", "1F64F")));
-        plugin.bypassReplacements = mock(LiteralReplacements.class);
+        plugin.bypassReplacements = null;
         Player player = mock(Player.class);
         ChatFilters filters = new ChatFilters(plugin);
         assertFalse(filters.validResult("CLEAN MESSAGE", player).getResult());
@@ -27,7 +27,6 @@ class FilterLoadingTest {
         assertEquals(Types.FONT, result.getType());
         assertEquals("unicode", result.getFilterWrapper().getRegex());
         assertSame(result, filters.validResult("\uD83D\uDE00", player));
-        verifyNoInteractions(plugin.bypassReplacements);
         verify(player, never()).hasPermission(anyString());
     }
 

@@ -3,10 +3,12 @@ package a4.papers.chatfilter.chatfilter;
 import a4.papers.chatfilter.chatfilter.commands.ImportCommand;
 import a4.papers.chatfilter.chatfilter.shared.regexHandler.LoadFilters;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -116,7 +118,9 @@ class ImportSchedulingTest {
     private static ChatFilter plugin(SchedulerFixture fixture, Path directory) throws Exception {
         ChatFilter plugin = mock(ChatFilter.class);
         when(plugin.tasks()).thenReturn(fixture.scheduler);
-        when(plugin.getDataFolder()).thenReturn(directory.toFile());
+        Field dataFolder = JavaPlugin.class.getDeclaredField("dataFolder");
+        dataFolder.setAccessible(true);
+        dataFolder.set(plugin, directory.toFile());
         return plugin;
     }
 

@@ -3,6 +3,7 @@ package a4.papers.chatfilter.chatfilter;
 import a4.papers.chatfilter.chatfilter.shared.LowerCaseReplace;
 import a4.papers.chatfilter.chatfilter.shared.lang.LangManager;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import java.lang.reflect.Field;
@@ -42,7 +43,9 @@ class ResourceLifecycleTest {
         YamlConfiguration config = new YamlConfiguration();
         config.set("locale", "en");
         when(plugin.getConfig()).thenReturn(config);
-        when(plugin.getDataFolder()).thenReturn(directory.toFile());
+        Field dataFolder = JavaPlugin.class.getDeclaredField("dataFolder");
+        dataFolder.setAccessible(true);
+        dataFolder.set(plugin, directory.toFile());
         Path language = directory.resolve("messages_en.properties");
         Files.writeString(language, "test=before\n");
         LangManager manager = new LangManager(plugin);
