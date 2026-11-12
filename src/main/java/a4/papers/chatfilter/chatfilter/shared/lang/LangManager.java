@@ -1,17 +1,22 @@
 package a4.papers.chatfilter.chatfilter.shared.lang;
 
-import a4.papers.chatfilter.chatfilter.ChatFilter;
-
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import a4.papers.chatfilter.chatfilter.ChatFilter;
 
 public class LangManager {
 
     public Locale locale;
-    public Map convertedStrings = new HashMap();
+    public volatile Map<String, String> convertedStrings = Map.of();
     ChatFilter chatFilter;
     private Locale SpanishLocale = new Locale("es");
     private Locale PolishLocale = new Locale("pl");
@@ -22,39 +27,52 @@ public class LangManager {
     }
 
     public String mapToString(String s) {
-        return convertedStrings.get(s).toString();
+        return convertedStrings.get(s);
     }
 
     public String stringArrayToString(String[] strArr) {
-        StringBuilder sb = new StringBuilder();
-        String prefix = "";
-        for (String str : strArr)
-            if (strArr.length > 1) {
-                sb.append(prefix);
-                prefix = ", ";
-                sb.append(str.replace(" ", ""));
-            } else {
-                sb.append(str.replace(" ", ""));
-            }
+        if (strArr.length == 0) {
+            return "";
+        }
+        if (strArr.length == 1) {
+            return stripSpaces(strArr[0]);
+        }
+
+        StringBuilder sb = new StringBuilder(strArr.length * 10);
+        sb.append(stripSpaces(strArr[0]));
+        for (int i = 1; i < strArr.length; i++) {
+            sb.append(", ").append(stripSpaces(strArr[i]));
+        }
         return sb.toString();
+    }
+
+    private static String stripSpaces(String s) {
+        return s.indexOf(' ') >= 0 ? s.replace(" ", "") : s;
     }
 
     public ResourceBundle fromClassLoader() throws MalformedURLException {
         String bundleName = "messages";
         File file = new File(chatFilter.getDataFolder().getAbsolutePath());
         URL[] urls = {file.toURI().toURL()};
-        ClassLoader loader = new URLClassLoader(urls);
-        return ResourceBundle.getBundle(bundleName, locale, loader);
+        try (URLClassLoader loader = new URLClassLoader(urls, null)) {
+            try {
+                return ResourceBundle.getBundle(bundleName, locale, loader);
+            } finally {
+                ResourceBundle.clearCache(loader);
+            }
+        } catch (IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
     }
 
     public void loadLang() throws MalformedURLException {
         setupLanguageFiles();
         ResourceBundle resource = fromClassLoader();
-        convertedStrings = convertResourceBundleToMap(resource);
+        convertedStrings = Map.copyOf(convertResourceBundleToMap(resource));
     }
 
     Map<String, String> convertResourceBundleToMap(ResourceBundle resource) {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         Enumeration<String> keys = resource.getKeys();
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
@@ -94,6 +112,7 @@ public class LangManager {
                 if (!lang_plFile.exists()) {
                     chatFilter.saveResource("messages_pl.properties", false);
                 }
+                break;
             case "da":
                 locale = DanishLocale;
                 File lang_daFile = new File(chatFilter.getDataFolder().getAbsolutePath(), "messages_da.properties");

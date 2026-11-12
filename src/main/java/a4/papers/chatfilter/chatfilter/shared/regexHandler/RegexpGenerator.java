@@ -1,24 +1,25 @@
 package a4.papers.chatfilter.chatfilter.shared.regexHandler;
 
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import java.util.regex.Pattern;
 
 public class RegexpGenerator {
-    static ChatFilter chatFilter;
+    private final ChatFilter chatFilter;
+    private static final Pattern STRIPPED_CHARACTERS = Pattern.compile("\\[|\\]|,|\\s");
 
     public RegexpGenerator(ChatFilter instance) {
         chatFilter = instance;
     }
 
     public String generateRegexp(String s) {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder(s.length() * 15);
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            String chars = String.valueOf(c);
-            if (chars.equals(" ")) {
+            if (c == ' ') {
                 String reg = "(%SPACE%+)+(\\W|_)*";
                 stringBuilder.append(reg);
             }
-            if (chars.equals("#")) {
+            if (c == '#') {
                 String reg = "#";
                 stringBuilder.append(reg);
             } else {
@@ -26,7 +27,7 @@ public class RegexpGenerator {
                 stringBuilder.append(reg);
             }
         }
-        String regexString = toLeetSpeak(stringBuilder.toString().replaceAll("\\[|\\]|,|\\s", "").replaceAll("%SPACE%", " "));
+        String regexString = toLeetSpeak(STRIPPED_CHARACTERS.matcher(stringBuilder).replaceAll("").replace("%SPACE%", " "));
         if (!regexString.contains("#")) {
             regexString = "(" + regexString + ")";
         } else if (regexString.startsWith("#") && regexString.endsWith("#")) {
@@ -43,9 +44,12 @@ public class RegexpGenerator {
     }
 
     String toLeetSpeak(String speak) {
-        StringBuilder sb = new StringBuilder(speak.length());
-        if (chatFilter.enableLeetSpeak)
-            for (char c : speak.toCharArray()) {
+        if (!chatFilter.enableLeetSpeak) {
+            return speak;
+        }
+        StringBuilder sb = new StringBuilder(speak.length() * 2);
+        for (int i = 0; i < speak.length(); i++) {
+                char c = speak.charAt(i);
                 switch (c) {
                     case 'a':
                         sb.append("@|a|4");
@@ -129,7 +133,7 @@ public class RegexpGenerator {
                         sb.append(c);
                         break;
                 }
-            }
+        }
         return sb.toString();
     }
 }

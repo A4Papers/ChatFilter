@@ -1,14 +1,12 @@
 package a4.papers.chatfilter.chatfilter.events;
 
-import a4.papers.chatfilter.chatfilter.ChatFilter;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.EventExecutor;
+import io.papermc.paper.event.player.AsyncChatEvent;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import a4.papers.chatfilter.chatfilter.ChatFilter;
 
 public class RepeatCharListener implements EventExecutor, Listener {
 
@@ -20,29 +18,25 @@ public class RepeatCharListener implements EventExecutor, Listener {
 
     @Override
     public void execute(final Listener listener, final Event event) throws EventException {
-        this.onPlayerCarSpam((AsyncPlayerChatEvent) event);
+        this.onPlayerCarSpam((AsyncChatEvent) event);
     }
 
-    public void onPlayerCarSpam(AsyncPlayerChatEvent event) {
-        String msg = event.getMessage();
-        if (chatFilter.antiSpamEnabled) {
-            if (event.getPlayer().hasPermission("chatfilter.bypass") || event.getPlayer().hasPermission("chatfilter.bypass.characters")) {
-                return;
-            }
-            if (isURL(msg)) {
-                return;
-            }
-            event.setMessage(chatFilter.antiSpamPattern.matcher(msg).replaceAll(new String(new char[chatFilter.antiSpamReplaceAmount]).replace("\0", "$1")));
+    public void onPlayerCarSpam(AsyncChatEvent event) {
+        if (!chatFilter.antiSpamEnabled) {
+            return;
         }
-    }
-
-    public boolean isURL(String str) {
-        boolean matched = false;
-        Pattern p = Pattern.compile(chatFilter.URL_REGEX);
-        Matcher m = p.matcher(str);
-        if (m.find()) {
-            matched = true;
+        org.bukkit.entity.Player player = event.getPlayer();
+        if (player.isOp() || player.hasPermission("chatfilter.bypass") || player.hasPermission("chatfilter.bypass.characters")) {
+            return;
         }
-        return matched;
+        String msg = chatFilter.plainMessage(event);
+        java.util.regex.Matcher matcher = chatFilter.antiSpamPattern.matcher(msg);
+        if (!matcher.find()) {
+            return;
+        }
+        if (chatFilter.urlPattern.matcher(msg).find()) {
+            return;
+        }
+        chatFilter.setPlainMessage(event, matcher.replaceAll(chatFilter.getAntiSpamReplacementToken()));
     }
 }

@@ -1,75 +1,65 @@
 package a4.papers.chatfilter.chatfilter.events;
 
-
 import a4.papers.chatfilter.chatfilter.ChatFilter;
-import a4.papers.chatfilter.chatfilter.shared.ChatData;
-import a4.papers.chatfilter.chatfilter.shared.StringSimilarity;
+import a4.papers.chatfilter.chatfilter.shared.RepeatMessageTracker;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.EventExecutor;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import io.papermc.paper.event.player.AsyncChatEvent;
 
 public class ChatDelayListener implements EventExecutor, Listener {
-    public Map<UUID, ChatData> chatmsgs = new HashMap<UUID, ChatData>();
+    private final RepeatMessageTracker tracker = new RepeatMessageTracker();
     ChatFilter chatFilter;
-    private HashMap<UUID, String> chatMSG = new HashMap<>();
-    private HashMap<UUID, Long> cooldown = new HashMap<>();
 
     public ChatDelayListener(ChatFilter instance) {
         chatFilter = instance;
     }
 
-    @Override
-    public void execute(final Listener listener, final Event event) throws EventException {
-        this.onPlayerSpam((AsyncPlayerChatEvent) event);
+    public void track(Player player) {
+        tracker.join(player.getUniqueId());
     }
 
-    @EventHandler
-    public void onPlayerSpam(AsyncPlayerChatEvent e) {
+    public void onJoin(PlayerJoinEvent event) {
+        track(event.getPlayer());
+    }
+
+    public void onQuit(PlayerQuitEvent event) {
+        tracker.quit(event.getPlayer().getUniqueId());
+    }
+
+    public void clear() {
+        tracker.clear();
+    }
+
+    @Override
+    public void execute(final Listener listener, final Event event) throws EventException {
+        this.onPlayerSpam((AsyncChatEvent) event);
+    }
+
+    public void onPlayerSpam(AsyncChatEvent e) {
         if (!chatFilter.antiRepeatEnabled) {
             return;
         }
-        if (e.getPlayer().hasPermission("chatfilter.bypass") || e.getPlayer().hasPermission("chatfilter.bypass.repeat"))
-            return;
+
         Player p = e.getPlayer();
-        UUID playerUUID = p.getUniqueId();
-        String msg = e.getMessage();
-        chatmsgs.containsKey(playerUUID);
+        if (p.isOp() || p.hasPermission("chatfilter.bypass") || p.hasPermission("chatfilter.bypass.repeat")) {
+            return;
+        }
+
+        String msg = chatFilter.plainMessage(e).toLowerCase();
+        long currentTime = System.currentTimeMillis();
         long configtime = chatFilter.repeatDelay * 1000L;
-        if (!p.hasPermission("chatfilter.bypass") || !e.getPlayer().hasPermission("chatfilter.bypass.repeat") && chatFilter.antiRepeatEnabled) {
-            if (chatmsgs.containsKey(playerUUID)) {
-                long time = chatmsgs.get(playerUUID).getLong();
-                double sim = StringSimilarity.similarity(msg, chatmsgs.get(playerUUID).getString());
-                BigDecimal d = new BigDecimal(chatFilter.percentage.trim().replace("%", "")).divide(BigDecimal.valueOf(100));
-                if (sim > d.doubleValue()) {
-                    if (time > System.currentTimeMillis()) {
-                        e.setCancelled(true);
-                        int remainingTime = Math.round((this.chatmsgs.get(playerUUID).getLong() - System.currentTimeMillis()) / 1000 * 10) / 10;
-                        String timeString = "";
-                        if (remainingTime >= 2) {
-                            timeString = remainingTime + " seconds";
-                        } else {
-                            timeString = 1 + " second";
-                        }
-                        p.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.chatRepeatMessage.s).replace("%time%", timeString)));
-                    } else {
-                        chatmsgs.put(playerUUID, new ChatData(msg, System.currentTimeMillis() + configtime));
-                    }
-                } else {
-                    chatmsgs.remove(playerUUID);
-                }
-            } else {
-                chatmsgs.put(playerUUID, new ChatData(msg, System.currentTimeMillis() + configtime));
-            }
+        long remainingMs = tracker.record(p.getUniqueId(), msg, currentTime, configtime, chatFilter.repeatSimilarityThreshold);
+        if (remainingMs > 0) {
+            e.setCancelled(true);
+            int remainingTime = (int) Math.ceil(remainingMs / 1000.0);
+            String timeString = remainingTime >= 2 ? remainingTime + " seconds" : "1 second";
+            p.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.chatRepeatMessage.s).replace("%time%", timeString)));
         }
     }
 }

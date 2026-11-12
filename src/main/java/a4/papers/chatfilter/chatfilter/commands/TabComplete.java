@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class TabComplete implements TabCompleter {
+    private static final List<String> ACTIONS = List.of("add", "list", "remove");
+    private static final List<String> TARGETS = List.of("word", "ip");
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
@@ -31,16 +33,9 @@ public class TabComplete implements TabCompleter {
             arguments1.add("help");
             return arguments1;
         } else if (args.length == 2) {
-            List<String> arguments2 = new ArrayList<>();
-            arguments2.add("add");
-            arguments2.add("list");
-            arguments2.add("remove");
-            return arguments2;
+            return ACTIONS;
         } else if (args.length == 3) {
-            List<String> arguments3 = new ArrayList<>();
-            arguments3.add("word");
-            arguments3.add("ip");
-            return arguments3;
+            return TARGETS;
         }
         return Collections.emptyList();
     }

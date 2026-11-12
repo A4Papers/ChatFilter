@@ -1,14 +1,25 @@
 package a4.papers.chatfilter.chatfilter.shared;
 
-import a4.papers.chatfilter.chatfilter.ChatFilter;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.entity.Player;
+
+import a4.papers.chatfilter.chatfilter.ChatFilter;
+
 public class ChatFilters {
+
+    private static final FilterWrapper URL_FILTER = new FilterWrapper("URL", Collections.singletonList("none"), "URL", true, false, "", false, true, false);
+    private static final FilterWrapper FONT_FILTER = new FilterWrapper("unicode", Collections.singletonList("none"), "unicode", true, false, "", true, true, true);
+    private static final String[] EMPTY_MATCHES = new String[0];
+    private static final List<String> EMPTY_REGEX_LIST = Collections.emptyList();
+    private static final Result NOTYPE_RESULT = new Result(false, EMPTY_MATCHES, Types.NOTYPE, null, EMPTY_REGEX_LIST);
+    private static final Result FONT_RESULT = new Result(true, EMPTY_MATCHES, Types.FONT, FONT_FILTER, EMPTY_REGEX_LIST);
 
     ChatFilter chatFilter;
 
@@ -17,118 +28,182 @@ public class ChatFilters {
     }
 
     private String removeBypass(String s) {
-        List<String> bypassItems = new ArrayList<String>(chatFilter.byPassWords);
-        bypassItems.addAll(chatFilter.byPassDNS);
-        for (String removewording : bypassItems) {
-            if (s.contains(removewording)) {
-                s = s.replaceAll(removewording, " ");
-            }
-        }
-        return s;
+        return chatFilter.bypassReplacements.replace(s, " ");
     }
 
     public Result validResult(String string, Player player) {
+        FilterSnapshot snapshot = chatFilter.compiledFilters;
+        CompiledFilter[] wordCompiled = snapshot.words();
+        CompiledFilter[] advertCompiled = snapshot.adverts();
+        boolean isOp = player.isOp();
+        boolean checkWords = wordCompiled.length != 0 && !isOp && !player.hasPermission("chatfilter.bypass.swear");
+        boolean checkAdverts = advertCompiled.length != 0 && !isOp && !player.hasPermission("chatfilter.bypass.ip");
+        boolean checkURL = !chatFilter.settingsAllowURL && !isOp && !player.hasPermission("chatfilter.bypass.url");
+        boolean fontCheckNeeded = chatFilter.settingsBlockFancyChat && !chatFilter.unicodeIndex.isEmpty();
+
+        if (!checkWords && !checkAdverts && !checkURL) {
+            return fontCheckNeeded && isFont(string) ? FONT_RESULT : NOTYPE_RESULT;
+        }
+
+        String lowercaseString = removeBypass(string.toLowerCase());
+        long lowCharacters = 0;
+        long highCharacters = 0;
+        if (checkWords || checkAdverts) {
+            for (int i = 0; i < lowercaseString.length(); i++) {
+                char c = lowercaseString.charAt(i);
+                if (c < 64) lowCharacters |= 1L << c;
+                else if (c < 128) highCharacters |= 1L << (c - 64);
+            }
+        }
+
         boolean matched = false;
         boolean matchedSwear = false;
         boolean matchedIP = false;
         boolean matchedURL = false;
-        String regex = "";
-        Map<String, FilterWrapper> regexMap = new HashMap<>();
-        String lowercaseString = removeBypass(string.toLowerCase());
-        Types type = Types.NOTYPE;
-        List<String> groupWords = new ArrayList<String>();
-        List<String> regexUsed = new ArrayList<String>();
-        if (!(player.hasPermission("chatfilter.bypass.swear"))) {
-            for (Pattern p : chatFilter.wordRegexPattern) {
-                Matcher m = p.matcher(lowercaseString);
+        String regex = null;
+        FilterWrapper matchedWrapper = null;
+
+        Set<String> groupWords = null;
+        List<String> regexUsed = null;
+
+        if (checkWords) {
+            for (int i = 0; i < wordCompiled.length; i++) {
+                CompiledFilter compiled = wordCompiled[i];
+                if (!compiled.mightMatch(lowCharacters, highCharacters)) {
+                    continue;
+                }
+                Matcher m = compiled.getPattern().matcher(lowercaseString);
                 while (m.find()) {
-                    if (!player.hasPermission("chatfilter.bypass.swear." + m.group(0)))
+                    String match = m.group(0);
+                    if (!player.hasPermission("chatfilter.bypass.swear." + match)) {
                         matched = true;
-                    matchedSwear = true;
-                    regex = p.pattern();
-                    regexUsed.add(p.pattern());
-                    if (!groupWords.contains(m.group(0))) {
-                        groupWords.add(m.group(0));
+                        matchedSwear = true;
+                        regex = compiled.getPattern().pattern();
+                        matchedWrapper = compiled.getWrapper();
+                        if (regexUsed == null) {
+                            regexUsed = new ArrayList<>();
+                        }
+                        if (groupWords == null) {
+                            groupWords = new LinkedHashSet<>();
+                        }
+                        regexUsed.add(regex);
+                        groupWords.add(match);
                     }
                 }
             }
         }
 
-        if (!(player.hasPermission("chatfilter.bypass.ip"))) {
-            for (Pattern p : chatFilter.advertRegexPattern) {
-                Matcher m = p.matcher(lowercaseString);
+        if (checkAdverts) {
+            for (int i = 0; i < advertCompiled.length; i++) {
+                CompiledFilter compiled = advertCompiled[i];
+                if (!compiled.mightMatch(lowCharacters, highCharacters)) {
+                    continue;
+                }
+                Matcher m = compiled.getPattern().matcher(lowercaseString);
                 while (m.find()) {
-                    if (!player.hasPermission("chatfilter.bypass.ip." + m.group(0)))
+                    String match = m.group(0);
+                    if (!player.hasPermission("chatfilter.bypass.ip." + match)) {
                         matched = true;
-                    matchedIP = true;
-                    regex = p.pattern();
-                    if (!groupWords.contains(m.group(0))) {
-                        groupWords.add(m.group(0));
+                        matchedIP = true;
+                        regex = compiled.getPattern().pattern();
+                        matchedWrapper = compiled.getWrapper();
+                        if (groupWords == null) {
+                            groupWords = new LinkedHashSet<>();
+                        }
+                        groupWords.add(match);
                     }
                 }
             }
         }
 
-        if (!(player.hasPermission("chatfilter.bypass.url"))) {
-            if (!chatFilter.settingsAllowURL) {
-                Pattern p = Pattern.compile(chatFilter.URL_REGEX);
-                Matcher m = p.matcher(lowercaseString);
-                if (m.find()) {
-                    matched = true;
-                    matchedURL = true;
-                    regex = chatFilter.URL_REGEX;
+        if (checkURL) {
+            Matcher m = chatFilter.urlPattern.matcher(lowercaseString);
+            if (m.find()) {
+                matched = true;
+                matchedURL = true;
+                regex = chatFilter.URL_REGEX;
+                if (matchedWrapper == null) {
+                    matchedWrapper = URL_FILTER;
                 }
-                regexMap.put(chatFilter.URL_REGEX, new FilterWrapper("URL", Collections.singletonList("none"), chatFilter.URL_REGEX, true, false, "", false, true, false));
             }
         }
 
-        if (matchedURL) {
+        if (fontCheckNeeded && isFont(string)) {
             matched = true;
-            type = Types.URL;
-        }
-        if (isFont(string)) {
-            matched = true;
-            type = Types.FONT;
             regex = "unicode";
-            regexMap.put("unicode", new FilterWrapper("unicode", Collections.singletonList("none"), "unicode", true, false, "", true, true, true));
+            if (matchedWrapper == null) {
+                matchedWrapper = FONT_FILTER;
+            }
+        }
 
-        }
-        if (matchedSwear) {
-            type = Types.SWEAR;
-        }
-        if (matchedIP) {
-            type = Types.IP_DNS;
-        }
+        Types type;
         if (matchedSwear && matchedIP) {
             type = Types.IP_SWEAR;
+        } else if (matchedSwear) {
+            type = Types.SWEAR;
+        } else if (matchedIP) {
+            type = Types.IP_DNS;
+        } else if (matchedURL) {
+            type = Types.URL;
+        } else if (matched) {
+            type = Types.FONT;
+        } else {
+            type = Types.NOTYPE;
         }
 
-        String[] array = new String[groupWords.size()];
-        groupWords.toArray(array);
-        regexMap.putAll(chatFilter.regexWords);
-        regexMap.putAll(chatFilter.regexAdvert);
-        return new Result(matched, array, type, regexMap.get(regex), regexUsed);
+        if (!matched) {
+            return NOTYPE_RESULT;
+        }
+        String[] array = groupWords == null ? EMPTY_MATCHES : groupWords.toArray(EMPTY_MATCHES);
+        if (matchedWrapper == null && regex != null) {
+            matchedWrapper = chatFilter.regexWords.get(regex);
+            if (matchedWrapper == null) {
+                matchedWrapper = chatFilter.regexAdvert.get(regex);
+            }
+        }
+        return new Result(true, array, type, matchedWrapper, regexUsed == null ? EMPTY_REGEX_LIST : regexUsed);
     }
 
     public boolean isFont(String string) {
-        boolean matchedFont = false;
-        for (String s : chatFilter.unicodeWhitelist) {
-            if (string.contains(s)) {
-                string = string.replace(s, "");
-            }
+        CodePointIndex index = chatFilter.unicodeIndex;
+        if (!chatFilter.settingsBlockFancyChat || index.isEmpty()) {
+            return false;
         }
-        if (chatFilter.settingsBlockFancyChat) {
-            for (String s : chatFilter.unicodeBlacklist.keySet()) {
-                int UrangeLow = Integer.parseInt(chatFilter.unicodeBlacklist.get(s).getStart(), 16);
-                int UrangeHigh = Integer.parseInt(chatFilter.unicodeBlacklist.get(s).getEnd(), 16);
-                for (int iLetter = 0; iLetter < string.length(); iLetter++) {
-                    int cp = string.codePointAt(iLetter);
-                    if (cp >= UrangeLow && cp <= UrangeHigh) {
-                        matchedFont = true;
-                    }
+
+        String processedString = chatFilter.unicodeReplacements.replace(string, "");
+
+        if (processedString.isEmpty()) {
+            return false;
+        }
+
+        int length = processedString.length();
+        for (int i = 0; i < length; ) {
+            int cp = processedString.codePointAt(i);
+            if (index.contains(cp)) {
+                return true;
+            }
+            i += Character.charCount(cp);
+        }
+        return false;
+    }
+
+    public boolean containsNonEnglishLetters(String string) {
+        if (!chatFilter.settingsBlockCustomSybols) {
+            return false;
+        }
+        if (string == null || string.isEmpty()) {
+            return false;
+        }
+        int length = string.length();
+        for (int i = 0; i < length; ) {
+            int cp = string.codePointAt(i);
+            if (Character.isLetter(cp)) {
+                if (!((cp >= 'A' && cp <= 'Z') || (cp >= 'a' && cp <= 'z'))) {
+                    return true;
                 }
             }
+            i += Character.charCount(cp);
         }
-        return matchedFont;
+        return false;
     }
 }

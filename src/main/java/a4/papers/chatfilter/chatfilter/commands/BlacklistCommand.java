@@ -1,22 +1,23 @@
 package a4.papers.chatfilter.chatfilter.commands;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
+
 import a4.papers.chatfilter.chatfilter.ChatFilter;
+import a4.papers.chatfilter.chatfilter.shared.FilterWrapper;
 import a4.papers.chatfilter.chatfilter.shared.lang.EnumStrings;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class BlacklistCommand implements CommandExecutor {
 
@@ -44,8 +45,8 @@ public class BlacklistCommand implements CommandExecutor {
                 }
                 if (args[2].equals("ip")) {
                     List<String> strlist = new ArrayList<>();
-                    for (String words : chatFilter.regexAdvert.keySet()) {
-                        strlist.add(chatFilter.regexAdvert.get(words).getWord());
+                    for (FilterWrapper wrapper : chatFilter.regexAdvert.values()) {
+                        strlist.add(wrapper.getWord());
                     }
                     Collections.sort(strlist);
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_IP_2.s)));
@@ -66,15 +67,15 @@ public class BlacklistCommand implements CommandExecutor {
                     }
                 }
                 if (args[2].equals("word")) {
-                    List<String> strlist = new ArrayList<>();
-                    for (String stringlist : chatFilter.regexWords.keySet()) {
-                        strlist.add(chatFilter.regexWords.get(stringlist).getWord());
+                    Set<String> dedup = new java.util.LinkedHashSet<>();
+                    for (FilterWrapper wrapper : chatFilter.regexWords.values()) {
+                        dedup.add(wrapper.getWord());
                     }
-                    List<String> listWithoutDuplicates = strlist.stream().distinct().collect(Collectors.toList());
-                    Collections.sort(listWithoutDuplicates);
+                    List<String> strlist = new ArrayList<>(dedup);
+                    Collections.sort(strlist);
                     if (chatFilter.manager.supported("text-component")) {
                         ComponentBuilder message = new ComponentBuilder("");
-                        for (String words : listWithoutDuplicates) {
+                        for (String words : strlist) {
                             message.append(ChatColor.WHITE + " " + words + ", ");
                             message.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cf blacklist remove word " + words));
                             message.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_LIST_WORD_1.s).replace("%word%", words)))));
@@ -110,7 +111,12 @@ public class BlacklistCommand implements CommandExecutor {
                     return true;
                 }
                 if (args[2].equals("word") && args.length > 3) {
-                    String ArgsString = String.join(" ", args).toLowerCase().replaceAll("blacklist remove word ", "");
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 3; i < args.length; i++) {
+                        if (i > 3) sb.append(' ');
+                        sb.append(args[i]);
+                    }
+                    String ArgsString = sb.toString().toLowerCase();
                     ConfigurationSection config = chatFilter.getWordConfig().getConfigurationSection("ChatFilter");
                     Set<String> set = config.getKeys(false);
                     if (!set.contains(ArgsString)) {
@@ -119,7 +125,7 @@ public class BlacklistCommand implements CommandExecutor {
                         sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_REMOVE_WORD_REMOVED.s).replace("%word%", ArgsString)));
                         chatFilter.regexWords.remove(ArgsString);
                         config.set(ArgsString, null);
-                        chatFilter.save();
+                        chatFilter.saveWordFilters();
                         chatFilter.getFilters().reloadFilters();
                     }
                     return true;
@@ -134,7 +140,7 @@ public class BlacklistCommand implements CommandExecutor {
                         sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_REMOVE_IP_REMOVED.s).replace("%ip%", args[3])));
                         chatFilter.regexWords.remove(args[3].toLowerCase());
                         config.set(args[3].toLowerCase(), null);
-                        chatFilter.save();
+                        chatFilter.saveAdvertFilters();
                         chatFilter.getFilters().reloadFilters();
                         return true;
                     }
@@ -153,7 +159,12 @@ public class BlacklistCommand implements CommandExecutor {
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_ADD_IP_ARG.s)));
                     return true;
                 } else if (args[2].equals("word") && args.length > 3) {
-                    String argsString = String.join(" ", args).toLowerCase().replace("blacklist add word ", "");
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 3; i < args.length; i++) {
+                        if (i > 3) sb.append(' ');
+                        sb.append(args[i]);
+                    }
+                    String argsString = sb.toString().toLowerCase();
                     if (matchStringAdd(argsString)) {
                         sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_ADD_WORD_NO.s).replace("%word%", argsString)));
                     } else {
@@ -161,7 +172,12 @@ public class BlacklistCommand implements CommandExecutor {
                         chatFilter.getFilters().createWordFilter(argsString, sender.getName());
                     }
                 } else if (args[2].equals("ip") && args.length > 3) {
-                    String argsString = String.join(" ", args).toLowerCase().replaceAll("blacklist add ip ", "");
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 3; i < args.length; i++) {
+                        if (i > 3) sb.append(' ');
+                        sb.append(args[i]);
+                    }
+                    String argsString = sb.toString().toLowerCase();
                     sender.sendMessage(chatFilter.colour(chatFilter.getLang().mapToString(EnumStrings.CMD_BLACKLIST_ADD_IP_ADDED.s).replace("%ip%", argsString)));
                     chatFilter.getFilters().createAdvertFilter(argsString, sender.getName());
                     return true;
@@ -176,8 +192,9 @@ public class BlacklistCommand implements CommandExecutor {
 
     private boolean matchStringAdd(String args) {
         ConfigurationSection config = chatFilter.getWordConfig().getConfigurationSection("ChatFilter");
+        String normalized = args.replace("#", "");
         for (String s : config.getKeys(false)) {
-            if (s.replace("#", "").equals(args.replace("#", ""))) {
+            if (s.replace("#", "").equals(normalized)) {
                 return true;
             }
         }

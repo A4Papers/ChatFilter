@@ -8,13 +8,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -61,7 +59,7 @@ public class Metrics {
         boolean logErrors = config.getBoolean("logFailedRequests", false);
         boolean logSentData = config.getBoolean("logSentData", false);
         boolean logResponseStatusText = config.getBoolean("logResponseStatusText", false);
-        metricsBase = new MetricsBase("bukkit", serverUUID, serviceId, enabled, this::appendPlatformData, this::appendServiceData, submitDataTask -> Bukkit.getScheduler().runTask(plugin, submitDataTask), plugin::isEnabled, (message, error) -> this.plugin.getLogger().log(Level.WARNING, message, error), (message) -> this.plugin.getLogger().log(Level.INFO, message), logErrors, logSentData, logResponseStatusText);
+        metricsBase = new MetricsBase("bukkit", serverUUID, serviceId, enabled, this::appendPlatformData, this::appendServiceData, ChatFilter::runTask, plugin::isEnabled, (message, error) -> this.plugin.getLogger().log(Level.WARNING, message, error), (message) -> this.plugin.getLogger().log(Level.INFO, message), logErrors, logSentData, logResponseStatusText);
     }
 
     /**
@@ -89,17 +87,12 @@ public class Metrics {
         builder.appendField("pluginVersion", plugin.getDescription().getVersion());
     }
 
+    public void shutdown() {
+        metricsBase.shutdown();
+    }
+
     private int getPlayerAmount() {
-        try {
-            // Around MC 1.8 the return type was changed from an array to a collection,
-            // This fixes java.lang.NoSuchMethodError:
-            // org.bukkit.Bukkit.getOnlinePlayers()Ljava/util/Collection;
-            Method onlinePlayersMethod = Class.forName("org.bukkit.Server").getMethod("getOnlinePlayers");
-            return onlinePlayersMethod.getReturnType().equals(Collection.class) ? ((Collection<?>) onlinePlayersMethod.invoke(Bukkit.getServer())).size() : ((Player[]) onlinePlayersMethod.invoke(Bukkit.getServer())).length;
-        } catch (Exception e) {
-            // Just use the new method if the reflection failed
-            return Bukkit.getOnlinePlayers().size();
-        }
+        return Bukkit.getOnlinePlayers().size();
     }
 
     public static class MetricsBase {
@@ -109,7 +102,7 @@ public class Metrics {
          */
         public static final String METRICS_VERSION = "2.2.1";
 
-        private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, task -> new Thread(task, "bStats-Metrics"));
+        private final ScheduledThreadPoolExecutor scheduler;
 
         private static final String REPORT_URL = "https://bStats.org/api/v2/data/%s";
 
@@ -177,7 +170,14 @@ public class Metrics {
             this.logSentData = logSentData;
             this.logResponseStatusText = logResponseStatusText;
             checkRelocation();
-            if (enabled) {
+            scheduler = enabled ? new ScheduledThreadPoolExecutor(1, task -> {
+                Thread thread = new Thread(task, "bStats-Metrics");
+                thread.setDaemon(true);
+                return thread;
+            }) : null;
+            if (scheduler != null) {
+                scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+                scheduler.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
                 startSubmitting();
             }
         }
@@ -203,17 +203,28 @@ public class Metrics {
             this.customCharts.add(chart);
         }
 
+        public synchronized void shutdown() {
+            if (scheduler != null) {
+                scheduler.shutdownNow();
+            }
+        }
+
         private void startSubmitting() {
             final Runnable submitTask = () -> {
-                if (!enabled || !checkServiceEnabledSupplier.get()) {
-                    // Submitting data or service is disabled
-                    scheduler.shutdown();
-                    return;
-                }
-                if (submitTaskConsumer != null) {
-                    submitTaskConsumer.accept(this::submitData);
-                } else {
-                    this.submitData();
+                synchronized (this) {
+                    if (scheduler.isShutdown()) {
+                        return;
+                    }
+                    if (!enabled || !checkServiceEnabledSupplier.get()) {
+                        // Submitting data or service is disabled
+                        shutdown();
+                        return;
+                    }
+                    if (submitTaskConsumer != null) {
+                        submitTaskConsumer.accept(this::submitData);
+                    } else {
+                        this.submitData();
+                    }
                 }
             };
             // Many servers tend to restart at a fixed time at xx:00 which causes an uneven distribution
@@ -229,7 +240,10 @@ public class Metrics {
             scheduler.scheduleAtFixedRate(submitTask, initialDelay + secondDelay, 1000 * 60 * 30, TimeUnit.MILLISECONDS);
         }
 
-        private void submitData() {
+        private synchronized void submitData() {
+            if (scheduler == null || scheduler.isShutdown() || !checkServiceEnabledSupplier.get()) {
+                return;
+            }
             final JsonObjectBuilder baseJsonBuilder = new JsonObjectBuilder();
             appendPlatformDataConsumer.accept(baseJsonBuilder);
             final JsonObjectBuilder serviceJsonBuilder = new JsonObjectBuilder();
@@ -260,28 +274,34 @@ public class Metrics {
             }
             String url = String.format(REPORT_URL, platform);
             HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
-            // Compress the data to save bandwidth
-            byte[] compressedData = compress(data.toString());
-            connection.setRequestMethod("POST");
-            connection.addRequestProperty("Accept", "application/json");
-            connection.addRequestProperty("Connection", "close");
-            connection.addRequestProperty("Content-Encoding", "gzip");
-            connection.addRequestProperty("Content-Length", String.valueOf(compressedData.length));
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("User-Agent", "Metrics-Service/1");
-            connection.setDoOutput(true);
-            try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
-                outputStream.write(compressedData);
-            }
-            StringBuilder builder = new StringBuilder();
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    builder.append(line);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+            try {
+                // Compress the data to save bandwidth
+                byte[] compressedData = compress(data.toString());
+                connection.setRequestMethod("POST");
+                connection.addRequestProperty("Accept", "application/json");
+                connection.addRequestProperty("Connection", "close");
+                connection.addRequestProperty("Content-Encoding", "gzip");
+                connection.addRequestProperty("Content-Length", String.valueOf(compressedData.length));
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setRequestProperty("User-Agent", "Metrics-Service/1");
+                connection.setDoOutput(true);
+                try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
+                    outputStream.write(compressedData);
                 }
-            }
-            if (logResponseStatusText) {
-                infoLogger.accept("Sent data to bStats and received response: " + builder);
+                StringBuilder builder = new StringBuilder();
+                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        builder.append(line);
+                    }
+                }
+                if (logResponseStatusText) {
+                    infoLogger.accept("Sent data to bStats and received response: " + builder);
+                }
+            } finally {
+                connection.disconnect();
             }
         }
 

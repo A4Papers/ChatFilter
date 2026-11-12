@@ -2,8 +2,8 @@ package a4.papers.chatfilter.chatfilter.shared;
 
 public class ChatData {
 
-    private String string;
-    private Long lo;
+    private final String string;
+    private final long lo;
 
     public ChatData(String string, long lo) {
         this.string = string;
@@ -17,6 +17,5 @@ public class ChatData {
     public long getLong() {
         return this.lo;
     }
-
 
 }

@@ -1,7 +1,8 @@
 name: ChatFilter
-version: 2.0.14
+version: ${version}
 main: a4.papers.chatfilter.chatfilter.ChatFilter
-api-version: 1.13
+api-version: 1.21
+folia-supported: true
 authors: [ A4_Papers ]
 description: Basic Regex chat, book and anvil filter
 commands:

@@ -58,6 +58,9 @@ settings:
   # Block fancy text? Often used with hacked clients.
   blockFancyChat: true
 
+  # Block non-English letters (allow numbers and symbols)
+  blockCustomSybols: true
+
   # Prevent same or repeated messages
   antiRepeatEnabled: true
   

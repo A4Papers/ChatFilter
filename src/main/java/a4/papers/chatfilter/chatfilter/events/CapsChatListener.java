@@ -1,62 +1,76 @@
 package a4.papers.chatfilter.chatfilter.events;
 
-import a4.papers.chatfilter.chatfilter.ChatFilter;
-import org.bukkit.Bukkit;
+import java.util.UUID;
+import java.util.Collection;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import org.bukkit.entity.Player;
-import org.bukkit.event.*;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
+import io.papermc.paper.event.player.AsyncChatEvent;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import a4.papers.chatfilter.chatfilter.ChatFilter;
+import a4.papers.chatfilter.chatfilter.shared.PlayerNameIndex;
 
 public class CapsChatListener implements EventExecutor, Listener {
 
     ChatFilter chatFilter;
+    private final PlayerNameIndex playerNames = new PlayerNameIndex();
 
     public CapsChatListener(ChatFilter instance) {
         this.chatFilter = instance;
     }
 
+    public void track(Player player) {
+        playerNames.join(player.getUniqueId(), player.getName());
+    }
+
+    public void trackAll(Collection<? extends Player> players) {
+        var names = new Object2ObjectLinkedOpenHashMap<UUID, String>(players.size());
+        for (Player player : players) names.put(player.getUniqueId(), player.getName());
+        playerNames.replaceAll(names);
+    }
+
+    public void untrack(UUID player) {
+        playerNames.quit(player);
+    }
+
+    public void clear() {
+        playerNames.clear();
+    }
+
     @Override
     public void execute(final Listener listener, final Event event) throws EventException {
-        this.onPlayerCaps((AsyncPlayerChatEvent) event);
+        this.onPlayerCaps((AsyncChatEvent) event);
     }
 
-    public void onPlayerCaps(AsyncPlayerChatEvent event) {
-        String msg = event.getMessage();
-        if (chatFilter.deCap) {
-            if (event.getPlayer().hasPermission("chatfilter.bypass") || event.getPlayer().hasPermission("chatfilter.bypass.caps"))
-                return;
-            if (isURL(msg))
-                return;
-            char[] charArray = msg.toCharArray();
-            int counter = 0;
-            for (char c : charArray) {
-                if (Character.isUpperCase(c)) counter++;
-            }
-            if (counter >= chatFilter.capsAmount) {
-                msg = msg.charAt(0) + msg.substring(1).toLowerCase();
-            }
-            String newmsg = msg;
-            for (Player p : Bukkit.getOnlinePlayers()) {
-                String player = p.getName();
-
-                if (msg.toLowerCase().contains(player.toLowerCase())) {
-                    newmsg = newmsg.replace(player.toLowerCase(), player);
-                }
-            }
-            event.setMessage(newmsg);
+    public void onPlayerCaps(AsyncChatEvent event) {
+        if (!chatFilter.deCap) {
+            return;
         }
-    }
-
-    public boolean isURL(String str) {
-        boolean matched = false;
-        Pattern p = Pattern.compile(chatFilter.URL_REGEX);
-        Matcher m = p.matcher(str);
-        if (m.find()) {
-            matched = true;
+        Player player = event.getPlayer();
+        if (player.isOp() || player.hasPermission("chatfilter.bypass") || player.hasPermission("chatfilter.bypass.caps"))
+            return;
+        String msg = chatFilter.plainMessage(event);
+        if (msg.isEmpty()) {
+            return;
         }
-        return matched;
+        if (chatFilter.urlPattern.matcher(msg).find())
+            return;
+        int length = msg.length();
+        int counter = 0;
+        for (int i = 0; i < length; i++) {
+            if (Character.isUpperCase(msg.charAt(i)) && ++counter >= chatFilter.capsAmount) {
+                break;
+            }
+        }
+        if (counter >= chatFilter.capsAmount) {
+            msg = msg.charAt(0) + msg.substring(1).toLowerCase();
+        }
+        String newmsg = playerNames.restore(msg);
+        if (!newmsg.equals(msg)) {
+            chatFilter.setPlainMessage(event, newmsg);
+        }
     }
 }

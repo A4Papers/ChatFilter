@@ -4,20 +4,29 @@ public class LowerCaseReplace
 {
     public static String replace(String source, String target, String replacement)
     {
-        StringBuilder sbSource = new StringBuilder(source);
-        StringBuilder sbSourceLower = new StringBuilder(source.toLowerCase());
-        String searchString = target.toLowerCase();
-
-        int idx = 0;
-        while((idx = sbSourceLower.indexOf(searchString, idx)) != -1) {
-            sbSource.replace(idx, idx + searchString.length(), replacement);
-            sbSourceLower.replace(idx, idx + searchString.length(), replacement);
-            idx+= replacement.length();
+        if (source == null || target == null || replacement == null || target.isEmpty()) {
+            return source;
         }
-        sbSourceLower.setLength(0);
-        sbSourceLower.trimToSize();
-        sbSourceLower = null;
-
+        
+        String searchString = target.toLowerCase();
+        String sourceLower = source.toLowerCase();
+        
+        int idx = sourceLower.indexOf(searchString);
+        if (idx == -1) {
+            return source;
+        }
+        
+        StringBuilder sbSource = new StringBuilder(source.length());
+        int lastIdx = 0;
+        
+        while (idx != -1) {
+            sbSource.append(source, lastIdx, idx);
+            sbSource.append(replacement);
+            lastIdx = idx + searchString.length();
+            idx = sourceLower.indexOf(searchString, lastIdx);
+        }
+        sbSource.append(source, lastIdx, source.length());
+        
         return sbSource.toString();
     }
 

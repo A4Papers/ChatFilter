@@ -8,6 +8,10 @@
 # IntelliJ
 out/
 
+# Gradle
+.gradle/
+build/
+
 # Compiled class file
 *.class
 
@@ -111,3 +115,4 @@ buildNumber.properties
 
 # Common working directory
 run/
+/bin
